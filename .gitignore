@@ -1,0 +1,12 @@
+/node_modules
+/.next/
+/out/
+/generated/
+/public/demo-files/
+/public/icons/
+/public/provider-icons.svg
+/capture/raw/
+/capture/runs/
+next-env.d.ts
+*.tsbuildinfo
+/public/api/

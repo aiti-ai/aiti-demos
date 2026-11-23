@@ -1,0 +1,15 @@
+{
+  "isWindows": false,
+  "powerShellEnabled": false,
+  "builtinTools": [
+    "read",
+    "edit",
+    "write",
+    "bash"
+  ],
+  "codemode": "automatic",
+  "codemodeMode": {
+    "value": "on"
+  },
+  "codemodeInlineBudget": {}
+}

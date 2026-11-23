@@ -1,0 +1,10 @@
+@import "../generated/styles/globals.css";
+@import "../generated/styles/settings.css";
+@import "../generated/styles/sidebar.css";
+@import "../generated/styles/sidebar-menu.css";
+
+/* generated/ is gitignored; Tailwind's automatic content detection skips
+   gitignored files, so the demo must declare its source roots explicitly. */
+@source "../generated";
+@source "../app";
+@source "../mock";

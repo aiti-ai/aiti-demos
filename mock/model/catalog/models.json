@@ -1,0 +1,50 @@
+{
+  "models": {
+    "demo:demo-large": "Demo Large",
+    "demo:demo-small": "Demo Small"
+  },
+  "modelList": [
+    {
+      "id": "demo-large",
+      "name": "Demo Large",
+      "provider": "demo",
+      "providerName": "Demo Gateway",
+      "input": [
+        "text",
+        "image"
+      ],
+      "hint": "$2/$10 per M"
+    },
+    {
+      "id": "demo-small",
+      "name": "Demo Small",
+      "provider": "demo",
+      "providerName": "Demo Gateway",
+      "input": [
+        "text"
+      ],
+      "hint": "$0.2/$1 per M"
+    }
+  ],
+  "defaultModel": {
+    "provider": "demo",
+    "modelId": "demo-large"
+  },
+  "defaultThinkingLevel": "medium",
+  "savedDefaultThinkingLevel": "medium",
+  "thinkingLevels": {
+    "demo:demo-large": [
+      "off",
+      "minimal",
+      "low",
+      "medium",
+      "high"
+    ],
+    "demo:demo-small": [
+      "off"
+    ]
+  },
+  "thinkingLevelMaps": {},
+  "thinkingLevelPins": {},
+  "isScoped": false
+}

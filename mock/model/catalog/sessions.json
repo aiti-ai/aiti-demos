@@ -1,0 +1,62 @@
+{
+  "sessions": [
+    {
+      "path": "/Users/demo/.pi/agent/sessions/demo/2026-11-23T11-50-00-000Z_demo-welcome.jsonl",
+      "id": "demo-welcome",
+      "cwd": "/Users/demo/code/pi-web",
+      "name": "👋 Welcome to Pi Web — a quick tour",
+      "created": "2026-11-23T11:50:00.000Z",
+      "modified": "2026-11-23T11:52:00.000Z",
+      "messageCount": 4,
+      "firstMessage": "Hi! Give me a quick tour of this screen.",
+      "lastRun": {
+        "status": "interrupted",
+        "at": "2026-11-23T11:52:00.000Z"
+      },
+      "transient": false,
+      "projectRoot": "/Users/demo/code/pi-web",
+      "projectKey": "/Users/demo/code/pi-web",
+      "branch": "master"
+    },
+    {
+      "path": "/Users/demo/.pi/agent/sessions/demo/2026-11-23T11-05-00-000Z_demo-feature.jsonl",
+      "id": "demo-feature",
+      "cwd": "/Users/demo/code/pi-web",
+      "name": "Refactor: extract formatDuration with tests",
+      "created": "2026-11-23T11:05:00.000Z",
+      "modified": "2026-11-23T11:07:00.000Z",
+      "messageCount": 4,
+      "firstMessage": "Move `formatDuration` into `lib/` and add unit tests.",
+      "lastRun": {
+        "status": "interrupted",
+        "at": "2026-11-23T11:07:00.000Z"
+      },
+      "transient": false,
+      "projectRoot": "/Users/demo/code/pi-web",
+      "projectKey": "/Users/demo/code/pi-web",
+      "branch": "master"
+    },
+    {
+      "path": "/Users/demo/.pi/agent/sessions/demo/2026-11-23T10-30-00-000Z_demo-branching.jsonl",
+      "id": "demo-branching",
+      "cwd": "/Users/demo/code/pi-web",
+      "name": "Branching: edit from here vs. new session",
+      "created": "2026-11-23T10:30:00.000Z",
+      "modified": "2026-11-23T10:33:00.000Z",
+      "messageCount": 4,
+      "firstMessage": "Explain the difference between a fork and a branch.",
+      "lastRun": {
+        "status": "interrupted",
+        "at": "2026-11-23T10:33:00.000Z"
+      },
+      "transient": false,
+      "projectRoot": "/Users/demo/code/pi-web",
+      "projectKey": "/Users/demo/code/pi-web",
+      "branch": "master"
+    }
+  ],
+  "sessionListVersion": 1,
+  "runningSessionIds": [],
+  "awaitingInputSessionIds": [],
+  "completionNotificationSuppressedSessionIds": []
+}

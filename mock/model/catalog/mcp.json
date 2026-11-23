@@ -1,0 +1,48 @@
+{
+  "mcp": {
+    "available": true
+  },
+  "codemode": {
+    "sandbox": {
+      "state": "not-checked"
+    },
+    "builtinDisabled": false,
+    "preference": "automatic",
+    "mode": {
+      "value": "on",
+      "settingsPath": "/Users/demo/.pi/agent/settings.json"
+    },
+    "inlineBudget": {
+      "settingsPath": "/Users/demo/.pi/agent/settings.json",
+      "default": 3000,
+      "max": 1000000
+    }
+  },
+  "files": [
+    {
+      "scope": "global",
+      "path": "/Users/demo/.pi/agent/mcp.json",
+      "exists": true,
+      "problems": []
+    },
+    {
+      "scope": "project",
+      "path": "/Users/demo/code/pi-web/.pi/mcp.json",
+      "exists": false,
+      "problems": []
+    }
+  ],
+  "servers": [],
+  "project": {
+    "cwd": "/Users/demo/code/pi-web",
+    "trust": {
+      "requiresTrust": false,
+      "trusted": true,
+      "decision": null,
+      "inherited": false
+    },
+    "trustFolder": {
+      "allowed": true
+    }
+  }
+}

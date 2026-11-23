@@ -1,0 +1,794 @@
+{
+  "extensions": [
+    {
+      "id": "aiti-ctx-meter",
+      "name": "上下文比例条（context %）",
+      "version": "0.1.16",
+      "clientUrl": "/api/extensions/aiti-ctx-meter/assets/dist/aiti-ctx-meter-client.mjs",
+      "ui": {
+        "i18n": {
+          "en": {
+            "ext.displayName": "Context Meter (context %)",
+            "meter.none": "No context data yet (idle or external backend)",
+            "meter.compacting": "Compacting…",
+            "meter.queued": "Compaction queued"
+          },
+          "zh-CN": {
+            "meter.none": "暂无上下文数据（空闲会话或外部后端）",
+            "meter.compacting": "压缩中…",
+            "meter.queued": "压缩已排队"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icons/meter-vertical.svg"
+    },
+    {
+      "id": "aiti-draft-keeper",
+      "name": "Draft Keeper",
+      "version": "0.1.11",
+      "clientUrl": "/api/extensions/aiti-draft-keeper/assets/dist/aiti-draft-keeper-client.mjs",
+      "ui": null,
+      "source": "bundled",
+      "icon": "icons/clipboard-list.svg"
+    },
+    {
+      "id": "aiti-feedback",
+      "name": "报告问题",
+      "version": "0.1.1",
+      "clientUrl": "/api/extensions/aiti-feedback/assets/dist/aiti-feedback-client.mjs",
+      "ui": {
+        "clientImmediately": false,
+        "toolbar": [
+          {
+            "id": "aiti-feedback-open",
+            "label": "i18n:fb.open.label",
+            "title": "i18n:fb.open.title",
+            "icon": "icons/discussion.svg"
+          }
+        ],
+        "dialogs": [
+          {
+            "id": "aiti-feedback-dialog",
+            "label": "i18n:fb.open.label"
+          }
+        ],
+        "i18n": {
+          "zh-CN": {
+            "fb.open.label": "报告问题",
+            "fb.open.title": "报告问题 / 提供反馈",
+            "fb.close": "关闭",
+            "fb.hint.disclaimer": "将以 GitHub issue 打开（预填内容）；提交前请确认不含敏感信息。",
+            "fb.kind": "类型",
+            "fb.kind.bug": "问题",
+            "fb.kind.suggestion": "建议",
+            "fb.kind.other": "其他",
+            "fb.field.title": "标题",
+            "fb.field.title.ph": "一句话摘要",
+            "fb.field.desc": "描述（必填）",
+            "fb.field.desc.ph": "发生了什么？期望是什么？",
+            "fb.field.steps": "复现步骤（可选）",
+            "fb.field.steps.ph": "1. 打开…\n2. 点击…",
+            "fb.field.context": "＋ 会话上下文（可选，自行粘贴）",
+            "fb.field.context.ph": "粘贴相关日志/输出（将做脱敏处理，预览里请再确认）",
+            "fb.field.contact": "联系方式（可选：邮箱等，公开可见）",
+            "fb.opt.env": "附带环境信息（浏览器/平台，不含会话内容）",
+            "fb.preview": "预览（将提交的内容，已脱敏）",
+            "fb.copy": "复制全文",
+            "fb.copied": "已复制全文",
+            "fb.copyFailed": "复制失败",
+            "fb.submit": "前往 GitHub 提交",
+            "fb.err.descRequired": "描述是必填项",
+            "fb.err.copyFailed": "复制失败",
+            "fb.err.tooLong": "内容超长已截断，完整内容已复制到剪贴板"
+          },
+          "en": {
+            "ext.displayName": "Report a Problem",
+            "fb.open.label": "Report an issue",
+            "fb.open.title": "Report an issue / send feedback",
+            "fb.close": "Close",
+            "fb.hint.disclaimer": "Opens a prefilled GitHub issue; review the preview and make sure it carries nothing sensitive before submitting.",
+            "fb.kind": "Type",
+            "fb.kind.bug": "Bug",
+            "fb.kind.suggestion": "Suggestion",
+            "fb.kind.other": "Other",
+            "fb.field.title": "Title",
+            "fb.field.title.ph": "one-line summary",
+            "fb.field.desc": "Description (required)",
+            "fb.field.desc.ph": "What happened? What did you expect?",
+            "fb.field.steps": "Steps to reproduce (optional)",
+            "fb.field.steps.ph": "1. Open…\n2. Click…",
+            "fb.field.context": "＋ Session context (optional, paste yourself)",
+            "fb.field.context.ph": "Paste relevant logs/output (sanitized; double-check in the preview)",
+            "fb.field.contact": "Contact (optional: email etc., publicly visible)",
+            "fb.opt.env": "Include environment info (browser/platform; no session content)",
+            "fb.preview": "Preview (what will be submitted, sanitized)",
+            "fb.copy": "Copy full text",
+            "fb.copied": "Full text copied",
+            "fb.copyFailed": "Copy failed",
+            "fb.submit": "Open GitHub to submit",
+            "fb.err.descRequired": "Description is required",
+            "fb.err.copyFailed": "Copy failed",
+            "fb.err.tooLong": "Too long for GitHub prefill — truncated; full text copied to clipboard"
+          },
+          "zh-TW": {
+            "fb.open.label": "回報問題",
+            "fb.open.title": "回報問題 / 提供建議",
+            "fb.close": "關閉",
+            "fb.hint.disclaimer": "將以 GitHub issue 打開（預填內容）；提交前請確認不含敏感資訊。",
+            "fb.kind": "類型",
+            "fb.kind.bug": "問題",
+            "fb.kind.suggestion": "建議",
+            "fb.kind.other": "其他",
+            "fb.field.title": "標題",
+            "fb.field.title.ph": "一句話摘要",
+            "fb.field.desc": "描述（必填）",
+            "fb.field.desc.ph": "發生了什麼？期望是什麼？",
+            "fb.field.steps": "重現步驟（可選）",
+            "fb.field.steps.ph": "1. 打開…\n2. 點擊…",
+            "fb.field.context": "＋ 會話上下文（可選，自行貼上）",
+            "fb.field.context.ph": "貼上相關日誌/輸出（將做脫敏處理，預覽裡請再確認）",
+            "fb.field.contact": "聯繫方式（可選：信箱等，公開可見）",
+            "fb.opt.env": "附帶環境資訊（瀏覽器/平台，不含會話內容）",
+            "fb.preview": "預覽（將提交的內容，已脫敏）",
+            "fb.copy": "複製全文",
+            "fb.copied": "已複製全文",
+            "fb.copyFailed": "複製失敗",
+            "fb.submit": "前往 GitHub 提交",
+            "fb.err.descRequired": "描述為必填項",
+            "fb.err.copyFailed": "複製失敗",
+            "fb.err.tooLong": "內容超長已截斷，完整內容已複製到剪貼簿"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icons/message-square-text.svg"
+    },
+    {
+      "id": "aiti-float",
+      "name": "弹窗浮动增强",
+      "version": "0.5.13",
+      "clientUrl": "/api/extensions/aiti-float/assets/dist/aiti-float-client.mjs",
+      "ui": {
+        "i18n": {
+          "zh-CN": {
+            "ext.displayName": "弹窗浮动增强器"
+          },
+          "en": {
+            "ext.displayName": "Dialog Float Enhancer"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icon.svg"
+    },
+    {
+      "id": "aiti-model-recent",
+      "name": "Model Recent",
+      "version": "0.1.12",
+      "clientUrl": "/api/extensions/aiti-model-recent/assets/dist/aiti-model-recent.mjs",
+      "ui": {
+        "i18n": {
+          "en": {
+            "feat.modelRecent.enabled": "Recently used models"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icons/clock.svg",
+      "features": [
+        {
+          "id": "modelRecent.enabled",
+          "type": "boolean",
+          "label": "最近使用模型",
+          "placeholder": "模型面板顶部「最近使用」分组；关闭后面板不显示该段（数据保留）",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "aiti-msg-anchor",
+      "name": "消息锚点横幅",
+      "version": "0.1.11",
+      "clientUrl": "/api/extensions/aiti-msg-anchor/assets/dist/aiti-msg-anchor-client.mjs",
+      "ui": {
+        "clientDependsOn": [
+          "aiti-msg-nav"
+        ],
+        "i18n": {
+          "zh-CN": {
+            "ext.displayName": "消息锚点横幅",
+            "anchor.currentInput": "当前输入",
+            "anchor.firstInput": "第一条输入",
+            "anchor.latestInput": "最近输入",
+            "anchor.sessionTitle": "会话标题",
+            "anchor.hint": "点击跳转到该输入"
+          },
+          "en": {
+            "feat.show.banner.desc": "Persistent banner at the top of the message area showing the user input owning the current viewport",
+            "feat.display.mode.desc": "current = user input owning the current viewport (scroll-follow); first = session's first input; latest = most recent input; title = session title",
+            "feat.display.title.desc": "Banner line 1 shows the current session title (name; falls back to the first input when absent)",
+            "feat.display.input.desc": "Banner line 2 shows the user input owning the current viewport (input decided by display.mode)",
+            "feat.display.opacity.desc": "Banner opacity (0-100 number: 0 = fully transparent, 100 = opaque)",
+            "feat.text.maxLen.desc": "Max characters for user input/title in the banner (truncated beyond this)",
+            "ext.displayName": "Message Anchor Banner",
+            "feat.show.banner": "Show the message anchor banner",
+            "feat.display.mode": "Display mode",
+            "feat.display.title": "Show session title row",
+            "feat.display.input": "Show current input row",
+            "feat.display.opacity": "Banner opacity",
+            "feat.text.maxLen": "Text truncation length",
+            "anchor.currentInput": "Current input",
+            "anchor.firstInput": "First input",
+            "anchor.latestInput": "Latest input",
+            "anchor.sessionTitle": "Session title",
+            "anchor.hint": "Click to jump to this input"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icon.svg",
+      "features": [
+        {
+          "id": "show.banner",
+          "label": "显示消息锚点横幅",
+          "description": "消息区顶部常驻横幅，展示当前视口所属的用户输入",
+          "default": true,
+          "enabled": true
+        },
+        {
+          "id": "display.mode",
+          "type": "string",
+          "label": "显示模式",
+          "group": "内容",
+          "description": "current=当前视口所属的用户输入（滚动跟随）；first=会话第一条输入；latest=最近一条输入；title=会话标题",
+          "value": "current",
+          "placeholder": "current",
+          "enabled": true
+        },
+        {
+          "id": "display.title",
+          "label": "显示会话标题行",
+          "group": "内容",
+          "description": "横幅第一行显示当前会话标题（name，无则显示会话第一条输入）",
+          "default": true,
+          "enabled": true
+        },
+        {
+          "id": "display.input",
+          "label": "显示当前输入行",
+          "group": "内容",
+          "description": "横幅第二行显示当前视口所属的用户输入（display.mode 决定的输入）",
+          "default": true,
+          "enabled": true
+        },
+        {
+          "id": "display.opacity",
+          "type": "string",
+          "label": "横幅透明度",
+          "group": "样式",
+          "description": "横幅不透明度（0-100 数字：0=全透明，100=不透明；默认 85，能看到但不干扰）",
+          "value": "85",
+          "placeholder": "85",
+          "enabled": true
+        },
+        {
+          "id": "text.maxLen",
+          "type": "string",
+          "label": "文本截断长度",
+          "group": "内容",
+          "description": "横幅里用户输入/标题最多显示的字符数（超出省略号；0 或非法值回退 140）",
+          "value": "140",
+          "placeholder": "140",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "aiti-msg-nav",
+      "name": "消息滚动导航",
+      "version": "0.1.11",
+      "clientUrl": "/api/extensions/aiti-msg-nav/assets/dist/aiti-msg-nav-client.mjs",
+      "ui": {
+        "clientDependsOn": [],
+        "i18n": {
+          "zh-CN": {
+            "ext.displayName": "消息滚动导航",
+            "nav.earliest": "到最早消息",
+            "nav.prevUser": "上一个用户输入",
+            "nav.nextUser": "下一个用户输入",
+            "nav.latestHint": "到最新消息（长按保持屏幕常亮）",
+            "nav.keepAwakeOn": "屏幕保持常亮"
+          },
+          "en": {
+            "feat.show.toolbar.desc": "Jump-to-earliest/jump-to-latest/prev/next buttons on the right of the message area",
+            "feat.behavior.keepAwake.desc": "Long-press the bottom-most button while the agent runs to keep the screen awake (Screen Wake Lock API)",
+            "ext.displayName": "Message Scroll Nav",
+            "feat.show.toolbar": "Show the message scroll nav bar",
+            "feat.behavior.keepAwake": "Keep screen awake while long-pressing \"jump to latest\"",
+            "nav.earliest": "Jump to earliest message",
+            "nav.prevUser": "Previous user message",
+            "nav.nextUser": "Next user message",
+            "nav.latestHint": "Jump to latest (long-press to keep the screen awake)",
+            "nav.keepAwakeOn": "Screen stays awake"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icon.svg",
+      "features": [
+        {
+          "id": "show.toolbar",
+          "label": "显示消息滚动导航条",
+          "description": "消息区右侧的到最早/到最新/上一条/下一条按钮列",
+          "default": true,
+          "enabled": true
+        },
+        {
+          "id": "behavior.keepAwake",
+          "label": "长按『到最新』保持屏幕常亮",
+          "description": "agent 运行时长按最底部按钮可让屏幕保持常亮（Screen Wake Lock API，不支持时自动降级）",
+          "default": true,
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "aiti-queue-keeper",
+      "name": "Queue Keeper",
+      "version": "0.1.12",
+      "clientUrl": "/api/extensions/aiti-queue-keeper/assets/dist/aiti-queue-keeper.mjs",
+      "ui": {
+        "queuePanel": [
+          {
+            "id": "panel",
+            "label": "队列面板"
+          }
+        ],
+        "provides": [
+          "queue-panel"
+        ],
+        "i18n": {
+          "zh-CN": {
+            "ext.displayName": "队列管家",
+            "chat.queued": "已排队 · {count}",
+            "chat.recall": "编辑",
+            "chat.recallTitle": "移除所有排队消息并将其放回输入框编辑",
+            "chat.steer": "插队",
+            "chat.followUp": "排队",
+            "chat.queueRecoveryKindSteer": "steer",
+            "chat.queueRecoveryKindFollowUp": "follow-up",
+            "chat.queueRecoveryNoText": "（无文本）",
+            "chat.queueHasImages": "排队消息带图片附件",
+            "chat.queueHasFiles": "排队消息带文件附件",
+            "chat.queueViewAttachments": "查看图片附件",
+            "chat.queueAttachmentsTitle": "排队图片附件",
+            "chat.queueAttachmentImage": "图片 {n}",
+            "chat.queueAttachmentDownload": "下载",
+            "chat.queueCollapse": "折叠排队消息",
+            "chat.queueExpand": "展开排队消息",
+            "chat.queueExport": "导出",
+            "chat.queueImport": "导入",
+            "chat.queueRemove": "删除该条",
+            "chat.queueMoveUp": "上移",
+            "chat.queueMoveDown": "下移",
+            "chat.queueRecallOne": "移回输入框编辑",
+            "chat.queueSteerSend": "尝试插队发送（等待 agent 优先调度）",
+            "chat.queueToFollowUp": "转为 follow-up（等待下一轮处理）",
+            "chat.queueSteerReadonly": "已注入后端 steer 队列（本轮工具间隙自动消费），不支持撤回/移动/转换；如需取消请停止本轮（stop）",
+            "chat.queueImportEmpty": "文件中没有有效的消息条目",
+            "chat.queueImported": "已导入 {count} 条消息到队列",
+            "chat.queueExported": "已导出 {count} 条消息",
+            "chat.queueTrash": "回收站",
+            "chat.queueTrashTitle": "回收站（已删除的消息，可恢复）",
+            "chat.queueTrashFromInput": "输入清除",
+            "chat.queueTrashRestoreToInput": "恢复到输入框",
+            "chat.queueTrashCount": "回收站 · {count}",
+            "chat.queueTrashEmpty": "回收站是空的",
+            "chat.queueTrashRestore": "恢复",
+            "chat.queueTrashRestoreAll": "全部恢复",
+            "chat.queueTrashPurge": "彻底删除（不可恢复）",
+            "chat.queueTrashPurgeAll": "清空回收站",
+            "chat.queueTrashPurgeAllConfirm": "确认？无法撤销",
+            "chat.queueTrashPurged": "已彻底删除 {count} 条消息",
+            "chat.queueTrashRestored": "已恢复 {count} 条消息",
+            "chat.queueUndoDeleted": "已删除",
+            "chat.queueUndo": "撤销",
+            "chat.queueUndoTitle": "恢复这条已删除的消息",
+            "chat.confirm": "确认",
+            "chat.close": "关闭"
+          },
+          "en": {
+            "ext.displayName": "Queue Keeper",
+            "feat.queuePanel.enabled": "Queue panel enhancements",
+            "feat.panel": "Queue panel",
+            "chat.queued": "Queued · {count}",
+            "chat.recall": "Edit",
+            "chat.recallTitle": "Remove all queued messages and put them back into the input box for editing",
+            "chat.steer": "Steer",
+            "chat.followUp": "Follow-up",
+            "chat.queueRecoveryKindSteer": "steer",
+            "chat.queueRecoveryKindFollowUp": "follow-up",
+            "chat.queueRecoveryNoText": "(no text)",
+            "chat.queueHasImages": "Queued message with image attachment(s)",
+            "chat.queueHasFiles": "Queued message with file attachment(s)",
+            "chat.queueViewAttachments": "View image attachments",
+            "chat.queueAttachmentsTitle": "Queued image attachments",
+            "chat.queueAttachmentImage": "Image {n}",
+            "chat.queueAttachmentDownload": "Download",
+            "chat.queueCollapse": "Collapse queued messages",
+            "chat.queueExpand": "Expand queued messages",
+            "chat.queueExport": "Export",
+            "chat.queueImport": "Import",
+            "chat.queueRemove": "Remove this message",
+            "chat.queueMoveUp": "Move up",
+            "chat.queueMoveDown": "Move down",
+            "chat.queueRecallOne": "Recall to input box",
+            "chat.queueSteerSend": "Send as steer (interrupt now)",
+            "chat.queueToFollowUp": "Convert to follow-up (wait for the next turn)",
+            "chat.queueSteerReadonly": "Injected into the backend steer queue (auto-consumed between tool calls); recall/move/convert unsupported — stop the turn to cancel",
+            "chat.queueImportEmpty": "No valid entries found in that file",
+            "chat.queueImported": "Imported {count} message(s) to the queue",
+            "chat.queueExported": "Exported {count} message(s)",
+            "chat.queueTrash": "Trash",
+            "chat.queueTrashTitle": "Trash bin (deleted messages, recoverable)",
+            "chat.queueTrashFromInput": "cleared input",
+            "chat.queueTrashRestoreToInput": "Restore to input",
+            "chat.queueTrashCount": "Trash · {count}",
+            "chat.queueTrashEmpty": "Trash is empty",
+            "chat.queueTrashRestore": "Restore",
+            "chat.queueTrashRestoreAll": "Restore all",
+            "chat.queueTrashPurge": "Delete permanently (no undo)",
+            "chat.queueTrashPurgeAll": "Empty trash",
+            "chat.queueTrashPurgeAllConfirm": "Confirm? No undo",
+            "chat.queueTrashPurged": "Permanently deleted {count} message(s)",
+            "chat.queueTrashRestored": "Restored {count} message(s)",
+            "chat.queueUndoDeleted": "Deleted",
+            "chat.queueUndo": "Undo",
+            "chat.queueUndoTitle": "Restore this deleted message",
+            "chat.confirm": "Confirm",
+            "chat.close": "Close"
+          },
+          "zh-TW": {
+            "chat.queued": "已排隊 · {count}",
+            "chat.recall": "編輯",
+            "chat.recallTitle": "移除所有排隊訊息並放回輸入框編輯",
+            "chat.steer": "插隊",
+            "chat.followUp": "排隊",
+            "chat.queueRecoveryKindSteer": "steer",
+            "chat.queueRecoveryKindFollowUp": "follow-up",
+            "chat.queueRecoveryNoText": "（無文字）",
+            "chat.queueHasImages": "佇列訊息帶圖片附件",
+            "chat.queueHasFiles": "佇列訊息帶檔案附件",
+            "chat.queueViewAttachments": "檢視圖片附件",
+            "chat.queueAttachmentsTitle": "排隊圖片附件",
+            "chat.queueAttachmentImage": "圖片 {n}",
+            "chat.queueAttachmentDownload": "下載",
+            "chat.queueCollapse": "折疊排隊訊息",
+            "chat.queueExpand": "展開排隊訊息",
+            "chat.queueExport": "匯出",
+            "chat.queueImport": "匯入",
+            "chat.queueRemove": "刪除此條",
+            "chat.queueMoveUp": "上移",
+            "chat.queueMoveDown": "下移",
+            "chat.queueRecallOne": "移回輸入框編輯",
+            "chat.queueSteerSend": "嘗試插隊發送（等待 agent 優先排程）",
+            "chat.queueToFollowUp": "轉為 follow-up（等待下一輪處理）",
+            "chat.queueSteerReadonly": "已注入後端 steer 佇列（本輪工具間隙自動消費），不支持撤回/移動/轉換；如需取消請停止本輪（stop）",
+            "chat.queueImportEmpty": "檔案中沒有有效的訊息條目",
+            "chat.queueImported": "已匯入 {count} 條訊息到佇列",
+            "chat.queueExported": "已匯出 {count} 條訊息",
+            "chat.queueTrash": "資源回收筒",
+            "chat.queueTrashTitle": "資源回收筒（已刪除的訊息，可復原）",
+            "chat.queueTrashFromInput": "輸入清除",
+            "chat.queueTrashRestoreToInput": "復原到輸入框",
+            "chat.queueTrashCount": "資源回收筒 · {count}",
+            "chat.queueTrashEmpty": "資源回收筒是空的",
+            "chat.queueTrashRestore": "復原",
+            "chat.queueTrashRestoreAll": "全部復原",
+            "chat.queueTrashPurge": "徹底刪除（不可復原）",
+            "chat.queueTrashPurgeAll": "清空資源回收筒",
+            "chat.queueTrashPurgeAllConfirm": "確認？無法復原",
+            "chat.queueTrashPurged": "已徹底刪除 {count} 條訊息",
+            "chat.queueTrashRestored": "已復原 {count} 條訊息",
+            "chat.queueUndoDeleted": "已刪除",
+            "chat.queueUndo": "復原",
+            "chat.queueUndoTitle": "復原此已刪除的訊息",
+            "chat.confirm": "確認",
+            "chat.close": "關閉"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icon.svg",
+      "features": [
+        {
+          "id": "queuePanel.enabled",
+          "type": "boolean",
+          "label": "队列面板增强",
+          "placeholder": "完整队列面板（横幅/行操作/拖拽/回收站/撤销条/导入导出）；关闭后回落 core 兜底 banner",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "aiti-session-cards",
+      "name": "会话请求卡（审批/问答/授权）",
+      "version": "0.1.14",
+      "clientUrl": "/api/extensions/aiti-session-cards/assets/dist/aiti-session-cards.mjs",
+      "ui": {
+        "i18n": {
+          "en": {
+            "ext.displayName": "Session Request Cards (approval/Q&A/authorization)",
+            "feat.sessionCards.enabled": "Full request card UI"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icons/message-square.svg",
+      "features": [
+        {
+          "id": "sessionCards.enabled",
+          "type": "boolean",
+          "label": "完整请求卡 UI",
+          "placeholder": "方案审批/问答选项/授权选项完整交互；关闭后落宿主极简兜底卡（仍可接受/拒绝）",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "demo",
+      "name": "扩展自检 (Demo)",
+      "version": "0.2.3",
+      "clientUrl": "/api/extensions/demo/assets/dist/demo-jsx.mjs",
+      "ui": {
+        "toolbar": [
+          {
+            "id": "open",
+            "label": "i18n:it.open.label",
+            "title": "i18n:it.open.label"
+          }
+        ],
+        "sidebar": [
+          {
+            "id": "entry",
+            "label": "demo 自检",
+            "title": "demo 扩展自检",
+            "badge": false
+          }
+        ],
+        "sessionTopbar": [
+          {
+            "id": "check",
+            "label": "🧪"
+          }
+        ],
+        "sessionRowActions": [
+          {
+            "id": "demo-star",
+            "label": "demo 标记",
+            "title": "demo 会话标记（演示，非收藏）"
+          }
+        ],
+        "dialogs": [
+          {
+            "id": "selfcheck",
+            "label": "i18n:it.selfcheck.label"
+          }
+        ],
+        "banners": [
+          {
+            "id": "banner",
+            "label": "demo 横幅测试"
+          }
+        ],
+        "pages": [
+          {
+            "id": "page",
+            "label": "i18n:it.page.label"
+          }
+        ],
+        "chatInputTop": [
+          {
+            "id": "check",
+            "label": "🧪"
+          }
+        ],
+        "rightFileDock": [
+          {
+            "id": "dock-demo",
+            "label": "i18n:it.dock-demo.label"
+          }
+        ],
+        "sidebarExplorerDock": [
+          {
+            "id": "dock-demo",
+            "label": "停靠示例",
+            "icon": "box"
+          }
+        ],
+        "userMessageActions": [
+          {
+            "id": "demo-pin",
+            "label": "demo 标记",
+            "title": "demo：给消息打 demo 标记（本地演示，与收藏库无关）"
+          }
+        ],
+        "newSessionWidgets": [
+          {
+            "id": "widget",
+            "label": "示例小组件"
+          }
+        ],
+        "clientDependsOn": [],
+        "i18n": {
+          "en": {
+            "it.open.label.2": "demo self-check",
+            "it.open.label.3": "demo self-check",
+            "it.star.label": "demo flag",
+            "it.banner.label": "demo banner test",
+            "it.open.label.4": "demo self-check",
+            "it.star.label.2": "demo flag",
+            "it.dock.title": "🧩 Dock demo",
+            "it.widget.title": "Sample widget",
+            "it.open.label": "demo self-check",
+            "it.dock-demo.label": "🧩 Dock demo",
+            "it.page.label": "demo self-check page",
+            "it.selfcheck.label": "demo self-check panel",
+            "it.jsx-demo.label": "JSX demo",
+            "it.dock-demo.title": "🧩 Dock demo",
+            "it.jsx-demo-panel.label": "JSX demo panel",
+            "it.dock-demo-float.label": "Dock demo (floating)",
+            "ext.displayName": "Demo Extension",
+            "feat.open": "demo self-check",
+            "feat.entry": "demo self-check",
+            "feat.demo-star": "demo flag",
+            "feat.selfcheck": "demo self-check panel",
+            "feat.banner": "demo banner test",
+            "feat.page": "demo self-check page",
+            "feat.dock-demo": "🧩 Dock demo",
+            "feat.demo-pin": "demo flag",
+            "feat.widget": "Sample widget",
+            "demo.title": "demo Extension self-check",
+            "demo.open": "demo Self-check",
+            "demo.close": "Close",
+            "demo.rerun": "Re-run",
+            "demo.check.api": "Server API (ping)",
+            "demo.check.core": "Core data (sessions)",
+            "demo.check.counter": "Cache dir (counter)",
+            "demo.check.middleware": "Middleware (/demo-middleware)",
+            "demo.check.client": "Client bundle (this panel)",
+            "demo.check.agent": "Agent tool (demo_ping)",
+            "demo.ms": "{ms} ms",
+            "demo.ok": "OK",
+            "demo.fail": "FAIL",
+            "demo.bannerTest": "demo test banner (5s)",
+            "demo.bannerText": "🧪 demo: banner slot works — auto-dismisses in 5s",
+            "demo.toggleStar": "demo mark",
+            "demo.pinTitle": "demo: mark this message locally (testing only; unrelated to favorites)",
+            "jsx.title": "JSX Demo Panel",
+            "jsx.close": "Close",
+            "jsx.hint": "This panel is rendered by the JSX + npm client bundle (client/src/*.tsx → demo-jsx.mjs via vite). Compare with the hyperscript demo-client.mjs.",
+            "jsx.jsx": "JSX syntax",
+            "jsx.npm": "npm dependency: qrcode",
+            "jsx.server": "Client ⇄ server",
+            "jsx.fetch": "Fetch counter",
+            "jsx.state": "How it works"
+          },
+          "zh-CN": {
+            "it.open.label.2": "demo 自检",
+            "it.open.label.3": "demo 自检",
+            "it.star.label": "demo 标记",
+            "it.banner.label": "demo 横幅测试",
+            "it.open.label.4": "demo 自检",
+            "it.star.label.2": "demo 标记",
+            "it.dock.title": "🧩 停靠示例",
+            "it.widget.title": "示例小组件",
+            "it.open.label": "demo 自检",
+            "it.dock-demo.label": "停靠示例",
+            "it.page.label": "demo 自检页面",
+            "it.selfcheck.label": "demo 自检面板",
+            "it.jsx-demo.label": "JSX 示例",
+            "it.dock-demo.title": "🧩 停靠示例",
+            "it.jsx-demo-panel.label": "JSX 示例面板",
+            "it.dock-demo-float.label": "停靠示例（浮窗态）",
+            "ext.displayName": "示例扩展",
+            "demo.title": "demo 扩展自检",
+            "demo.open": "demo 自检",
+            "demo.close": "关闭",
+            "demo.rerun": "重跑",
+            "demo.check.api": "服务端 API（ping）",
+            "demo.check.core": "核心数据（会话）",
+            "demo.check.counter": "缓存目录（计数器）",
+            "demo.check.middleware": "中间件（/demo-middleware）",
+            "demo.check.client": "client bundle（本面板）",
+            "demo.check.agent": "agent 工具（demo_ping）",
+            "demo.ms": "{ms} ms",
+            "demo.ok": "通过",
+            "demo.fail": "失败",
+            "demo.bannerTest": "demo 测试横幅（5 秒）",
+            "demo.bannerText": "🧪 demo 横幅插槽正常 —— 5 秒后自动消失",
+            "demo.toggleStar": "demo 标记",
+            "demo.pinTitle": "demo：给消息打 demo 标记（本地演示，与收藏库无关）",
+            "jsx.title": "JSX 示例面板",
+            "jsx.close": "关闭",
+            "jsx.hint": "本面板由 JSX + npm 的 client bundle 渲染（client/src/*.tsx → demo-jsx.mjs，vite 构建）；对比手写 hyperscript 的 demo-client.mjs。",
+            "jsx.jsx": "JSX 语法",
+            "jsx.npm": "npm 依赖：qrcode",
+            "jsx.server": "client ⇄ server 联动",
+            "jsx.fetch": "读取计数",
+            "jsx.state": "原理"
+          }
+        }
+      },
+      "source": "bundled",
+      "icon": "icon.svg"
+    }
+  ],
+  "graph": {
+    "rev": "c8cbc5abff96",
+    "entries": [
+      {
+        "id": "aiti-ctx-meter",
+        "url": "/api/extensions/aiti-ctx-meter/assets/dist/aiti-ctx-meter-client.mjs?rev=a7d201a2684a",
+        "rev": "a7d201a2684a",
+        "immediately": true
+      },
+      {
+        "id": "aiti-draft-keeper",
+        "url": "/api/extensions/aiti-draft-keeper/assets/dist/aiti-draft-keeper-client.mjs?rev=75a0ff28c5b9",
+        "rev": "75a0ff28c5b9",
+        "immediately": true
+      },
+      {
+        "id": "aiti-feedback",
+        "url": "/api/extensions/aiti-feedback/assets/dist/aiti-feedback-client.mjs?rev=6b57ee653a44",
+        "rev": "6b57ee653a44",
+        "immediately": true
+      },
+      {
+        "id": "aiti-float",
+        "url": "/api/extensions/aiti-float/assets/dist/aiti-float-client.mjs?rev=1ae04773b888",
+        "rev": "1ae04773b888",
+        "immediately": true
+      },
+      {
+        "id": "aiti-model-recent",
+        "url": "/api/extensions/aiti-model-recent/assets/dist/aiti-model-recent.mjs?rev=b7d76761249d",
+        "rev": "b7d76761249d",
+        "immediately": true
+      },
+      {
+        "id": "aiti-msg-anchor",
+        "url": "/api/extensions/aiti-msg-anchor/assets/dist/aiti-msg-anchor-client.mjs?rev=973815cfc2e6",
+        "rev": "973815cfc2e6",
+        "immediately": true
+      },
+      {
+        "id": "aiti-msg-nav",
+        "url": "/api/extensions/aiti-msg-nav/assets/dist/aiti-msg-nav-client.mjs?rev=91f56188b03a",
+        "rev": "91f56188b03a",
+        "immediately": true
+      },
+      {
+        "id": "aiti-queue-keeper",
+        "url": "/api/extensions/aiti-queue-keeper/assets/dist/aiti-queue-keeper.mjs?rev=06a1190703fa",
+        "rev": "06a1190703fa",
+        "immediately": true
+      },
+      {
+        "id": "aiti-session-cards",
+        "url": "/api/extensions/aiti-session-cards/assets/dist/aiti-session-cards.mjs?rev=4500b4d6fb17",
+        "rev": "4500b4d6fb17",
+        "immediately": true
+      },
+      {
+        "id": "demo",
+        "url": "/api/extensions/demo/assets/dist/demo-jsx.mjs?rev=bc82b9373b9a",
+        "rev": "bc82b9373b9a",
+        "immediately": true
+      }
+    ]
+  },
+  "failed": []
+}
