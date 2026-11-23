@@ -24,7 +24,8 @@
     "extensions:curated": "node scripts/build-extension-manifest.mjs --curated",
     "extensions:refresh": "node scripts/prepare-extension-tier.mjs --force && node scripts/build-extension-manifest.mjs --full",
     "capture:extensions": "node capture/run.mjs --extensions",
-    "extensions:captured": "node scripts/build-extension-manifest.mjs --full --from-capture p1-core4"
+    "extensions:captured": "node scripts/build-extension-manifest.mjs --full --from-capture p1-core4",
+    "capture:app": "node capture/run.mjs --app-center"
   },
   "dependencies": {
     "@earendil-works/pi-agent-core": "1.6.0",

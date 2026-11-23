@@ -23,20 +23,19 @@ const arg = (name, fallback) => {
   const index = args.indexOf(`--${name}`);
   return index >= 0 ? args[index + 1] : fallback;
 };
-const runId = arg("run");
-if (!runId) {
-  console.error("usage: node capture/compile.mjs --run <run-id>");
+const runIds = (arg("runs") ?? arg("run") ?? "").split(",").map((id) => id.trim()).filter(Boolean);
+if (!runIds.length) {
+  console.error("usage: node capture/compile.mjs --run <run-id> | --runs a,b");
   process.exit(1);
 }
-const rawDir = join(demoDir, "capture", "raw", runId);
-if (!existsSync(join(rawDir, "requests.ndjson"))) {
-  console.error(`[compile] no capture at ${rawDir}`);
-  process.exit(1);
+const rawDirs = runIds.map((id) => join(demoDir, "capture", "raw", id));
+for (const rawDir of rawDirs) {
+  if (!existsSync(join(rawDir, "requests.ndjson"))) {
+    console.error(`[compile] no capture at ${rawDir}`);
+    process.exit(1);
+  }
 }
-const runDir = join(demoDir, "capture", "runs", runId);
-const projectDir = join(runDir, "project");
-const agentDir = join(runDir, "agent");
-const webDataDir = join(runDir, "web-data");
+const runDirs = runIds.map((id) => join(demoDir, "capture", "runs", id));
 
 const outDir = join(demoDir, "mock", "model");
 const assetsOut = join(demoDir, "mock", "assets");
@@ -45,14 +44,16 @@ rmSync(assetsOut, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 mkdirSync(assetsOut, { recursive: true });
 
-const replacements = [
-  [projectDir, "/Users/demo/code/pi-web"],
-  [agentDir, "/Users/demo/.pi/agent"],
-  [webDataDir, "/Users/demo/.pi/web/data"],
-  [runDir, "/Users/demo"],
-  ["/Users/demo/code/pi-web", "/Users/demo/code/pi-web"],
-  ["/Users/demo", "/Users/demo"],
-];
+const replacements = [];
+for (const runDir of runDirs) {
+  replacements.push(
+    [join(runDir, "project"), "/Users/demo/code/pi-web"],
+    [join(runDir, "agent"), "/Users/demo/.pi/agent"],
+    [join(runDir, "web-data"), "/Users/demo/.pi/web/data"],
+    [runDir, "/Users/demo"],
+  );
+}
+replacements.push(["/Users/demo/code/pi-web", "/Users/demo/code/pi-web"], ["/Users/demo", "/Users/demo"]);
 const secretKeys = /^(api_?key|token|secret|password|authorization|cookie|access_?token|refresh_?token)$/i;
 
 function sanitizeText(text) {
@@ -84,8 +85,16 @@ function scrub(value, stats) {
   return value;
 }
 
-const rawText = readFileSync(join(rawDir, "requests.ndjson"), "utf8").trim();
-const rows = rawText ? rawText.split("\n").map((line) => JSON.parse(line)) : [];
+const rows = [];
+for (const rawDir of rawDirs) {
+  const rawText = readFileSync(join(rawDir, "requests.ndjson"), "utf8").trim();
+  if (!rawText) continue;
+  for (const line of rawText.split("\n")) {
+    const row = JSON.parse(line);
+    row.step = sanitizeText(String(row.step ?? ""));
+    rows.push(row);
+  }
+}
 const stats = { secrets: 0, bodies: 0, assets: 0, skipped: 0 };
 const routes = {};
 const catalog = {
@@ -186,16 +195,19 @@ for (const row of rows) {
   if (row.url === "/api/tools/settings") remember("tools", row);
 }
 
-// Copy captured extension assets to the model as well (public/ is the replay
-// home; mock/assets keeps an auditable copy).
-const rawAssets = join(rawDir, "assets");
-if (existsSync(rawAssets)) cpSync(rawAssets, assetsOut, { recursive: true });
+// Copy captured extension assets from every run (auditable copy; the runtime
+// full tier comes from aiti-ai/extensions/*/dist).
+for (const rawDir of rawDirs) {
+  const rawAssets = join(rawDir, "assets");
+  if (existsSync(rawAssets)) cpSync(rawAssets, assetsOut, { recursive: true });
+}
 
 const meta = {
-  runId,
+  runId: runIds.join(","),
+  runs: runIds,
   compiledAt: new Date().toISOString(),
   sourceCommit: (() => {
-    try { return JSON.parse(readFileSync(join(rawDir, "meta.json"), "utf8")).sourceCommit; }
+    try { return JSON.parse(readFileSync(join(rawDirs[0], "meta.json"), "utf8")).sourceCommit; }
     catch { return "unknown"; }
   })(),
   counts: {

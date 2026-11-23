@@ -229,6 +229,89 @@ async function crawlExtensions() {
   console.log(`[capture] extension crawl opened ${opened}/${labels.length}`);
 }
 
+async function crawlAppCenter() {
+  const collapseAppDrawer = async () => {
+    const collapse = page.getByTitle("Collapse").first();
+    if (await collapse.count()) await collapse.click({ timeout: 2_000 }).catch(() => {});
+    await page.waitForTimeout(800);
+  };
+  await collapseAppDrawer();
+  const cards = await page.evaluate(() => [...document.querySelectorAll("[data-app-card]")]
+    .map((el) => ({ key: el.getAttribute("data-app-card"), text: (el.textContent || "").trim().slice(0, 60) })));
+  console.log(`[capture] app center: ${cards.length} card(s)`);
+  let opened = 0;
+  for (const [index, card] of cards.entries()) {
+    const skip = /delete|remove|stop|send|compact|share|reset|logout|uninstall|install|new session/i;
+    if (skip.test(card.text)) continue;
+    currentStep = `app:${card.key}`.slice(0, 120);
+    // A card may replace the app drawer with a panel; reload + collapse for each
+    // card so the next one is reliably visible.
+    await page.goto(`${base}/?session=demo-welcome`, { waitUntil: "domcontentloaded", timeout: 60_000 }).catch(() => {});
+    await page.getByRole("button", { name: "Settings", exact: true }).last().waitFor({ timeout: 20_000 }).catch(() => {});
+    await collapseAppDrawer();
+    const locator = page.locator(`[data-app-card="${card.key.replace(/"/g, '\\"')}"]`).first();
+    if (!(await locator.count())) continue;
+    try {
+      await locator.click({ timeout: 2_000 });
+      opened += 1;
+      await page.waitForTimeout(600);
+      if (index % 3 === 0) {
+        const safe = `${String(index).padStart(2, "0")}-${card.key}`.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 100);
+        await page.screenshot({ path: join(shotsDir, `app-${safe}.png`) }).catch(() => {});
+      }
+      await page.keyboard.press("Escape").catch(() => {});
+      await page.waitForTimeout(200);
+    } catch { /* hidden */ }
+  }
+  steps.push({ label: "app-center-crawl", ok: true, opened, cards: cards.length });
+  console.log(`[capture] app center opened ${opened}/${cards.length}`);
+}
+
+async function crawlDomButtons() {
+  const max = Number(arg("max-buttons", "70"));
+  const skip = /delete|remove|stop|send|fork|logout|uninstall|install|reset|pair|upload|download|shutdown|reboot|kill|compact|generate title|new session|^new$|close|collapse|expand/i;
+  const clicked = new Set();
+  let opened = 0;
+  for (let index = 0; index < max; index += 1) {
+    const candidates = await page.evaluate(() => [...document.querySelectorAll("button, [role=\"button\"]")]
+      .filter((el) => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      })
+      .map((el) => ({
+        title: el.getAttribute("title") || "",
+        aria: el.getAttribute("aria-label") || "",
+        text: (el.textContent || "").trim().slice(0, 60),
+      }))
+      .filter((item) => item.title || item.aria));
+    const next = candidates.find((item) => {
+      const key = item.title || item.aria;
+      return key && !clicked.has(key) && !skip.test(key);
+    });
+    if (!next) break;
+    const key = next.title || next.aria;
+    clicked.add(key);
+    currentStep = `dom:${key}`.slice(0, 120);
+    const locator = next.title
+      ? page.getByTitle(next.title, { exact: true }).first()
+      : page.getByRole("button", { name: next.aria, exact: true }).first();
+    if (!(await locator.count())) continue;
+    try {
+      await locator.click({ timeout: 1_500 });
+      opened += 1;
+      await page.waitForTimeout(500);
+      if (index % 4 === 0) {
+        const safe = `${String(index).padStart(3, "0")}-${key}`.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 100);
+        await page.screenshot({ path: join(shotsDir, `dom-${safe}.png`) }).catch(() => {});
+      }
+      await page.keyboard.press("Escape").catch(() => {});
+      await page.waitForTimeout(200);
+    } catch { /* non-clickable */ }
+  }
+  steps.push({ label: "dom-button-crawl", ok: true, opened });
+  console.log(`[capture] dom button crawl opened ${opened}`);
+}
+
 try {
   await page.goto(`${base}/`, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await step("boot", async () => {
@@ -303,7 +386,11 @@ try {
       }
     }
   });
-  if (args.includes("--extensions")) await crawlExtensions();
+  if (args.includes("--extensions")) {
+    await crawlExtensions();
+    await crawlDomButtons();
+  }
+  if (args.includes("--app-center")) await crawlAppCenter();
   await step("model-selector", async () => {
     const model = page.getByText("Demo Large", { exact: false }).first();
     if (await model.count()) {
