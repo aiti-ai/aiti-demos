@@ -3,7 +3,7 @@
     {
       "id": "aiti-acp-agent",
       "name": "ACP Agents (通用 ACP 驱动)",
-      "version": "0.3.10",
+      "version": "0.3.11",
       "clientUrl": "/api/extensions/aiti-acp-agent/assets/dist/acp-manager.mjs?v=22849844cf8f",
       "ui": {
         "clientImmediately": true,
@@ -331,7 +331,7 @@
     {
       "id": "aiti-agent-manager",
       "name": "Agent 管理界面",
-      "version": "0.2.11",
+      "version": "0.2.12",
       "clientUrl": "/api/extensions/aiti-agent-manager/assets/dist/agent-manager-client.mjs?v=921fae03b2b8",
       "ui": {
         "clientImmediately": false,
@@ -581,7 +581,7 @@
     {
       "id": "aiti-ai-input",
       "name": "AI input",
-      "version": "0.4.14",
+      "version": "0.4.15",
       "clientUrl": "/api/extensions/aiti-ai-input/assets/dist/aiti-ai-input-client.mjs?v=77d4349f9875",
       "ui": {
         "toolbar": [
@@ -984,7 +984,7 @@
     {
       "id": "aiti-ai-schedule",
       "name": "AI 自调度（计划管理）",
-      "version": "0.4.10",
+      "version": "0.4.11",
       "clientUrl": "/api/extensions/aiti-ai-schedule/assets/dist/aiti-ai-schedule.mjs?v=4d779f472ee6",
       "ui": {
         "clientImmediately": false,
@@ -1421,7 +1421,7 @@
     {
       "id": "aiti-ai-speek",
       "name": "跟读模式（AI 输出朗读）",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "clientUrl": "/api/extensions/aiti-ai-speek/assets/dist/aiti-ai-speek-client.mjs?v=616c48b72002",
       "ui": {
         "toolbar": [
@@ -1972,7 +1972,7 @@
     {
       "id": "aiti-ai-usage",
       "name": "AI Usage",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-ai-usage/assets/dist/aiti-ai-usage.mjs?v=6578d082340c",
       "ui": {
         "clientImmediately": false,
@@ -2330,7 +2330,7 @@
     {
       "id": "aiti-app-center",
       "name": "应用中心",
-      "version": "0.2.12",
+      "version": "0.2.13",
       "clientUrl": "/api/extensions/aiti-app-center/assets/dist/aiti-app-center-client.mjs?v=1a01108b993c",
       "ui": {
         "clientImmediately": false,
@@ -2522,7 +2522,7 @@
     {
       "id": "aiti-attach-agent",
       "name": "Session Attach (socket 附着后端)",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -2554,7 +2554,7 @@
     {
       "id": "aiti-backup",
       "name": "数据备份（快照）",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -2571,7 +2571,7 @@
     {
       "id": "aiti-channels",
       "name": "IM 渠道（cc-connect 大前端）",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-channels/assets/dist/aiti-channels-client.mjs?v=eb0ef06c5640",
       "ui": {
         "clientImmediately": false,
@@ -2984,7 +2984,7 @@
     {
       "id": "aiti-claude-code-agent",
       "name": "Claude Code (resume)",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -3045,7 +3045,7 @@
     {
       "id": "aiti-cmd",
       "name": "aiti 命令管理器（真 TTY 终端 + 常用命令）",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "clientUrl": "/api/extensions/aiti-cmd/assets/dist/aiti-cmd-client.mjs?v=c30403ddbdca",
       "ui": {
         "clientImmediately": true,
@@ -3994,7 +3994,7 @@
     {
       "id": "aiti-codebuddy-agent",
       "name": "CodeBuddy Code (腾讯)",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -4155,7 +4155,7 @@
     {
       "id": "aiti-codex-agent",
       "name": "Codex CLI",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -4216,7 +4216,7 @@
     {
       "id": "aiti-configs",
       "name": "配置版本化 + 崩溃自检（安全网）",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-configs/assets/dist/aiti-configs-client.mjs?v=e235509a34d3",
       "ui": {
         "clientImmediately": false,
@@ -4411,7 +4411,7 @@
     {
       "id": "aiti-cpu-meter",
       "name": "主线程流畅度检测器（读秒 + 0-100 分 + 可注入任意站点）",
-      "version": "0.2.10",
+      "version": "0.2.11",
       "clientUrl": "/api/extensions/aiti-cpu-meter/assets/dist/aiti-cpu-meter-client.mjs?v=8b389c20965c",
       "ui": {
         "i18n": {
@@ -4499,7 +4499,7 @@
     {
       "id": "aiti-ctx-meter",
       "name": "上下文比例条（context %）",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "clientUrl": "/api/extensions/aiti-ctx-meter/assets/dist/aiti-ctx-meter-client.mjs?v=234fef3e3114",
       "ui": {
         "i18n": {
@@ -4524,7 +4524,7 @@
     {
       "id": "aiti-cursor-agent",
       "name": "Cursor Agent",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -4585,7 +4585,7 @@
     {
       "id": "aiti-custom-agent",
       "name": "自定义 Agent",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-custom-agent/assets/dist/custom-agent-client.mjs?v=1d7f11ea2d8a",
       "ui": {
         "i18n": {
@@ -4816,7 +4816,7 @@
     {
       "id": "aiti-debug-inject",
       "name": "AITI 远程调试注入（可配置目标 pi-web）",
-      "version": "0.3.10",
+      "version": "0.3.11",
       "clientUrl": "/api/extensions/aiti-debug-inject/assets/dist/aiti-debug-inject-client.mjs?v=42862a200407",
       "ui": {
         "i18n": {
@@ -5060,7 +5060,7 @@
     {
       "id": "aiti-doc-center",
       "name": "文档中心",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-doc-center/assets/dist/aiti-doc-center-client.mjs?v=b8396d63e710",
       "ui": {
         "clientImmediately": false,
@@ -5352,7 +5352,7 @@
     {
       "id": "aiti-draft-keeper",
       "name": "Draft Keeper",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-draft-keeper/assets/dist/aiti-draft-keeper-client.mjs?v=03ad013935fa",
       "ui": null,
       "source": "user",
@@ -5383,7 +5383,7 @@
     {
       "id": "aiti-editor",
       "name": "aiti-editor",
-      "version": "1.0.13",
+      "version": "1.0.14",
       "clientUrl": "/api/extensions/aiti-editor/assets/dist/aiti-editor-client.mjs?v=c6332b37bb35",
       "ui": {
         "clientImmediately": false,
@@ -6250,7 +6250,7 @@
     {
       "id": "aiti-event-bus",
       "name": "页面事件总线",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-event-bus/assets/dist/aiti-event-bus-client.mjs?v=dbb0bede9788",
       "ui": {
         "i18n": {
@@ -6270,7 +6270,7 @@
     {
       "id": "aiti-extman",
       "name": "aiti 扩展管理器",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-extman/assets/dist/aiti-extman-client.mjs?v=86ee81a5a0c4",
       "ui": {
         "clientImmediately": false,
@@ -6691,7 +6691,7 @@
     {
       "id": "aiti-feedback",
       "name": "报告问题",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "clientUrl": "/api/extensions/aiti-feedback/assets/dist/aiti-feedback-client.mjs?v=3614a021eeb1",
       "ui": {
         "clientImmediately": false,
@@ -6807,7 +6807,7 @@
     {
       "id": "aiti-float",
       "name": "弹窗浮动增强",
-      "version": "0.5.12",
+      "version": "0.5.13",
       "clientUrl": "/api/extensions/aiti-float/assets/dist/aiti-float-client.mjs?v=13a4da7f2946",
       "ui": {
         "i18n": {
@@ -6830,7 +6830,7 @@
     {
       "id": "aiti-folder",
       "name": "aiti-folder",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-folder/assets/dist/aiti-folder-client.mjs?v=2895d43aa2a4",
       "ui": {
         "fileViewer": [
@@ -7135,7 +7135,7 @@
     {
       "id": "aiti-git-ops",
       "name": "Git Ops（共享 Git 操作引擎）",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -7155,7 +7155,7 @@
     {
       "id": "aiti-git-review",
       "name": "Git 代码审核",
-      "version": "0.2.10",
+      "version": "0.2.11",
       "clientUrl": "/api/extensions/aiti-git-review/assets/dist/aiti-git-review-client.mjs?v=31c50dabf1a2",
       "ui": {
         "clientImmediately": false,
@@ -7285,7 +7285,7 @@
     {
       "id": "aiti-git-trace",
       "name": "AI 变更追踪",
-      "version": "0.2.14",
+      "version": "0.2.15",
       "clientUrl": "/api/extensions/aiti-git-trace/assets/dist/aiti-git-trace-client.mjs?v=0c05cae09b97",
       "ui": {
         "toolbar": [
@@ -7885,7 +7885,7 @@
     {
       "id": "aiti-helper",
       "name": "AI Helper（扩展的一句话 AI 能力）",
-      "version": "0.5.13",
+      "version": "0.5.14",
       "clientUrl": "/api/extensions/aiti-helper/assets/dist/aiti-helper-client.mjs?v=09ca23bbda64",
       "ui": {
         "clientImmediately": true,
@@ -8162,7 +8162,7 @@
     {
       "id": "aiti-mail",
       "name": "邮件发送",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-mail/assets/dist/aiti-mail-client.mjs?v=606b227fff02",
       "ui": {
         "clientImmediately": false,
@@ -8291,7 +8291,7 @@
     {
       "id": "aiti-model-check",
       "name": "模型可用性管理（探测 / 429 限流识别）",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-model-check/assets/dist/aiti-model-check-client.mjs?v=26f69f442501",
       "ui": {
         "clientImmediately": true,
@@ -8963,7 +8963,7 @@
     {
       "id": "aiti-model-recent",
       "name": "Model Recent",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-model-recent/assets/dist/aiti-model-recent.mjs?v=a9117c0ec923",
       "ui": {
         "i18n": {
@@ -8988,8 +8988,8 @@
     {
       "id": "aiti-model-wizard",
       "name": "模型添加向导（目录搜索 / 反向匹配 / 自动探测）",
-      "version": "0.1.16",
-      "clientUrl": null,
+      "version": "0.1.17",
+      "clientUrl": "/api/extensions/aiti-model-wizard/assets/dist/aiti-model-wizard-client.mjs?v=ec0d5c801b52",
       "ui": {
         "toolbar": [
           {
@@ -11195,7 +11195,7 @@
     {
       "id": "aiti-models-import",
       "name": "模型配置导入（从其他 agent）",
-      "version": "0.1.12",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-models-import/assets/dist/aiti-models-import.mjs?v=224c27fafdcf",
       "ui": {
         "toolbar": [
@@ -11210,6 +11210,7 @@
         ],
         "i18n": {
           "zh-CN": {
+            "ext.displayName": "模型导入",
             "n": "模型配置导入",
             "it.import.label": "模型配置导入",
             "mi.open.label": "导入模型配置",
@@ -11401,6 +11402,7 @@
             "mi.srv.qoder.reason": "Credentials are WASM-encrypted and endpoints are regional constants; the model list comes from a server API rather than a local config file"
           },
           "zh-TW": {
+            "ext.displayName": "模型匯入",
             "n": "模型設定匯入",
             "it.import.label": "模型設定匯入",
             "mi.open.label": "匯入模型設定",
@@ -11511,7 +11513,7 @@
     {
       "id": "aiti-msg-anchor",
       "name": "消息锚点横幅",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-msg-anchor/assets/dist/aiti-msg-anchor-client.mjs?v=6d99678aa30f",
       "ui": {
         "clientDependsOn": [
@@ -11602,7 +11604,7 @@
     {
       "id": "aiti-msg-nav",
       "name": "消息滚动导航",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-msg-nav/assets/dist/aiti-msg-nav-client.mjs?v=d41b04eeb972",
       "ui": {
         "clientDependsOn": [],
@@ -11650,7 +11652,7 @@
     {
       "id": "aiti-msg-share",
       "name": "消息分享",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-msg-share/assets/dist/aiti-msg-share-client.mjs?v=6d0285979b9e",
       "ui": {
         "i18n": {
@@ -11973,7 +11975,7 @@
       "id": "aiti-msg-smart",
       "name": "消息智能（段落点击识别）",
       "version": "0.1.12",
-      "clientUrl": "/api/extensions/aiti-msg-smart/assets/dist/aiti-msg-smart-client.mjs?v=1f8e30bfcb2e",
+      "clientUrl": "/api/extensions/aiti-msg-smart/assets/dist/aiti-msg-smart-client.mjs?v=4b5ad5cfa0e4",
       "ui": {
         "clientDependsOn": [],
         "i18n": {
@@ -12129,7 +12131,7 @@
     {
       "id": "aiti-omp-agent",
       "name": "Oh My Pi (omp 子进程后端)",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -12202,7 +12204,7 @@
     {
       "id": "aiti-onlyoffice",
       "name": "aiti-onlyoffice",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-onlyoffice/assets/dist/aiti-onlyoffice-client.mjs?v=a34e9d6c4a54",
       "ui": {
         "i18n": {
@@ -12263,7 +12265,7 @@
     {
       "id": "aiti-pair",
       "name": "设备互连（临时聊天 / 互传文件）",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "clientUrl": "/api/extensions/aiti-pair/assets/dist/aiti-pair-client.mjs?v=b537929a5d65",
       "ui": {
         "rightFileDock": [
@@ -12303,7 +12305,7 @@
     {
       "id": "aiti-pi-agent",
       "name": "Pi Spawn (子进程后端)",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -12368,7 +12370,7 @@
     {
       "id": "aiti-prompts",
       "name": "aiti prompt 片段收藏库",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-prompts/assets/dist/aiti-prompts-client.mjs?v=9914912d2038",
       "ui": {
         "clientImmediately": false,
@@ -12769,7 +12771,7 @@
     {
       "id": "aiti-provider-usage",
       "name": "Provider Usage",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-provider-usage/assets/dist/aiti-provider-usage.mjs?v=d53ffde1dad1",
       "ui": {
         "sessionInfoPanel": [
@@ -12847,7 +12849,7 @@
     {
       "id": "aiti-qoder-agent",
       "name": "Qoder CLI (国际/CN 独立 CLI·非 IDE)",
-      "version": "0.4.12",
+      "version": "0.4.13",
       "clientUrl": null,
       "ui": {
         "provides": [
@@ -12915,7 +12917,7 @@
     {
       "id": "aiti-queue-keeper",
       "name": "Queue Keeper",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-queue-keeper/assets/dist/aiti-queue-keeper.mjs?v=6763af5f8bc7",
       "ui": {
         "queuePanel": [
@@ -13094,7 +13096,7 @@
     {
       "id": "aiti-quickstart",
       "name": "快速上手",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "clientUrl": "/api/extensions/aiti-quickstart/assets/dist/aiti-quickstart-client.mjs?v=2a068a8ac3d0",
       "ui": {
         "clientImmediately": false,
@@ -13388,7 +13390,7 @@
     {
       "id": "aiti-recovery",
       "name": "Recovery",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-recovery/assets/dist/aiti-recovery.mjs?v=6a1e0254c6ed",
       "ui": {
         "recoveryDialog": [
@@ -13586,7 +13588,7 @@
     {
       "id": "aiti-session-cards",
       "name": "会话请求卡（审批/问答/授权）",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-session-cards/assets/dist/aiti-session-cards.mjs?v=4c228dff1688",
       "ui": {
         "i18n": {
@@ -13612,7 +13614,7 @@
     {
       "id": "aiti-sheet-univer",
       "name": "aiti-sheet-univer",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-sheet-univer/assets/dist/aiti-sheet-univer-client.mjs?v=0ae1a7581bc9",
       "ui": {
         "i18n": {
@@ -13641,7 +13643,7 @@
     {
       "id": "aiti-subagents",
       "name": "子代理（ai 委托 · 多 agent 协作）",
-      "version": "0.4.12",
+      "version": "0.4.13",
       "clientUrl": "/api/extensions/aiti-subagents/assets/dist/aiti-subagents-client.mjs?v=21bed8633810",
       "ui": {
         "i18n": {
@@ -14034,7 +14036,7 @@
     {
       "id": "aiti-sysmon",
       "name": "系统状态（服务器 CPU/内存/磁盘/网络/温度）",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "clientUrl": "/api/extensions/aiti-sysmon/assets/dist/aiti-sysmon-client.mjs?v=3bba6ccc6e08",
       "ui": {
         "clientImmediately": true,
@@ -14152,7 +14154,7 @@
     {
       "id": "aiti-testagent",
       "name": "TestAgent 连桥（Java 进程扫描 / Attach）",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-testagent/assets/dist/aiti-testagent-client.mjs?v=546fa5a33ac7",
       "ui": {
         "toolbar": [
@@ -14240,7 +14242,7 @@
     {
       "id": "aiti-testagent-native",
       "name": "testagent-native（Windows API/COM 追踪面板）",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-testagent-native/assets/dist/aiti-testagent-native-client.mjs?v=0d69e2442d4f",
       "ui": {
         "toolbar": [
@@ -14311,7 +14313,7 @@
     {
       "id": "aiti-ui-env",
       "name": "UI 环境（桌面/无头虚拟屏）",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-ui-env/assets/dist/aiti-ui-env-client.mjs?v=9783ed4eb84a",
       "ui": {
         "clientImmediately": false,
@@ -15247,7 +15249,7 @@
     {
       "id": "aiti-word-docx-preview",
       "name": "aiti-word-docx-preview",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-word-docx-preview/assets/dist/aiti-word-docx-preview-client.mjs?v=35b387bf922d",
       "ui": {
         "i18n": {
@@ -15267,7 +15269,7 @@
     {
       "id": "aiti-word-superdoc",
       "name": "aiti-word-superdoc",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "clientUrl": "/api/extensions/aiti-word-superdoc/assets/dist/aiti-word-superdoc-client.mjs?v=a8f887f2b6ae",
       "ui": {
         "i18n": {
@@ -15296,7 +15298,7 @@
     {
       "id": "aiti-zcode-agent",
       "name": "ZCode CLI",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-zcode-agent/assets/dist/aiti-zcode-cards.mjs?v=37a148244b44",
       "ui": {
         "i18n": {
@@ -15434,8 +15436,8 @@
     {
       "id": "service-tunnels",
       "name": "Service Tunnels",
-      "version": "0.3.89",
-      "clientUrl": "/api/extensions/service-tunnels/assets/dist/service-tunnels.mjs?v=e1907d554947",
+      "version": "0.3.90",
+      "clientUrl": "/api/extensions/service-tunnels/assets/dist/service-tunnels.mjs?v=607c29fadb85",
       "ui": {
         "clientImmediately": false,
         "toolbar": [
@@ -17586,7 +17588,7 @@
     }
   ],
   "graph": {
-    "rev": "1892e9686c13",
+    "rev": "09629f3e97f8",
     "entries": [
       {
         "id": "aiti-acp-agent",
@@ -17760,6 +17762,11 @@
         "rev": "a9117c0ec923"
       },
       {
+        "id": "aiti-model-wizard",
+        "url": "/api/extensions/aiti-model-wizard/assets/dist/aiti-model-wizard-client.mjs?rev=ec0d5c801b52",
+        "rev": "ec0d5c801b52"
+      },
+      {
         "id": "aiti-models-import",
         "url": "/api/extensions/aiti-models-import/assets/dist/aiti-models-import.mjs?rev=224c27fafdcf",
         "rev": "224c27fafdcf"
@@ -17784,8 +17791,8 @@
       },
       {
         "id": "aiti-msg-smart",
-        "url": "/api/extensions/aiti-msg-smart/assets/dist/aiti-msg-smart-client.mjs?rev=1f8e30bfcb2e",
-        "rev": "1f8e30bfcb2e"
+        "url": "/api/extensions/aiti-msg-smart/assets/dist/aiti-msg-smart-client.mjs?rev=4b5ad5cfa0e4",
+        "rev": "4b5ad5cfa0e4"
       },
       {
         "id": "aiti-onlyoffice",
@@ -17880,8 +17887,8 @@
       },
       {
         "id": "service-tunnels",
-        "url": "/api/extensions/service-tunnels/assets/dist/service-tunnels.mjs?rev=e1907d554947",
-        "rev": "e1907d554947",
+        "url": "/api/extensions/service-tunnels/assets/dist/service-tunnels.mjs?rev=607c29fadb85",
+        "rev": "607c29fadb85",
         "immediately": false
       },
       {

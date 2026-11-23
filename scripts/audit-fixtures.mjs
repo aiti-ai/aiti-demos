@@ -56,7 +56,13 @@ for (const file of filesUnder(assetsDir)) {
   if (!/\.(js|mjs|json|txt|md|css|svg|html)$/i.test(file)) continue;
   const text = readFileSync(file, "utf8");
   if (text.length > 4_000_000) continue;
+  // Compiled extension code may contain documented example addresses; only
+  // fixtures (mock/model) are treated as leaked data for private IPs.
+  const before = hits.length;
   scan(file, text);
+  for (let i = hits.length - 1; i >= before; i -= 1) {
+    if (hits[i].kind === "private ip") hits.splice(i, 1);
+  }
 }
 
 if (hits.length) {

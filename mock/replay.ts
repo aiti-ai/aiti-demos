@@ -28,9 +28,13 @@ function candidates(request: MockRequest): string[] {
 
 export function replayRoutes(request: MockRequest): Response | null {
   if (request.method !== "GET") return null;
-  // Extension APIs are owned by the curated static tier; the full recorded
-  // manifest would point at bundles the demo does not ship.
-  if (request.path.startsWith("/api/extensions/")) return null;
+  // Extension framework endpoints and asset files stay with the static tier;
+  // extension-owned API reads are replayed from the recorded model.
+  if (request.path.startsWith("/api/extensions/")) {
+    const action = request.segments[2];
+    if (["manifest", "status", "client-bundle", "reload"].includes(action)) return null;
+    if (request.segments[3] === "assets") return null;
+  }
   // Agent/session/terminal streams and state machines stay hand-written.
   if (request.path.startsWith("/api/agent/")) return null;
   if (request.path.startsWith("/api/sessions/")) return null;

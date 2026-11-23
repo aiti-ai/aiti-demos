@@ -50,7 +50,7 @@ if (fullMode) {
     "aiti-bridge-probe", "aiti-plan-first", "aiti-plan-review", "aiti-video-studio",
   ]);
   // Settings takeovers that still need more recorded APIs: catalog only.
-  const skipClients = new Set(["aiti-model-wizard"]);
+  const skipClients = new Set();
 
   if (captureRun) {
     const rawAssets = join(demoDir, "capture", "raw", captureRun, "assets", "api", "extensions");

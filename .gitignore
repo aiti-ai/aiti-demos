@@ -10,3 +10,5 @@
 next-env.d.ts
 *.tsbuildinfo
 /public/api/
+
+/mock/assets/

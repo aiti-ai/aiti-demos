@@ -169,39 +169,48 @@ async function crawlExtensions() {
   const labels = [];
   const seen = new Set();
   const skip = /new session|delete|remove|stop|send|fork|logout|uninstall|install|reset|pair|upload|download|stop/i;
+  const resolve = (ui, raw) => {
+    if (typeof raw !== "string") return null;
+    if (!raw.startsWith("i18n:")) return raw;
+    const key = raw.slice(5);
+    return ui.i18n?.en?.[key] ?? ui.i18n?.["zh-CN"]?.[key] ?? key;
+  };
   for (const ext of manifest.extensions ?? []) {
     const ui = ext.ui;
     if (!ui) continue;
     for (const [slot, items] of Object.entries(ui)) {
       if (!Array.isArray(items)) continue;
       for (const item of items) {
-        let label = item?.title ?? item?.label;
-        if (typeof label !== "string") continue;
-        if (label.startsWith("i18n:")) {
-          const key = label.slice(5);
-          label = ui.i18n?.en?.[key] ?? ui.i18n?.["zh-CN"]?.[key] ?? key;
+        for (const raw of [item?.title, item?.label, item?.name]) {
+          const label = resolve(ui, raw);
+          if (!label || label.length > 80 || skip.test(label)) continue;
+          const id = `${ext.id}|${slot}|${label}`;
+          if (seen.has(id)) continue;
+          seen.add(id);
+          labels.push({ ext: ext.id, slot, label });
         }
-        if (!label || label.length > 80 || skip.test(label)) continue;
-        const id = `${ext.id}|${slot}|${label}`;
-        if (seen.has(id)) continue;
-        seen.add(id);
-        labels.push({ ext: ext.id, slot, label });
       }
     }
   }
   console.log(`[capture] extension crawl: ${labels.length} candidate(s)`);
+  // Session-specific slots only render with a session open.
+  await page.goto(`${base}/?session=demo-welcome`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.waitForTimeout(1200);
   let opened = 0;
   for (const [index, { label, ext }] of labels.entries()) {
     currentStep = `ext:${ext}:${label}`.slice(0, 120);
     let clicked = false;
     for (const locator of [
       page.getByTitle(label, { exact: true }).first(),
+      page.getByTitle(label, { exact: false }).first(),
       page.getByRole("button", { name: label, exact: true }).first(),
+      page.getByRole("button", { name: label, exact: false }).first(),
       page.getByText(label, { exact: true }).first(),
+      page.getByText(label, { exact: false }).first(),
     ]) {
       if (!(await locator.count())) continue;
       try {
-        await locator.click({ timeout: 2_000 });
+        await locator.click({ timeout: 1_500 });
         clicked = true;
         break;
       } catch { /* try next */ }
@@ -238,7 +247,7 @@ try {
     const dialog = page.getByRole("dialog", { name: "Settings" });
     await dialog.getByText("General", { exact: false }).first().waitFor({ timeout: 20_000 });
     await page.screenshot({ path: join(shotsDir, "03-settings-general.png") });
-    for (const tab of ["Models", "MCP", "Plugins", "Skills"]) {
+    for (const tab of ["Models", "Skills", "Sub-agents", "Plugins", "MCP"]) {
       const item = dialog.getByText(tab, { exact: true }).first();
       if (await item.count()) {
         await item.click({ timeout: 5_000 }).catch(() => {});

@@ -1,0 +1,44 @@
+{
+  "skills": [
+    {
+      "name": "demo-helper",
+      "description": "A tiny demo skill shown in the Skills settings page.",
+      "filePath": "/Users/demo/.pi/agent/skills/demo-helper/SKILL.md",
+      "baseDir": "/Users/demo/.pi/agent/skills/demo-helper",
+      "sourceInfo": {
+        "path": "/Users/demo/.pi/agent/skills/demo-helper/SKILL.md",
+        "source": "auto",
+        "scope": "user",
+        "origin": "top-level",
+        "baseDir": "/Users/demo/.pi/agent"
+      },
+      "disableModelInvocation": false
+    },
+    {
+      "name": "git-pullkeep",
+      "description": "Prefer `git pullkeep` over `git pull` / `git pull --rebase --autostash` whenever a repository has uncommitted changes. Pulls while parking only the blocking files in a labelled temp commit; keeps staged state, untracked files, and every other dirty file untouched. Use when a pull fails with \"local changes would be overwritten\", when syncing machines that carry local edits, or when autostash/stash-pop keeps causing conflicts.",
+      "filePath": "/Users/demo/.agents/skills/git-pullkeep/SKILL.md",
+      "baseDir": "/Users/demo/.agents/skills/git-pullkeep",
+      "sourceInfo": {
+        "path": "/Users/demo/.agents/skills/git-pullkeep/SKILL.md",
+        "source": "auto",
+        "scope": "user",
+        "origin": "top-level",
+        "baseDir": "/Users/demo/.agents"
+      },
+      "disableModelInvocation": false,
+      "install": {
+        "package": "aiti-ai/git-pullkeep@git-pullkeep",
+        "scope": "global",
+        "source": "aiti-ai/git-pullkeep",
+        "sourceType": "github",
+        "skillsShUrl": "https://skills.sh/aiti-ai/git-pullkeep/git-pullkeep",
+        "skillPath": "skills/git-pullkeep/SKILL.md",
+        "versionHash": "e25aca9e0ab5c3793b3caa6568011fa81bd1dee4",
+        "canCheckForUpdates": true
+      }
+    }
+  ],
+  "diagnostics": [],
+  "projectResourcesLoaded": true
+}
