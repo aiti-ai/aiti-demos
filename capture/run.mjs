@@ -164,6 +164,62 @@ async function step(label, fn) {
   await page.waitForTimeout(600);
 }
 
+async function crawlExtensions() {
+  const manifest = await page.evaluate(async () => (await fetch("/api/extensions/manifest")).json());
+  const labels = [];
+  const seen = new Set();
+  const skip = /new session|delete|remove|stop|send|fork|logout|uninstall|install|reset|pair|upload|download|stop/i;
+  for (const ext of manifest.extensions ?? []) {
+    const ui = ext.ui;
+    if (!ui) continue;
+    for (const [slot, items] of Object.entries(ui)) {
+      if (!Array.isArray(items)) continue;
+      for (const item of items) {
+        let label = item?.title ?? item?.label;
+        if (typeof label !== "string") continue;
+        if (label.startsWith("i18n:")) {
+          const key = label.slice(5);
+          label = ui.i18n?.en?.[key] ?? ui.i18n?.["zh-CN"]?.[key] ?? key;
+        }
+        if (!label || label.length > 80 || skip.test(label)) continue;
+        const id = `${ext.id}|${slot}|${label}`;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        labels.push({ ext: ext.id, slot, label });
+      }
+    }
+  }
+  console.log(`[capture] extension crawl: ${labels.length} candidate(s)`);
+  let opened = 0;
+  for (const [index, { label, ext }] of labels.entries()) {
+    currentStep = `ext:${ext}:${label}`.slice(0, 120);
+    let clicked = false;
+    for (const locator of [
+      page.getByTitle(label, { exact: true }).first(),
+      page.getByRole("button", { name: label, exact: true }).first(),
+      page.getByText(label, { exact: true }).first(),
+    ]) {
+      if (!(await locator.count())) continue;
+      try {
+        await locator.click({ timeout: 2_000 });
+        clicked = true;
+        break;
+      } catch { /* try next */ }
+    }
+    if (!clicked) continue;
+    opened += 1;
+    await page.waitForTimeout(700);
+    if (index % 5 === 0) {
+      const safe = `${String(index).padStart(3, "0")}-${ext}-${label}`.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 100);
+      await page.screenshot({ path: join(shotsDir, `ext-${safe}.png`) }).catch(() => {});
+    }
+    await page.keyboard.press("Escape").catch(() => {});
+    await page.waitForTimeout(250);
+  }
+  steps.push({ label: "extension-crawl", ok: true, opened, candidates: labels.length });
+  console.log(`[capture] extension crawl opened ${opened}/${labels.length}`);
+}
+
 try {
   await page.goto(`${base}/`, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await step("boot", async () => {
@@ -238,6 +294,7 @@ try {
       }
     }
   });
+  if (args.includes("--extensions")) await crawlExtensions();
   await step("model-selector", async () => {
     const model = page.getByText("Demo Large", { exact: false }).first();
     if (await model.count()) {

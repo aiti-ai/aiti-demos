@@ -43,6 +43,15 @@ if (fullMode) {
     console.error("[ext] missing mock/model/catalog/extensionManifest.json (run compile first)");
     process.exit(1);
   }
+  const captured = JSON.parse(readFileSync(capturedManifestPath, "utf8"));
+  const skipIds = new Set([
+    "demo", "demo-lazy", "sm-demo-source",
+    // experimental pi-work extensions, not part of the public aiti-ai tree
+    "aiti-bridge-probe", "aiti-plan-first", "aiti-plan-review", "aiti-video-studio",
+  ]);
+  // Settings takeovers that still need more recorded APIs: catalog only.
+  const skipClients = new Set(["aiti-model-wizard"]);
+
   if (captureRun) {
     const rawAssets = join(demoDir, "capture", "raw", captureRun, "assets", "api", "extensions");
     if (!existsSync(rawAssets)) {
@@ -51,29 +60,57 @@ if (fullMode) {
     }
     rmSync(publicRoot, { recursive: true, force: true });
     cpSync(rawAssets, publicRoot, { recursive: true });
-  } else if (!existsSync(publicRoot)) {
-    console.error("[ext] public/api/extensions missing — run scripts/prepare-extension-tier.mjs");
-    process.exit(1);
+  } else {
+    // Copy the real client bundles straight from the aiti-ai checkout:
+    // extensions/<id>/dist + icons. No archive, no second mock.
+    if (!existsSync(join(sourceRoot, "extensions"))) {
+      console.error(`[ext] aiti-ai extensions not found at ${sourceRoot}`);
+      process.exit(1);
+    }
+    rmSync(publicRoot, { recursive: true, force: true });
+    mkdirSync(publicRoot, { recursive: true });
+    for (const ext of captured.extensions) {
+      if (skipIds.has(ext.id)) continue;
+      const sourceDir = join(sourceRoot, "extensions", ext.id);
+      if (!existsSync(sourceDir)) continue;
+      const assetDir = join(publicRoot, ext.id, "assets");
+      const rootDir = join(publicRoot, ext.id);
+      if (existsSync(join(sourceDir, "dist"))) cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
+      if (existsSync(join(sourceDir, "icons"))) cpSync(join(sourceDir, "icons"), join(assetDir, "icons"), { recursive: true });
+      if (existsSync(join(sourceDir, "icon.svg"))) cpSync(join(sourceDir, "icon.svg"), join(assetDir, "icon.svg"));
+      // Some extensions (aiti-devtools) serve runtime helpers from the
+      // extension root as well as /assets/; mirror both static paths.
+      if (existsSync(join(sourceDir, "assets"))) {
+        cpSync(join(sourceDir, "assets"), assetDir, { recursive: true });
+        cpSync(join(sourceDir, "assets"), rootDir, { recursive: true });
+      }
+      for (const name of readdirSync(sourceDir)) {
+        if (!/\.(js|mjs|css|json|html|svg|png)$/.test(name)) continue;
+        const file = join(sourceDir, name);
+        if (!statSync(file).isFile()) continue;
+        cpSync(file, join(rootDir, name));
+      }
+      for (const name of ["LICENSE", "README.md"]) {
+        if (existsSync(join(sourceDir, name))) cpSync(join(sourceDir, name), join(assetDir, name));
+      }
+    }
   }
-  const captured = JSON.parse(readFileSync(capturedManifestPath, "utf8"));
-  const assetsRoot = publicRoot;
-  // Extensions whose settings takeover still needs more recorded APIs: keep the
-  // catalog entry but do not load the client (core fallback renders instead).
-  const skipClients = new Set(["aiti-model-wizard"]);
+
   const extensions = captured.extensions.map((ext) => {
     const path = ext.clientUrl?.replace(/\?.*$/, "");
-    const exists = path && existsSync(join(assetsRoot, ext.id, "assets", path.replace(`/api/extensions/${ext.id}/assets/`, "")));
+    const relative = path?.replace(`/api/extensions/${ext.id}/assets/`, "") ?? "";
+    const exists = path && relative && existsSync(join(publicRoot, ext.id, "assets", relative));
     return { ...ext, clientUrl: exists && !skipClients.has(ext.id) ? ext.clientUrl : null };
-  }).filter((ext) => !["demo", "demo-lazy", "sm-demo-source"].includes(ext.id));
+  }).filter((ext) => !skipIds.has(ext.id));
   const available = new Set(extensions.filter((e) => e.clientUrl).map((e) => e.id));
   const entries = (captured.graph?.entries ?? []).filter((row) => available.has(row.id));
   const manifest = {
     extensions,
-    graph: { rev: captured.graph?.rev ?? "capture", entries: entries.map((row) => ({ ...row, url: row.url })) },
+    graph: { rev: captured.graph?.rev ?? "source", entries },
     failed: [],
   };
   writeFileSync(join(demoDir, "mock", "data", "extension-manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
-  console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${entries.length} client bundle(s) (${captureRun ?? "packaged tier"})`);
+  console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${entries.length} client bundle(s) (${captureRun ? `capture ${captureRun}` : `source ${sourceRoot}`})`);
   process.exit(0);
 }
 
