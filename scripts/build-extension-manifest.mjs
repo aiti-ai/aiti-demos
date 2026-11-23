@@ -28,15 +28,60 @@ const jiti = createJiti(import.meta.url, { interopDefault: true });
 
 const demoDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
+const fullMode = args.includes("--full");
+const captureRun = args.find((a) => a.startsWith("--from-capture="))?.slice("--from-capture=".length)
+  ?? (args.includes("--from-capture") ? args[args.indexOf("--from-capture") + 1] : undefined);
 const rootArg = args.find((a) => a.startsWith("--root="))?.slice("--root=".length)
   ?? (args.includes("--root") ? args[args.indexOf("--root") + 1] : undefined);
 const sourceRoot = resolve(rootArg ?? process.env.AITI_SRC ?? join(demoDir, "..", "aiti-ai"));
+
+const publicRoot = join(demoDir, "public", "api", "extensions");
+
+if (fullMode) {
+  const capturedManifestPath = join(demoDir, "mock", "model", "catalog", "extensionManifest.json");
+  if (!existsSync(capturedManifestPath)) {
+    console.error("[ext] missing mock/model/catalog/extensionManifest.json (run compile first)");
+    process.exit(1);
+  }
+  if (captureRun) {
+    const rawAssets = join(demoDir, "capture", "raw", captureRun, "assets", "api", "extensions");
+    if (!existsSync(rawAssets)) {
+      console.error(`[ext] missing captured assets at ${rawAssets}`);
+      process.exit(1);
+    }
+    rmSync(publicRoot, { recursive: true, force: true });
+    cpSync(rawAssets, publicRoot, { recursive: true });
+  } else if (!existsSync(publicRoot)) {
+    console.error("[ext] public/api/extensions missing — run scripts/prepare-extension-tier.mjs");
+    process.exit(1);
+  }
+  const captured = JSON.parse(readFileSync(capturedManifestPath, "utf8"));
+  const assetsRoot = publicRoot;
+  // Extensions whose settings takeover still needs more recorded APIs: keep the
+  // catalog entry but do not load the client (core fallback renders instead).
+  const skipClients = new Set(["aiti-model-wizard"]);
+  const extensions = captured.extensions.map((ext) => {
+    const path = ext.clientUrl?.replace(/\?.*$/, "");
+    const exists = path && existsSync(join(assetsRoot, ext.id, "assets", path.replace(`/api/extensions/${ext.id}/assets/`, "")));
+    return { ...ext, clientUrl: exists && !skipClients.has(ext.id) ? ext.clientUrl : null };
+  }).filter((ext) => !["demo", "demo-lazy", "sm-demo-source"].includes(ext.id));
+  const available = new Set(extensions.filter((e) => e.clientUrl).map((e) => e.id));
+  const entries = (captured.graph?.entries ?? []).filter((row) => available.has(row.id));
+  const manifest = {
+    extensions,
+    graph: { rev: captured.graph?.rev ?? "capture", entries: entries.map((row) => ({ ...row, url: row.url })) },
+    failed: [],
+  };
+  writeFileSync(join(demoDir, "mock", "data", "extension-manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+  console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${entries.length} client bundle(s) (${captureRun ?? "packaged tier"})`);
+  process.exit(0);
+}
+
+/** Curated tier: self-contained client bundles (see the plan §9). */
 if (!existsSync(join(sourceRoot, "extensions"))) {
   console.error(`[ext] aiti-ai extensions not found at ${sourceRoot}`);
   process.exit(1);
 }
-
-/** Curated tier: self-contained client bundles (see the plan §9). */
 const EXT_IDS = [
   "aiti-ctx-meter",
   "aiti-msg-nav",
@@ -50,7 +95,6 @@ const EXT_IDS = [
   "demo",
 ];
 
-const publicRoot = join(demoDir, "public", "api", "extensions");
 rmSync(publicRoot, { recursive: true, force: true });
 mkdirSync(publicRoot, { recursive: true });
 

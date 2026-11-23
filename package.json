@@ -19,8 +19,10 @@
     "audit": "node scripts/audit-fixtures.mjs",
     "coverage": "node scripts/check-coverage.mjs",
     "tour": "node scripts/tour.mjs",
-    "extensions": "node scripts/build-extension-manifest.mjs",
-    "capture:install:cn": "bash scripts/install-playwright-browser.sh"
+    "extensions": "node scripts/prepare-extension-tier.mjs && node scripts/build-extension-manifest.mjs --full",
+    "capture:install:cn": "bash scripts/install-playwright-browser.sh",
+    "extensions:curated": "node scripts/build-extension-manifest.mjs --curated",
+    "extensions:refresh": "node scripts/prepare-extension-tier.mjs --force && node scripts/build-extension-manifest.mjs --full"
   },
   "dependencies": {
     "@earendil-works/pi-agent-core": "1.6.0",

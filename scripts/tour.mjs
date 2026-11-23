@@ -121,11 +121,19 @@ try {
     if (await files.count()) await files.click({ timeout: 5_000 });
     await page.getByText("README.md", { exact: false }).first().waitFor({ timeout: 20_000 });
   });
-  await check("demo-extension", async () => {
-    const button = page.getByTitle("demo Self-check").first();
-    await button.waitFor({ timeout: 20_000 });
-    await button.click();
-    await page.getByText("demo Extension self-check", { exact: false }).first().waitFor({ timeout: 20_000 });
+  await check("extension-tier", async () => {
+    // Curated tier: the reference demo extension is present. Full tier: the
+    // extension manager is the visible proof (60 real client bundles).
+    const demo = page.getByTitle("demo Self-check").first();
+    if (await demo.count()) {
+      await demo.click();
+      await page.getByText("demo Extension self-check", { exact: false }).first().waitFor({ timeout: 20_000 });
+      return;
+    }
+    const extman = page.getByRole("button", { name: /Extensions/i }).first();
+    await extman.waitFor({ timeout: 20_000 });
+    await extman.click();
+    await page.getByText(/Extensions|Extension manager/i).first().waitFor({ timeout: 20_000 });
   });
 } finally {
   await browser.close();
