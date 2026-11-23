@@ -208,8 +208,8 @@ export function usageReport(providerId: string) {
         metrics: [
           { id: "availability", label: "API calls", value: "Available" },
           { id: "cny-total", label: "Total balance", value: 66.66, unit: "currency", currency: "CNY" },
-          { id: "cny-granted", label: "Granted balance", value: 10, unit: "currency", currency: "CNY" },
-          { id: "cny-topped-up", label: "Topped-up balance", value: 60.0, unit: "currency", currency: "CNY" },
+          { id: "cny-granted", label: "Granted balance", value: 6.66, unit: "currency", currency: "CNY" },
+          { id: "cny-topped-up", label: "Topped-up balance", value: 60.00, unit: "currency", currency: "CNY" },
         ],
       },
     };

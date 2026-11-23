@@ -63,6 +63,8 @@ function sanitizeText(text) {
   out = out.replace(/\bsk-[A-Za-z0-9_-]{20,}\b/g, "sk-***");
   out = out.replace(/Bearer\s+[A-Za-z0-9._-]{10,}/g, "Bearer ***");
   out = out.replace(/(?:10|192\.168|172\.(?:1[6-9]|2\d|3[01]))\.\d{1,3}\.\d{1,3}(?:\.\d{1,3})?/g, "private-host");
+  // Masked key fragments (prefix***suffix) still leak first/last chars — flatten them.
+  out = out.replace(/([A-Za-z]{2,6})\*{2,}([A-Za-z0-9]{2,8})/g, "$1***demo");
   return out;
 }
 
@@ -111,9 +113,76 @@ const catalog = {
   settings: null,
 };
 
+const PCT = [
+  [encodeURIComponent("/Users/demo"), "/Users/demo"],
+  [encodeURIComponent("/Users/demo/code/pi-web"), "/Users/demo/code/pi-web"],
+];
+
+/** Replace operator-config-shaped recorded bodies with synthetic demo data. */
+function syntheticBody(url) {
+  const u = url.split("?")[0];
+  if (u === "/api/extensions/aiti-model-wizard/status") {
+    return { ok: true, file: "/Users/demo/.pi/agent/models.json", providers: [{
+      provider: "demo", combo: false, enabled: true, api: "openai-completions",
+      baseUrl: "https://llm.example.invalid/v1", apiKeyMasked: "sk-***demo", hasKey: true,
+      modelCount: 2, models: [{ id: "demo-large", enabled: true }, { id: "demo-small", enabled: true }],
+      keys: [], keyCount: 0,
+    }] };
+  }
+  if (u === "/api/extensions/aiti-model-check/status") {
+    return { ok: true, state: { updatedAt: 0, models: {} }, models: [{
+      provider: "demo", model: "Demo Large", modelId: "demo-large", api: "openai-completions",
+      baseUrl: "https://llm.example.invalid/v1", reasoning: true, source: "pi",
+    }], modelsError: null, runtime: "demo", piError: null,
+      summary: { total: 1, ok: 1, limited: 0, error: 0, unknown: 0 }, recover: [] };
+  }
+  if (u === "/api/extensions/aiti-model-check/balance") {
+    return { ok: true, refreshed: true, balances: [{
+      provider: "demo", label: "Demo Gateway", kind: "balance", ok: true, unsupported: false,
+      exhausted: false, checkedAt: 0, latencyMs: 12, text: "Balance 66.66 CNY (demo)", details: null,
+    }] };
+  }
+  if (u === "/api/extensions/aiti-ai-usage/facets") {
+    return { agents: ["pi"], providers: ["demo"], models: ["Demo Large", "Demo Small"],
+      keys: [], workspaces: ["/Users/demo/code/pi-web"], days: ["2026-11-23"] };
+  }
+  if (u.startsWith("/api/extensions/aiti-ai-usage/overview")) {
+    const series = ["2026-11-20", "2026-11-21", "2026-11-22", "2026-11-23"].map((bucket) => (
+      { bucket, provider: "demo", tokens: 120000, cost: 0.8 }));
+    return { label: "30d", totals: { msgs: 96, tokens: 480000, cost: 3.2 },
+      keyTotals: { reqs: 96, err429: 0 }, series,
+      rows: [], byModel: [{ model: "Demo Large", provider: "demo", tokens: 480000, cost: 3.2 }] };
+  }
+  if (u === "/api/extensions/aiti-agent-manager/agents") {
+    return { agents: [{ agent: "acp", label: { zh: "ACP 家族", en: "ACP family" }, extId: "aiti-acp-agent",
+      modes: ["tui"], installed: true, authState: "unknown", flowState: "idle", authSource: "none",
+      dependencyHint: { zh: "各 ACP CLI 随用随装", en: "ACP CLIs connect when installed" },
+      accounts: [], hasContent: false }] };
+  }
+  if (u === "/api/session-backends") {
+    return { providers: [], sessionListVersion: 1 };
+  }
+  if (u === "/api/extensions/aiti-models-import/scan") {
+    return { ok: true, scanning: false, total: 0, providers: [], baseline: false, toast: null };
+  }
+  return null;
+}
+
 function routeKey(row) {
-  const query = row.query ? row.query.replace(/^\?/, "") : "";
-  return `${row.method ?? "GET"} ${row.url}${query ? `?${query}` : ""}`;
+  const url0 = row.url;
+  let query = row.query ? row.query.replace(/^\?/, "") : "";
+  let url = url0;
+  // Recorded keys may percent-encode operator paths (?project=%2Fhome%2F...) —
+  // decode, sanitize, re-encode so no real path survives in any form.
+  if (/%[0-9A-Fa-f]{2}/.test(url + query)) {
+    try {
+      const dec = sanitizeText(decodeURIComponent(`${url0}${row.query ?? ""}`));
+      const qIdx = dec.indexOf("?");
+      url = qIdx >= 0 ? dec.slice(0, qIdx) : dec;
+      query = qIdx >= 0 ? dec.slice(qIdx + 1) : "";
+    } catch { /* keep raw */ }
+  }
+  return `${row.method ?? "GET"} ${url}${query ? `?${query}` : ""}`;
 }
 
 function remember(name, row) {
@@ -167,6 +236,9 @@ for (const row of rows) {
     catch { row.requestBody = sanitizeText(row.requestBody); }
   }
   const key = routeKey(row);
+  // Operator-config endpoints: never publish the recorded body.
+  const synthetic = syntheticBody(row.url);
+  if (synthetic) body = synthetic;
   const catalogRef = row.url === "/api/extensions/manifest"
     ? "catalog/extensionManifest.json"
     : row.url === "/api/extensions/status"
