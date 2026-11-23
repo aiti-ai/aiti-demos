@@ -74,81 +74,85 @@ const context = await browser.newContext({
   timezoneId: "UTC",
 });
 const page = await context.newPage();
-page.setDefaultTimeout(15_000);
-const cdp = await context.newCDPSession(page);
-await cdp.send("Network.enable");
-cdp.on("Network.eventSourceMessageReceived", (event) => {
-  streams.push({
-    step: currentStep,
-    requestId: event.requestId,
-    timestamp: event.timestamp,
-    event: event.eventName ?? "",
-    data: event.data,
-  });
-});
+await instrument(page);
 
 const pendingResponses = [];
-page.on("response", (response) => {
-  const url = new URL(response.url());
-  if (url.origin !== new URL(base).origin) return;
-  if (!url.pathname.startsWith("/api/")) return;
-  const type = response.headers()["content-type"] ?? "";
-  if (type.includes("text/event-stream")) return;
-  pendingResponses.push((async () => {
-    try {
-      const isAsset = url.pathname.startsWith("/api/extensions/") && /\.(mjs|js|css|svg|png|jpg|woff2?|ttf)$/.test(url.pathname);
-      if (isAsset) {
-        const body = await response.body();
-        const asset = writeAsset(url.pathname, body, type);
-        requests.push({ step: currentStep, method: response.request().method(), url: url.pathname, query: url.search, status: response.status(), type, asset });
-        return;
+const pendingRequests = [];
+
+async function instrument(target) {
+  target.setDefaultTimeout(15_000);
+  const cdpSession = await context.newCDPSession(target);
+  await cdpSession.send("Network.enable");
+  cdpSession.on("Network.eventSourceMessageReceived", (event) => {
+    streams.push({
+      step: currentStep,
+      requestId: event.requestId,
+      timestamp: event.timestamp,
+      event: event.eventName ?? "",
+      data: event.data,
+    });
+  });
+  target.on("response", (response) => {
+    const url = new URL(response.url());
+    if (url.origin !== new URL(base).origin) return;
+    if (!url.pathname.startsWith("/api/")) return;
+    const type = response.headers()["content-type"] ?? "";
+    if (type.includes("text/event-stream")) return;
+    pendingResponses.push((async () => {
+      try {
+        const isAsset = url.pathname.startsWith("/api/extensions/") && /\.(mjs|js|css|svg|png|jpg|woff2?|ttf)$/.test(url.pathname);
+        if (isAsset) {
+          const body = await response.body();
+          const asset = writeAsset(url.pathname, body, type);
+          requests.push({ step: currentStep, method: response.request().method(), url: url.pathname, query: url.search, status: response.status(), type, asset });
+          return;
+        }
+        if (!/json|text|javascript/.test(type)) {
+          requests.push({ step: currentStep, method: response.request().method(), url: url.pathname, query: url.search, status: response.status(), type, skipped: "non-text" });
+          return;
+        }
+        const body = await response.text();
+        requests.push({
+          step: currentStep,
+          method: response.request().method(),
+          url: url.pathname,
+          query: url.search,
+          status: response.status(),
+          type,
+          bytes: body.length,
+          body: body.length > 4 * 1024 * 1024 ? body.slice(0, 4 * 1024 * 1024) : body,
+        });
+      } catch (error) {
+        requests.push({ step: currentStep, url: url.pathname, error: String(error).slice(0, 200) });
       }
-      if (!/json|text|javascript/.test(type)) {
-        requests.push({ step: currentStep, method: response.request().method(), url: url.pathname, query: url.search, status: response.status(), type, skipped: "non-text" });
-        return;
-      }
-      const body = await response.text();
+    })());
+  });
+  target.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.origin !== new URL(base).origin) return;
+    if (!url.pathname.startsWith("/api/")) return;
+    if (request.method() === "GET") return;
+    pendingRequests.push((() => {
+      let data = null;
+      try { data = request.postData(); } catch { /* binary */ }
       requests.push({
         step: currentStep,
-        method: response.request().method(),
+        method: request.method(),
         url: url.pathname,
         query: url.search,
-        status: response.status(),
-        type,
-        bytes: body.length,
-        body: body.length > 4 * 1024 * 1024 ? body.slice(0, 4 * 1024 * 1024) : body,
+        requestBody: data && data.length <= 64 * 1024 ? data : null,
       });
-    } catch (error) {
-      requests.push({ step: currentStep, url: url.pathname, error: String(error).slice(0, 200) });
+    })());
+  });
+  target.on("console", (message) => {
+    if (message.type() === "error" || message.type() === "warning") {
+      consoleLines.push({ step: currentStep, type: message.type(), text: message.text().slice(0, 2000) });
     }
-  })());
-});
-const pendingRequests = [];
-page.on("request", (request) => {
-  const url = new URL(request.url());
-  if (url.origin !== new URL(base).origin) return;
-  if (!url.pathname.startsWith("/api/")) return;
-  if (request.method() === "GET") return;
-  pendingRequests.push((() => {
-    let data = null;
-    try { data = request.postData(); } catch { /* binary */ }
-    requests.push({
-      step: currentStep,
-      method: request.method(),
-      url: url.pathname,
-      query: url.search,
-      requestBody: data && data.length <= 64 * 1024 ? data : null,
-    });
-  })());
-});
-page.on("console", (message) => {
-  if (message.type() === "error" || message.type() === "warning") {
-    consoleLines.push({ step: currentStep, type: message.type(), text: message.text().slice(0, 2000) });
-  }
-});
-page.on("pageerror", (error) => {
-  consoleLines.push({ step: currentStep, type: "pageerror", text: `${error.message}\n${(error.stack ?? "").slice(0, 2000)}` });
-});
+  });
+  target.on("pageerror", (error) => {
+    consoleLines.push({ step: currentStep, type: "pageerror", text: `${error.message}\n${(error.stack ?? "").slice(0, 2000)}` });
+  });
+}
 
 async function step(label, fn) {
   currentStep = label;
@@ -274,6 +278,45 @@ async function crawlAppCenter() {
   console.log(`[capture] app center opened ${opened}/${cards.length}`);
 }
 
+async function crawlAppCenterFresh(cards) {
+  const skip = /delete|remove|stop|send|compact|share|reset|logout|uninstall|install|new session/i;
+  let opened = 0;
+  for (const [index, card] of cards.entries()) {
+    if (skip.test(card.text)) continue;
+    currentStep = `app:${card.key}`.slice(0, 120);
+    const fresh = await context.newPage();
+    try {
+      await instrument(fresh);
+      await fresh.goto(`${base}/?session=demo-welcome`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+      await fresh.getByRole("button", { name: "Settings", exact: true }).last().waitFor({ timeout: 20_000 }).catch(() => {});
+      for (let i = 0; i < 6; i += 1) {
+        const collapse = await fresh.getByTitle("Collapse").all();
+        if (!collapse.length) break;
+        for (const button of collapse) await button.click({ timeout: 1_000 }).catch(() => {});
+        await fresh.waitForTimeout(300);
+        if (await fresh.locator("[data-app-card]").count()) break;
+      }
+      await fresh.waitForTimeout(500);
+      const locator = fresh.locator(`[data-app-card="${card.key.replace(/"/g, '\\"')}"]`).first();
+      if (!(await locator.count())) continue;
+      try {
+        await locator.click({ timeout: 2_000 });
+      } catch {
+        await locator.click({ timeout: 2_000, force: true });
+      }
+      opened += 1;
+      await fresh.waitForTimeout(600);
+      if (index % 3 === 0) {
+        const safe = `${String(index).padStart(2, "0")}-${card.key}`.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 100);
+        await fresh.screenshot({ path: join(shotsDir, `appf-${safe}.png`) }).catch(() => {});
+      }
+    } catch { /* not openable */ }
+    await fresh.close().catch(() => {});
+  }
+  steps.push({ label: "app-center-fresh", ok: true, opened, cards: cards.length });
+  console.log(`[capture] fresh app center opened ${opened}/${cards.length}`);
+}
+
 async function crawlDomButtons() {
   const max = Number(arg("max-buttons", "70"));
   const skip = /delete|remove|stop|send|fork|logout|uninstall|install|reset|pair|upload|download|shutdown|reboot|kill|compact|generate title|new session|^new$|close|collapse|expand/i;
@@ -393,11 +436,6 @@ try {
       }
     }
   });
-  if (args.includes("--extensions")) {
-    await crawlExtensions();
-    await crawlDomButtons();
-  }
-  if (args.includes("--app-center")) await crawlAppCenter();
   await step("model-selector", async () => {
     const model = page.getByText("Demo Large", { exact: false }).first();
     if (await model.count()) {
@@ -410,6 +448,24 @@ try {
       await page.keyboard.press("Escape").catch(() => {});
     }
   });
+  if (args.includes("--extensions")) {
+    await crawlExtensions();
+    await crawlDomButtons();
+  }
+  if (args.includes("--app-center")) await crawlAppCenter();
+  if (args.includes("--app-center-fresh")) {
+    for (let i = 0; i < 6; i += 1) {
+      const collapse = await page.getByTitle("Collapse").all();
+      if (!collapse.length) break;
+      for (const button of collapse) await button.click({ timeout: 1_000 }).catch(() => {});
+      await page.waitForTimeout(300);
+      if (await page.locator("[data-app-card]").count()) break;
+    }
+    const cards = await page.evaluate(() => [...document.querySelectorAll("[data-app-card]")]
+      .map((el) => ({ key: el.getAttribute("data-app-card"), text: (el.textContent || "").trim().slice(0, 60) })));
+    console.log(`[capture] app center candidates: ${cards.length}`);
+    await crawlAppCenterFresh(cards);
+  }
 } finally {
   await Promise.allSettled([...pendingRequests, ...pendingResponses]);
   if (!page.isClosed()) await page.waitForTimeout(500);

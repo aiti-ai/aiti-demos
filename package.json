@@ -25,7 +25,8 @@
     "extensions:refresh": "node scripts/prepare-extension-tier.mjs --force && node scripts/build-extension-manifest.mjs --full",
     "capture:extensions": "node capture/run.mjs --extensions",
     "extensions:captured": "node scripts/build-extension-manifest.mjs --full --from-capture p1-core4",
-    "capture:app": "node capture/run.mjs --app-center"
+    "capture:app": "node capture/run.mjs --app-center",
+    "capture:app-fresh": "node capture/run.mjs --app-center-fresh"
   },
   "dependencies": {
     "@earendil-works/pi-agent-core": "1.6.0",
