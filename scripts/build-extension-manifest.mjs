@@ -78,11 +78,24 @@ if (fullMode) {
       if (existsSync(join(sourceDir, "dist"))) cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
       if (existsSync(join(sourceDir, "icons"))) cpSync(join(sourceDir, "icons"), join(assetDir, "icons"), { recursive: true });
       if (existsSync(join(sourceDir, "icon.svg"))) cpSync(join(sourceDir, "icon.svg"), join(assetDir, "icon.svg"));
-      // Some extensions (aiti-devtools) serve runtime helpers from the
-      // extension root as well as /assets/; mirror both static paths.
+      // Asset routing mirrors the host: a URL "/assets/<rel>" maps to the
+      // extension directory itself (registry.assetPath strips the prefix), so
+      // serve <extDir>/<rel> at BOTH root and /assets/ — that covers aiti-editor
+      // (assets/vendor + assets/monaco/vs from its monaco/ + vendor/ dirs) and
+      // aiti-devtools (root-level runtime helpers).
       if (existsSync(join(sourceDir, "assets"))) {
         cpSync(join(sourceDir, "assets"), assetDir, { recursive: true });
         cpSync(join(sourceDir, "assets"), rootDir, { recursive: true });
+      }
+      if (ext.id === "aiti-editor") {
+        if (existsSync(join(sourceDir, "vendor"))) {
+          cpSync(join(sourceDir, "vendor"), join(assetDir, "vendor"), { recursive: true });
+          cpSync(join(sourceDir, "vendor"), join(rootDir, "vendor"), { recursive: true });
+        }
+        if (existsSync(join(sourceDir, "monaco", "vs"))) {
+          cpSync(join(sourceDir, "monaco", "vs"), join(assetDir, "monaco", "vs"), { recursive: true });
+          cpSync(join(sourceDir, "monaco", "vs"), join(rootDir, "monaco", "vs"), { recursive: true });
+        }
       }
       for (const name of readdirSync(sourceDir)) {
         if (!/\.(js|mjs|css|json|html|svg|png)$/.test(name)) continue;
