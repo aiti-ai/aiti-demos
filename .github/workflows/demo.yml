@@ -1,0 +1,66 @@
+name: Demo
+
+# Build the static showcase from this repo + the aiti-ai source checkout.
+# Artifact only: demo.aiti.pw is served from the operator host (LAN DNS), so
+# deployment is scripts/deploy-demo.sh rather than a GitHub runner.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "mock/**"
+      - "scripts/**"
+      - "capture/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - ".github/workflows/demo.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "mock/**"
+      - "scripts/**"
+      - "capture/**"
+      - "package.json"
+      - "package-lock.json"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - ".github/workflows/demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      AITI_SRC: ${{ github.workspace }}/aiti-ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: aiti-ai/aiti-ai
+          path: aiti-ai
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run audit
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - run: npm run tour
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aiti-demos-out
+          path: out
+          retention-days: 14

@@ -1,22 +1,49 @@
-# pi-web
+# aiti-demos
 
-[中文文档](https://github.com/aiti-ai/pi-web/blob/main/docs/README.zh-CN.md) | [日本語](https://github.com/aiti-ai/pi-web/blob/main/docs/README.ja.md) | [Русский](https://github.com/aiti-ai/pi-web/blob/main/docs/README.ru.md)
+Static showcase of **AITI Web** (the [aiti-ai](https://github.com/aiti-ai/aiti-ai) pi-web fork):
+the real host UI, the real extension host and real extension client bundles, backed by a
+recorded mock model instead of a server.
 
-**AITI Web** (`@aiti-ai/pi-web`) is a browser workbench for the [pi coding agent](https://github.com/earendil-works/pi) — and the base of the [aiti](https://aiti.pw/) tooling ecosystem: page-injected debugging tools, an MCP bridge for AI agents, and a large library of bundled extensions.
+Live (LAN, `*.aiti.pw` certificate): <https://demo.aiti.pw/>
 
-This repository is a placeholder. The workbench itself — the `@aiti-ai/pi-web` distribution (an upstream [pi-web](https://github.com/agegr/pi-web) fork that ships 63+ bundled extensions), its documentation, and the whole aiti ecosystem (extensions, pi packages, tooling) — lives in the **[aiti-ai/aiti-ai](https://github.com/aiti-ai/aiti-ai)** monorepo:
+## How it works
 
-- Workbench (install, docs, source): <https://github.com/aiti-ai/aiti-ai>
-- TUI bridge: [@aiti-ai/pi-web-bridge](https://github.com/aiti-ai/aiti-ai/tree/main/pi-plugins/pi-web-bridge) — bridge a pi TUI session to the workbench with `/web` (live view + bidirectional IO)
-- Site: <https://aiti.pw>
+- `app/` is a thin Next.js static-export shell.
+- `generated/` is synced from a sibling `aiti-ai` checkout by `scripts/sync-frontend.mjs`
+  (gitignored; `--check` catches drift).
+- `public/api/extensions/<id>/assets/...` is copied **verbatim** from
+  `aiti-ai/extensions/<id>/dist` + `icons` + runtime assets. The host loads these with
+  native `import()`; `mock/data/extension-manifest.json` is the static manifest/graph.
+- `mock/` answers `/api/*` in the browser: hand-written state machines for the demo
+  sessions, plus `mock/model/routes.json` replaying recorded responses.
 
-### Public repositories under aiti-ai
+## Commands
 
-- **[aiti-ai](https://github.com/aiti-ai/aiti-ai)** — the monorepo: the AITI Web distribution (63+ bundled extensions), pi packages, and tooling (fork of upstream pi-web)
-- **[aiti-aigrdpwasm](https://github.com/aiti-ai/aiti-aigrdpwasm)** — Web-based RDP client (Go WASM); fork of [nakagami/grdpwasm](https://github.com/nakagami/grdpwasm) with xrdp/GDS/CredSSP fixes — npm package `@aiti-ai/grdpwasm`
-- **[pi-subagents](https://github.com/aiti-ai/pi-subagents)** — upstream fork of the pi extension for async subagent delegation (truncation, artifacts, session sharing)
-- **[pi-models-respect](https://github.com/aiti-ai/pi-models-respect)** — pi package: keep only the models you explicitly configured (legacy name, superseded by `@aiti-ai/pi-models-combo`)
+```bash
+# optional: a sibling aiti-ai checkout, or AITI_SRC=/path/to/aiti-ai
+npm ci
+npm run dev          # sync + extension tier + file snapshot, then next dev :30146
+npm run build        # static export in out/
+npm run audit        # fixture/secret audit
+npm run tour         # Playwright regression against out/
+npm run capture:install:cn   # CN mirror fallback for Playwright's Chromium
+npm run deploy       # build + rsync to demo.aiti.pw (scripts/deploy-demo.sh)
+```
 
-## License
+## Recording (maintainers)
 
-MIT
+```bash
+node capture/seed.mjs --run my-run          # isolated agent/data/project
+node capture/run.mjs --run my-run --extensions --app-center-fresh
+node capture/compile.mjs --runs my-run      # sanitises into mock/model/
+node scripts/audit-fixtures.mjs
+```
+
+`capture/raw/**` is gitignored and never published; `mock/model/**` is sanitised.
+`demo`, `demo-lazy` and `sm-demo-source` are excluded from recording.
+
+## Limits
+
+The mock replays recorded GET responses. Server-side extension logic, live agent turns,
+writes and bridges are not executed; panels that need them show recorded snapshots or
+degrade. See the internal plan for the full coverage matrix.
