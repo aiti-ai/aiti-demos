@@ -252,7 +252,12 @@ async function crawlAppCenter() {
     const locator = page.locator(`[data-app-card="${card.key.replace(/"/g, '\\"')}"]`).first();
     if (!(await locator.count())) continue;
     try {
-      await locator.click({ timeout: 2_000 });
+      try {
+        await locator.click({ timeout: 1_500 });
+      } catch {
+        // A previous panel may still overlay the drawer; force the card click.
+        await locator.click({ timeout: 1_500, force: true });
+      }
       opened += 1;
       await page.waitForTimeout(600);
       if (index % 3 === 0) {
@@ -260,6 +265,8 @@ async function crawlAppCenter() {
         await page.screenshot({ path: join(shotsDir, `app-${safe}.png`) }).catch(() => {});
       }
       await page.keyboard.press("Escape").catch(() => {});
+      const close = page.locator('button[aria-label="Close"], button[title="Close"]').last();
+      if (await close.count()) await close.click({ timeout: 800 }).catch(() => {});
       await page.waitForTimeout(200);
     } catch { /* hidden */ }
   }
