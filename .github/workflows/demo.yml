@@ -67,6 +67,11 @@ jobs:
         with:
           node-version: 22.19.0
           cache: npm
+      # npm 10 (bundled with Node 22) resolves the optional
+      # @tailwindcss/oxide-wasm32-wasi subtree differently than npm 11, which
+      # wrote this lockfile: npm 10 rejects it with "Missing: @emnapi/runtime".
+      # Use the same major here so `npm ci` accepts the lock as-is.
+      - run: npm install -g npm@11
       - run: npm ci
       # prebuild: sync the UI from aiti-ai, rebuild the extension tier, snapshot
       # the repository files for the explorer, then next build → out/
