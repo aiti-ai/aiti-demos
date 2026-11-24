@@ -9,6 +9,8 @@ import { type MockRequest, error, json } from "./http";
 import { editorRoute } from "./editor";
 import { modelsImportRoute } from "./models-import";
 import { sessionManagerRoute } from "./session-manager";
+import { gitReviewRoute } from "./git-review";
+import { aiInputRoute } from "./ai-input";
 
 let demoCounter = 0;
 
@@ -63,6 +65,8 @@ export async function extensionsRoute(request: MockRequest): Promise<Response> {
   if (action === "aiti-editor") return editorRoute(request);
   if (action === "aiti-models-import") return modelsImportRoute(request);
   if (action === "session-manager") return sessionManagerRoute(request);
+  if (action === "aiti-git-review") return gitReviewRoute(request);
+  if (action === "aiti-ai-input") return aiInputRoute(request);
   // The reference "demo" extension's self-check API (it is a real extension
   // bundle in the curated tier; its server hooks are replayed from constants).
   if (action === "demo") {

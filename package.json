@@ -27,7 +27,8 @@
     "extensions:captured": "node scripts/build-extension-manifest.mjs --full --from-capture p1-core4",
     "capture:app": "node capture/run.mjs --app-center",
     "capture:app-fresh": "node capture/run.mjs --app-center-fresh",
-    "deploy": "bash scripts/deploy-demo.sh"
+    "deploy": "bash scripts/deploy-demo.sh",
+    "check:i18n": "node scripts/check-routes-en.mjs"
   },
   "dependencies": {
     "@earendil-works/pi-agent-core": "1.6.0",

@@ -6,6 +6,7 @@
  */
 import type { MockRequest, } from "./http";
 import { error, json } from "./http";
+import { currentDemoLocale } from "./locale";
 import { lookup } from "./files";
 
 function encodeTicket(path: string): string {
@@ -48,25 +49,25 @@ export async function editorRoute(request: MockRequest): Promise<Response> {
     const body = await request.json<{ filePath?: string }>();
     if (!body.filePath) return error("filePath is required", 400);
     const content = await readProjectFile(body.filePath);
-    if (content === null) return error("路径不在白名单内", 400);
+    if (content === null) return error(currentDemoLocale() === "zh" ? "路径不在白名单内" : "path not in the allowed list", 400);
     return json({ ok: true, ticket: encodeTicket(body.filePath), expiresIn: 3600 });
   }
   const ticketPath = parts[0] === "t" ? decodeTicket(parts[1] ?? "") : null;
-  if (!ticketPath) return error("ticket 无效或已过期", 403);
+  if (!ticketPath) return error(currentDemoLocale() === "zh" ? "ticket 无效或已过期" : "invalid or expired ticket", 403);
   const endpoint = parts[2];
   if (endpoint === "stat") {
     const content = await readProjectFile(ticketPath);
-    if (content === null) return error("文件不存在", 404);
+    if (content === null) return error(currentDemoLocale() === "zh" ? "文件不存在" : "file not found", 404);
     return json({ ok: true, mtimeMs: 0, size: content.length });
   }
   if (endpoint === "file") {
     const content = (overrides.get(ticketPath) ?? await readProjectFile(ticketPath));
-    if (content === null) return error("文件不存在", 404);
+    if (content === null) return error(currentDemoLocale() === "zh" ? "文件不存在" : "file not found", 404);
     return new Response(content, { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
   }
   if (endpoint === "raw") {
     const content = (overrides.get(ticketPath) ?? await readProjectFile(ticketPath));
-    if (content === null) return error("文件不存在", 404);
+    if (content === null) return error(currentDemoLocale() === "zh" ? "文件不存在" : "file not found", 404);
     return json({ ok: true, content, encoding: "utf-8", hasBOM: false });
   }
   if (endpoint === "git-changes") {

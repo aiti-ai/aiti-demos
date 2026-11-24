@@ -13,7 +13,7 @@ import { readSessionToolSelectionFromEntries } from "./tool-selection";
 import { currentDemoLocale, type DemoLocale } from "../locale";
 import { PROJECT_BRANCH, PROJECT_ROOT, SCRATCH_ROOT, WORKTREE_BRANCH, WORKTREE_ROOT, sessionFilePath } from "../paths";
 import { buildSession } from "./builder";
-import { SESSION_SCRIPTS } from "./scripts";
+import { SESSION_SCRIPTS, SESSION_SCRIPT_METAS as SCRIPT_METAS } from "./scripts";
 
 export interface LiveState {
   model: { provider: string; modelId: string };
@@ -65,6 +65,31 @@ export function markTouched(): void {
   state.touched = true;
 }
 
+/** Cheap metadata pass: counts and first/last text straight from the script
+ *  steps, with zero file IO. The session list renders from this so first paint
+ *  does not wait for the full tutorial build (which reads project files for
+ *  every tool result). */
+function buildMetas(locale: DemoLocale): Map<string, MockSession> {
+  const sessions = new Map<string, MockSession>();
+  for (const script of SCRIPT_METAS) {
+    const created = new Date(PAGE_LOADED_AT - script.startedMinutesAgo * 60_000).toISOString();
+    const name = script.name ? (typeof script.name === "string" ? script.name : (script.name[locale] ?? script.name.en)) : undefined;
+    sessions.set(script.id, {
+      id: script.id,
+      cwd: script.cwd,
+      created,
+      name,
+      relation: script.relation,
+      parentSessionId: script.parentSessionId,
+      entries: script.metaEntries.map((entry) => ({ ...entry, timestamp: created })) as never,
+      leafId: "meta",
+      transient: false,
+      live: null,
+    });
+  }
+  return sessions;
+}
+
 async function build(locale: DemoLocale): Promise<void> {
   const sessions = new Map<string, MockSession>();
   for (const script of SESSION_SCRIPTS) {
@@ -87,15 +112,40 @@ async function build(locale: DemoLocale): Promise<void> {
   state.locale = locale;
 }
 
-/** Build (or rebuild after a language switch) the tutorial sessions. */
+/**
+ * Populate the session table for listing. Cheap by design: metadata only, no
+ * file reads. A session switched to the full tutorial build on first open
+ * (see ensureSessionBuilt), so the sidebar paints immediately.
+ */
 export async function ensureSessions(): Promise<void> {
   const locale = currentDemoLocale();
-  if (state.building) await state.building;
-  if (state.locale === locale || (state.locale && state.touched)) return;
-  const rebuilding = state.locale !== null;
-  state.building = build(locale).finally(() => { state.building = null; });
-  await state.building;
-  if (rebuilding) state.version += 1;
+  if (state.locale === locale) return;
+  state.sessions = buildMetas(locale);
+  state.locale = locale;
+  state.version += 1;
+}
+
+/** Full build for one session (file reads for tool results); idempotent. */
+export async function ensureSessionBuilt(id: string): Promise<void> {
+  const locale = currentDemoLocale();
+  const script = SESSION_SCRIPTS.find((candidate) => candidate.id === id);
+  if (!script) return;
+  const current = state.sessions.get(id);
+  if (current && current.leafId !== "meta") return; // already real
+  const built = await buildSession(script, locale, PAGE_LOADED_AT, projectRootFor);
+  const created = new Date(PAGE_LOADED_AT - script.startedMinutesAgo * 60_000).toISOString();
+  state.sessions.set(id, {
+    id: script.id,
+    cwd: script.cwd,
+    created,
+    name: script.name ? (typeof script.name === "string" ? script.name : script.name[locale]) : undefined,
+    relation: script.relation,
+    parentSessionId: script.parentSessionId,
+    entries: built.entries,
+    leafId: built.leafId,
+    transient: false,
+    live: current?.live ?? null,
+  });
 }
 
 export function allSessions(): MockSession[] {

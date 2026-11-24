@@ -15,6 +15,7 @@ import { agentState, attachAgentStream, createRuntimeSession, runAgentCommand, r
 import {
   allSessions,
   buildContext,
+  ensureSessionBuilt,
   deleteSession,
   ensureSessions,
   getSession,
@@ -56,6 +57,7 @@ async function sessionsRoute(request: MockRequest): Promise<Response> {
     if (query.length > 200) return error("Search query exceeds 200 characters", 400);
     return json(await searchSessions(query));
   }
+  await ensureSessionBuilt(id);
   const session = getSession(id);
   if (!session) return error("Session not found", 404);
   if (!sub) {
