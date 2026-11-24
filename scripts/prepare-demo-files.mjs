@@ -29,7 +29,9 @@ function scrubText(text) {
     .replace(/\b192\.168\.\d{1,3}\.\d{1,3}\b/g, "192.0.2.10")
     .replace(/\b10\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, "10.0.0.10")
     .replace(/\.alot\.pw\b/g, ".aiti.pw")
-    .replace(/\balot\.pw\b/g, "aiti.pw");
+    .replace(/\balot\.pw\b/g, "aiti.pw")
+    // Vault-alias-shaped tokens in docs/tests: keep the shape, drop the value.
+    .replace(/\brsec_[0-9a-f]{8}\b/g, "rsec_demo00");
 }
 
 const tracked = execFileSync("git", ["-C", repoDir, "ls-files", "-z"], { encoding: "utf8" })
