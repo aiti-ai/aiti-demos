@@ -99,6 +99,9 @@ for (let run = 1; run <= runs; run += 1) {
     if (await page.evaluate(() => /msgs|条消息/.test(document.body.innerText))) { ready = Date.now() - started; break; }
     await page.waitForTimeout(100);
   }
+  // Extension clients load after the shell: wait for them (bounded) so the
+  // bundle counts below reflect a settled page.
+  await page.waitForFunction(() => document.querySelectorAll("[data-ext-id]").length >= 5, undefined, { timeout: 30_000 }).catch(() => {});
   await page.waitForTimeout(1500);
   const stats = await page.evaluate(() => {
     const resources = performance.getEntriesByType("resource");
