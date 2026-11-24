@@ -384,10 +384,22 @@ if (fullMode) {
     return { ...ext, clientUrl: exists && !skipClients.has(ext.id) ? ext.clientUrl : null };
   }).filter((ext) => !skipIds.has(ext.id));
   const available = new Set(extensions.filter((e) => e.clientUrl).map((e) => e.id));
+  // [first-load chunk governance] The office viewer extensions are lazy upstream
+  // now (aiti-ai flipped them to ui.clientImmediately:false + prefetchOnIdle after
+  // this recording was made). Mirror that in the recorded graph until the next
+  // capture refresh, so the demo's boot matches the source tree: the provider
+  // shells stay out of boot and materialize in the first idle window instead.
+  const OFFICE_LAZY = new Set(["aiti-sheet-univer", "aiti-word-superdoc", "aiti-word-docx-preview"]);
   const entries = (captured.graph?.entries ?? []).filter((row) => available.has(row.id)).map((row) => ({
     ...row,
+    ...(OFFICE_LAZY.has(row.id) ? { immediately: false } : {}),
     ...(row.bundleExcluded ? { bundleExcluded: true } : {}),
   }));
+  for (const ext of extensions) {
+    if (OFFICE_LAZY.has(ext.id) && ext.ui && !ext.ui.prefetchOnIdle) {
+      ext.ui.prefetchOnIdle = true;
+    }
+  }
   const manifest = {
     extensions,
     graph: { rev: captured.graph?.rev ?? "source", entries },

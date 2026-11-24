@@ -22,7 +22,8 @@
  * dictionary key no longer matches the recording, so a re-record that adds
  * Chinese copy surfaces immediately instead of silently rendering zh in en.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -1159,6 +1160,32 @@ const ROUTE_OVERRIDES = {
 
 const routes = JSON.parse(readFileSync(routesPath, "utf8"));
 
+// Large bodies live in public/demo-mock/catalog (externalized by capture/compile.mjs;
+// the replay layer fetches them on demand). This builder materializes them for
+// translation and re-externalizes translated bodies the same way, so en entries
+// never inline megabytes back into the index.
+const EN_CATALOG_DIR = join(demoDir, "public", "demo-mock", "catalog");
+const EXTERNALIZE_BYTES = 8192;
+
+function entryBody(entry) {
+  if (!entry?.catalog) return entry?.body ?? null;
+  if (!String(entry.catalog).startsWith("demo-mock/")) return null;
+  return JSON.parse(readFileSync(join(demoDir, "public", entry.catalog), "utf8"));
+}
+
+/** Same externalization contract as capture/compile.mjs (>8KB object → catalog file). */
+function externalizeBody(outEntry) {
+  if (outEntry.body === null || outEntry.body === undefined || typeof outEntry.body !== "object") return outEntry;
+  const serialized = JSON.stringify(outEntry.body);
+  if (serialized.length <= EXTERNALIZE_BYTES) return outEntry;
+  const routeSafe = outEntry.catalog?.match(/^demo-mock\/catalog\/(.+)-[0-9a-f]{10}\.json$/)?.[1]
+    ?? "en-root";
+  const name = `${routeSafe}-en-${createHash("sha1").update(serialized).digest("hex").slice(0, 10)}.json`;
+  mkdirSync(EN_CATALOG_DIR, { recursive: true });
+  writeFileSync(join(EN_CATALOG_DIR, name), serialized);
+  return { ...outEntry, catalog: `demo-mock/catalog/${name}`, body: null };
+}
+
 const skipped = [];
 const missing = [];
 const translated = new Map();
@@ -1234,13 +1261,19 @@ for (const [route, map] of Object.entries(ROUTE_OVERRIDES)) {
   }
   const used = new Set();
   const counter = { count: 0 };
-  const outEntries = entries.map((entry, index) => walk(entry, `entries[${index}]`, route, map, used, counter));
+  const zhBodies = entries.map((entry) => entryBody(entry));
+  const outEntries = entries.map((entry, index) => {
+    const materialized = { ...entry, body: zhBodies[index] };
+    const walked = walk(materialized, `entries[${index}]`, route, map, used, counter);
+    return externalizeBody(walked);
+  });
   outRoutes[route] = outEntries;
   translated.set(route, counter.count);
   usedKeys.set(route, used);
 
   for (let index = 0; index < entries.length; index += 1) {
-    const diffs = structureDiff(entries[index], outEntries[index], `entry[${index}]`, []);
+    // Compare materialized bodies (externalization is a storage detail, not structure).
+    const diffs = structureDiff(zhBodies[index], entryBody(outEntries[index]), `entry[${index}]`, []);
     for (const d of diffs) {
       console.error(`[build-routes-en] structure mismatch ${route}: ${d}`);
       fatal += 1;
@@ -1291,8 +1324,8 @@ const extmanKeys = [
   "GET /api/extensions/aiti-extman/status?locale=en",
 ];
 for (const key of extmanKeys) {
-  const zhCount = Object.keys(routes[key][0].body.extensions).length;
-  const enCount = Object.keys(outRoutes[key][0].body.extensions).length;
+  const zhCount = Object.keys(entryBody(routes[key][0]).extensions).length;
+  const enCount = Object.keys(entryBody(outRoutes[key][0]).extensions).length;
   if (zhCount !== enCount) {
     console.error(`[build-routes-en] extension count mismatch for ${key}: zh ${zhCount} ≠ en ${enCount}`);
     process.exit(1);

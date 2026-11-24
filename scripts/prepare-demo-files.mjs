@@ -40,6 +40,7 @@ const tracked = execFileSync("git", ["-C", repoDir, "ls-files", "-z"], { encodin
 
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(assetDir, { recursive: true });
+mkdirSync(join(outDir, "shards"), { recursive: true });
 
 const files = [];
 for (const path of tracked.sort()) {
@@ -64,5 +65,30 @@ for (const path of tracked.sort()) {
   files.push({ path, size, asset });
 }
 
-writeFileSync(join(outDir, "manifest.json"), JSON.stringify({ files }));
-console.log(`[demo] copied ${files.length} project files into public/demo-files`);
+writeFileSync(join(outDir, "manifest.json"), JSON.stringify({
+  v: 1,
+  // [first-load governance B3] shard index: one shard per top-level directory
+  // (+ "root" for top-level files). The file explorer only fetches the shards
+  // for the directories it lists; the full manifest warm-up happens after the
+  // boot's idle window (mock/files.ts primeAssetLookup).
+  shards: Object.entries(files.reduce((acc, file) => {
+    const top = shardId(file.path);
+    acc[top] = (acc[top] ?? 0) + 1;
+    return acc;
+  }, {})).map(([id, count]) => ({ id, count })),
+}));
+const shardGroups = new Map();
+for (const file of files) {
+  const top = shardId(file.path);
+  (shardGroups.get(top) ?? shardGroups.set(top, []).get(top)).push(file);
+}
+for (const [id, group] of shardGroups) {
+  writeFileSync(join(outDir, "shards", `${id}.json`), JSON.stringify({ files: group }));
+}
+
+function shardId(path) {
+  const slash = path.indexOf("/");
+  if (slash <= 0) return "root";
+  return path.slice(0, slash);
+}
+console.log(`[demo] copied ${files.length} project files into public/demo-files (${shardGroups.size} shards)`);

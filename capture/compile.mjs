@@ -11,6 +11,7 @@
  *
  * Output: mock/model/{routes.json,meta.json,catalog/*.json}
  */
+import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,6 +39,8 @@ for (const rawDir of rawDirs) {
 const runDirs = runIds.map((id) => join(demoDir, "capture", "runs", id));
 
 const outDir = join(demoDir, "mock", "model");
+// Static files for externalized large bodies (see the externalization step below).
+const demoCatalogDir = join(demoDir, "public", "demo-mock", "catalog");
 const assetsOut = join(demoDir, "mock", "assets");
 rmSync(outDir, { recursive: true, force: true });
 rmSync(assetsOut, { recursive: true, force: true });
@@ -106,7 +109,9 @@ for (const rawDir of rawDirs) {
     rows.push(row);
   }
 }
-const stats = { secrets: 0, bodies: 0, assets: 0, skipped: 0 };
+const stats = { secrets: 0, bodies: 0, assets: 0, skipped: 0, externalized: 0 };
+rmSync(join(demoDir, "public", "demo-mock"), { recursive: true, force: true });
+mkdirSync(demoCatalogDir, { recursive: true });
 const routes = {};
 const catalog = {
   sessions: null,
@@ -252,12 +257,29 @@ for (const row of rows) {
   // Operator-config endpoints: never publish the recorded body.
   const synthetic = syntheticBody(row.url);
   if (synthetic) body = synthetic;
-  const catalogRef = row.url === "/api/extensions/manifest"
+  let catalogRef = row.url === "/api/extensions/manifest"
     ? "catalog/extensionManifest.json"
     : row.url === "/api/extensions/status"
       ? "catalog/extensionStatus.json"
       : null;
   if (catalogRef) body = null;
+  // [first-load chunk governance] Large bodies move out of routes.json into static
+  // files under public/demo-mock/catalog (served by the static host, fetched by the
+  // replay layer on first hit — see mock/replay-tables.ts resolveEntry). The route
+  // table ships as a small index, so the boot-time chunk stays tiny: the 13 >8KB
+  // entries held ~1MB of the ~1.1MB inline total. Manifest/status keep their legacy
+  // mock/model/catalog refs above (build inputs; replay skips them).
+  if (!catalogRef && body !== null && typeof body === "object") {
+    const serialized = JSON.stringify(body);
+    if (serialized.length > 8192) {
+      const safe = (row.url.replace(/^\/+/, "").replace(/\?[^"]*$/, "").replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 80)) || "root";
+      const name = `${safe}-${createHash("sha1").update(serialized).digest("hex").slice(0, 10)}.json`;
+      writeFileSync(join(demoCatalogDir, name), serialized);
+      catalogRef = `demo-mock/catalog/${name}`;
+      body = null;
+      stats.externalized += 1;
+    }
+  }
   (routes[key] ??= []).push({
     step: row.step,
     status: row.status,
@@ -324,5 +346,5 @@ for (const [name, value] of Object.entries(catalog)) {
   writeFileSync(join(outDir, "catalog", `${name}.json`), JSON.stringify(value, null, 2) + "\n");
 }
 
-console.log(`[compile] ${meta.counts.requests} requests -> ${meta.counts.routes} route(s), ${meta.counts.assets} asset(s), ${meta.counts.secretsRedacted} secret(s) redacted`);
+console.log(`[compile] ${meta.counts.requests} requests -> ${meta.counts.routes} route(s), ${meta.counts.assets} asset(s), ${meta.counts.secretsRedacted} secret(s) redacted, ${stats.externalized} large body(s) externalized`);
 console.log(`[compile] model -> ${outDir}`);

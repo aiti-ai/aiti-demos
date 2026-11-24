@@ -6,6 +6,7 @@
  */
 import { loadExtensionManifest } from "./extension-manifest-loader";
 import { type MockRequest, error, json } from "./http";
+import { currentDemoLocale } from "./locale";
 import { editorRoute } from "./editor";
 import { modelsImportRoute } from "./models-import";
 import { sessionManagerRoute } from "./session-manager";
@@ -48,7 +49,7 @@ function statusPayload(manifest: ExtensionManifest) {
     devExtensionsRoot: null,
     bundledExtensionsRoot: "/Users/demo/.pi/web/extensions",
     dataRoot: "/Users/demo/.pi/web/data",
-    extensions: Object.fromEntries(manifest.extensions.map((ext) => [ext.id, statusEntry(ext)])),
+    extensions: Object.fromEntries(localeFiltered(manifest).extensions.map((ext) => [ext.id, statusEntry(ext)])),
     services: [],
     capabilities: {},
     multiSource: {},
@@ -57,13 +58,43 @@ function statusPayload(manifest: ExtensionManifest) {
   };
 }
 
+/**
+ * Manifest with ui.i18n narrowed to the current UI locale (first-load chunk
+ * governance B2): the full manifest carries both locale tables for all 68
+ * extensions (~626KB of its ~906KB raw); the host's translateExtItemText looks
+ * up the current locale with a same-family fallback, so shipping one table per
+ * extension halves the boot-time manifest. The generated file stays complete
+ * (build artifact); the narrowing happens per request and is cached per locale.
+ * Known trade-off: switching the demo language mid-session leaves static labels
+ * of not-yet-materialized extensions on their keys until reload.
+ */
+const localeFilteredCache = new Map<string, ExtensionManifest>();
+
+function localeFiltered(manifest: ExtensionManifest): ExtensionManifest {
+  const locale = currentDemoLocale();
+  const cached = localeFilteredCache.get(locale);
+  if (cached) return cached;
+  const narrowed: ExtensionManifest = {
+    ...manifest,
+    extensions: manifest.extensions.map((ext) => {
+      const i18n = (ext.ui as { i18n?: Record<string, unknown> } | null)?.i18n;
+      if (!i18n) return ext;
+      const table = (i18n as Record<string, unknown>)[locale] ?? Object.values(i18n)[0] ?? {};
+      return { ...ext, ui: { ...ext.ui, i18n: { [locale]: table } } } as ManifestExtension;
+    }),
+  };
+  localeFilteredCache.set(locale, narrowed);
+  return narrowed;
+}
+
 export async function extensionsRoute(request: MockRequest): Promise<Response> {
   const action = request.segments[2];
   // The manifest is 1.1MB of JSON: load it on the first request instead of
-  // bundling it into the main chunk (see extension-manifest-loader.ts).
+  // bundling it into the main chunk (see extension-manifest-loader.ts). The
+  // response narrows ui.i18n to the current locale (see localeFiltered).
   if (action === "manifest" || action === "status") {
     const manifest = await loadExtensionManifest();
-    if (action === "manifest") return json(manifest);
+    if (action === "manifest") return json(localeFiltered(manifest));
     return json(statusPayload(manifest));
   }
   if (action === "client-bundle") {

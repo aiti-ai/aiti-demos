@@ -10,7 +10,7 @@
  * and parse them before the first paint.
  */
 import type { MockRequest } from "./http";
-import { routeTable } from "./replay-tables";
+import { routeTable, resolveEntry } from "./replay-tables";
 
 /** Writes are replayed only for read-only probes; anything destructive is refused. */
 const WRITE_GUARD = /\/(delete|remove|uninstall|reset|logout|shutdown|kill|purge)\b/i;
@@ -48,8 +48,10 @@ export async function replayRoutes(request: MockRequest): Promise<Response | nul
   for (const key of candidates(request)) {
     const entries = table[key];
     if (!entries?.length) continue;
-    const entry = entries[0];
-    if (entry.catalog || entry.asset || entry.body === undefined || entry.body === null) continue;
+    // Externalized bodies (entry.catalog → demo-mock catalog file) fetch on first
+    // hit; a failed fetch keeps the marker so this candidate still falls through.
+    const entry = await resolveEntry(entries[0]);
+    if (!entry || entry.catalog || entry.asset || entry.body === undefined || entry.body === null) continue;
     const body = typeof entry.body === "string" ? entry.body : JSON.stringify(entry.body);
     return new Response(body, {
       status: entry.status ?? 200,

@@ -20,6 +20,15 @@ const demoDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const routes = JSON.parse(readFileSync(join(demoDir, "mock", "model", "routes.json"), "utf8"));
 const routesEn = JSON.parse(readFileSync(join(demoDir, "mock", "model", "routes.en.json"), "utf8"));
 
+// Large bodies are externalized to public/demo-mock/catalog (replay fetches them
+// on demand — mock/replay-tables.ts resolveEntry); this checker reads them the
+// same way so translated-body scans see the full payload.
+function entryBody(entry) {
+  if (!entry?.catalog) return entry?.body ?? null;
+  if (!String(entry.catalog).startsWith("demo-mock/")) return null;
+  return JSON.parse(readFileSync(join(demoDir, "public", entry.catalog), "utf8"));
+}
+
 const CJK_RE = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 const BY_DESIGN_RE = /(^|\.)(cnName|zh|zh-CN|zh-TW|zh-Hans|zh-Hant)$/;
 
@@ -47,7 +56,7 @@ for (const [route, enEntries] of Object.entries(routesEn)) {
   }
   enEntries.forEach((entry, index) => {
     const hits = [];
-    walk(entry.body, "body", hits);
+    walk(entryBody(entry), "body", hits);
     const byDesign = hits.filter((h) => BY_DESIGN_RE.test(h.path));
     const stray = hits.filter((h) => !BY_DESIGN_RE.test(h.path));
     if (stray.length) {
@@ -65,8 +74,8 @@ for (const key of [
   "GET /api/extensions/aiti-extman/status",
   "GET /api/extensions/aiti-extman/status?locale=en",
 ]) {
-  const zhCount = Object.keys(routes[key][0].body.extensions).length;
-  const enCount = Object.keys(enTable[key][0].body.extensions).length;
+  const zhCount = Object.keys(entryBody(routes[key][0]).extensions).length;
+  const enCount = Object.keys(entryBody(enTable[key][0]).extensions).length;
   if (zhCount !== enCount) {
     console.error(`[check-routes-en] ${key}: extension count zh ${zhCount} ≠ en ${enCount}`);
     fatal += 1;

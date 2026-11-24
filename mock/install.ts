@@ -74,7 +74,11 @@ if (typeof window !== "undefined" && !window.__piWebDemoInstalled) {
   (window as unknown as { EventSource: unknown }).EventSource = MockEventSource;
   // The repository snapshot manifest is ~400KB and only speeds up asset URL
   // mapping; prime it after the shell has painted instead of at boot.
-  const primeLater = () => window.setTimeout(() => warmDemoAssets(), 1200);
+  // Asset warm-up (full snapshot shards) waits for a late idle window: it is a
+  // background optimization (binary-preview URL mapping) and must not compete
+  // with the boot graph / extension idle materialization for the connection
+  // pool. Path lookups answer from per-directory shards in the meantime.
+  const primeLater = () => window.setTimeout(() => warmDemoAssets(), 9_000);
   if (document.readyState === "complete") primeLater();
   else window.addEventListener("load", primeLater, { once: true });
 }

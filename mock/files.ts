@@ -64,20 +64,70 @@ function byteLength(text: string): number {
   return new TextEncoder().encode(text).length;
 }
 
-let manifestPromise: Promise<VirtualFile[]> | null = null;
+// [first-load governance B3] Shard store: manifest.json is a small shard index
+// ({v, shards:[{id,count}]}); one shard file per top-level directory holds that
+// directory's {path,size,asset} rows. Directory listings and file lookups fetch
+// only the shard they need; the full snapshot (projectFiles / asset warm-up)
+// fetches every shard — now happening after the boot's idle window instead of
+// competing with the first paint.
+type ShardIndex = { v: number; shards: Array<{ id: string; count: number }> };
 
-function loadRepositorySnapshot(): Promise<VirtualFile[]> {
-  manifestPromise ??= getRealFetch()(demoAssetPath("/demo-files/manifest.json"))
+let shardIndexPromise: Promise<ShardIndex> | null = null;
+const shardPromises = new Map<string, Promise<VirtualFile[]>>();
+let allShardsPromise: Promise<VirtualFile[]> | null = null;
+
+function shardIdFor(relativePath: string): string {
+  const slash = relativePath.indexOf("/");
+  return slash <= 0 ? "root" : relativePath.slice(0, slash);
+}
+
+function fetchShard(id: string): Promise<VirtualFile[]> {
+  let promise = shardPromises.get(id);
+  if (!promise) {
+    promise = getRealFetch()(demoAssetPath(`/demo-files/shards/${id}.json`))
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json() as Promise<{ files: VirtualFile[] }>;
+      })
+      .then((manifest) => manifest.files)
+      .catch((error) => {
+        shardPromises.delete(id);
+        throw error;
+      });
+    shardPromises.set(id, promise);
+  }
+  return promise;
+}
+
+async function loadShardIndex(): Promise<ShardIndex> {
+  shardIndexPromise ??= getRealFetch()(demoAssetPath("/demo-files/manifest.json"))
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json() as Promise<{ files: VirtualFile[] }>;
+      return response.json() as Promise<ShardIndex>;
     })
-    .then((manifest) => manifest.files)
     .catch((error) => {
-      manifestPromise = null;
+      shardIndexPromise = null;
       throw error;
     });
-  return manifestPromise;
+  return shardIndexPromise;
+}
+
+/** All snapshot files (fetches every shard once, in parallel). */
+function loadRepositorySnapshot(): Promise<VirtualFile[]> {
+  allShardsPromise ??= loadShardIndex()
+    .then((index) => Promise.all(index.shards.map((shard) => fetchShard(shard.id))))
+    .then((groups) => groups.flat())
+    .catch((error) => {
+      allShardsPromise = null;
+      throw error;
+    });
+  return allShardsPromise;
+}
+
+/** Snapshot files under one top-level directory (fetches just that shard). */
+async function loadRepositoryShard(relativePath: string): Promise<VirtualFile[]> {
+  await loadShardIndex();
+  return fetchShard(shardIdFor(relativePath));
 }
 
 /** Files added or rewritten by the demo sessions, keyed by project-relative path. */
@@ -93,10 +143,11 @@ export function writeProjectFile(relativePath: string, content: string): void {
 const editedOriginals = new Map<string, string>();
 let editsApplied: Promise<void> | null = null;
 
-function applyProjectEdits(files: VirtualFile[]): Promise<void> {
+function applyProjectEdits(): Promise<void> {
   editsApplied ??= (async () => {
     for (const { path, edits } of PROJECT_FILE_EDITS) {
-      const file = files.find((candidate) => candidate.path === path);
+      const shard = await loadRepositoryShard(path).catch(() => [] as VirtualFile[]);
+      const file = shard.find((candidate) => candidate.path === path);
       if (!file) continue;
       const original = await readFileText(file).catch(() => null);
       if (original === null) continue;
@@ -124,8 +175,8 @@ const PROJECTS: Project[] = [
   {
     root: PROJECT_ROOT,
     async load() {
+      await applyProjectEdits();
       const files = await loadRepositorySnapshot();
-      await applyProjectEdits(files);
       const merged = new Map(files.map((file) => [file.path, file]));
       for (const [path, file] of overrides) merged.set(path, file);
       return [...merged.values()];
@@ -156,6 +207,19 @@ function findProject(filePath: string): { project: Project; relative: string } |
   return null;
 }
 
+/**
+ * Snapshot files for one top-level directory + session overrides — the shard
+ * view used by path lookups and directory listings so the file explorer only
+ * fetches the shards it actually browses (first-load governance B3).
+ */
+async function shardView(relativePath: string): Promise<VirtualFile[]> {
+  await applyProjectEdits();
+  const shard = await loadRepositoryShard(relativePath);
+  const merged = new Map(shard.map((file) => [file.path, file]));
+  for (const [path, file] of overrides) merged.set(path, file);
+  return [...merged.values()];
+}
+
 export async function projectFiles(root: string): Promise<VirtualFile[]> {
   const project = PROJECTS.find((candidate) => candidate.root === root);
   return project ? project.load() : [];
@@ -170,7 +234,15 @@ export async function lookup(filePath: string): Promise<FileLookup> {
   const match = findProject(filePath.replace(/\/+$/, "") || "/");
   if (!match) return null;
   if (match.relative === "") return { kind: "dir", relative: "", root: match.project.root };
-  const files = await match.project.load();
+  if (match.project.root !== PROJECT_ROOT) {
+    const files = await match.project.load();
+    const file0 = files.find((candidate) => candidate.path === match.relative);
+    if (file0) return { kind: "file", file: file0, relative: match.relative, root: match.project.root };
+    const prefix0 = `${match.relative}/`;
+    if (files.some((candidate) => candidate.path.startsWith(prefix0))) return { kind: "dir", relative: match.relative, root: match.project.root };
+    return null;
+  }
+  const files = await shardView(match.relative);
   const file = files.find((candidate) => candidate.path === match.relative);
   if (file) return { kind: "file", file, relative: match.relative, root: match.project.root };
   const prefix = `${match.relative}/`;
@@ -183,7 +255,7 @@ export async function lookup(filePath: string): Promise<FileLookup> {
 export async function listDirectory(filePath: string): Promise<{ name: string; isDir: boolean; size: number; modified: string }[] | null> {
   const found = await lookup(filePath);
   if (!found || found.kind !== "dir") return null;
-  const files = await projectFiles(found.root);
+  const files = found.root === PROJECT_ROOT ? await shardView(found.relative) : await projectFiles(found.root);
   const prefix = found.relative ? `${found.relative}/` : "";
   const children = new Map<string, boolean>();
   for (const file of files) {
