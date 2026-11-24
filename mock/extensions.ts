@@ -12,6 +12,7 @@ import { sessionManagerRoute } from "./session-manager";
 import { gitReviewRoute } from "./git-review";
 import { aiInputRoute } from "./ai-input";
 import { sysmonRoute } from "./sysmon";
+import { modelWizardRoute } from "./model-wizard";
 
 let demoCounter = 0;
 
@@ -69,6 +70,7 @@ export async function extensionsRoute(request: MockRequest): Promise<Response> {
   if (action === "aiti-git-review") return gitReviewRoute(request);
   if (action === "aiti-ai-input") return aiInputRoute(request);
   if (action === "aiti-sysmon") return sysmonRoute(request);
+  if (action === "aiti-model-wizard" && request.segments[3] === "new-models") return modelWizardRoute(request);
   // The reference "demo" extension's self-check API (it is a real extension
   // bundle in the curated tier; its server hooks are replayed from constants).
   if (action === "demo") {
