@@ -16,6 +16,7 @@
  * self-contained (no owner API or only light endpoints). Server-heavy
  * extensions stay in the catalog without a client (clientUrl: null).
  */
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -29,12 +30,55 @@ const jiti = createJiti(import.meta.url, { interopDefault: true });
 const demoDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const fullMode = args.includes("--full");
+// Where client bundles come from: `checkout` (a working aiti-ai tree, dists already
+// built locally) or `npm` (published tarballs, for CI where extension dists are
+// build artifacts and absent from a fresh clone).
+const DIST_SOURCE = (process.env.AITI_DIST_SOURCE ?? "checkout").toLowerCase();
 const captureRun = args.find((a) => a.startsWith("--from-capture="))?.slice("--from-capture=".length)
   ?? (args.includes("--from-capture") ? args[args.indexOf("--from-capture") + 1] : undefined);
 const rootArg = args.find((a) => a.startsWith("--root="))?.slice("--root=".length)
   ?? (args.includes("--root") ? args[args.indexOf("--root") + 1] : undefined);
 const sourceRoot = resolve(rootArg ?? process.env.AITI_SRC ?? join(demoDir, "..", "aiti-ai"));
 
+
+
+/**
+ * Install one extension's client bundles from its published npm tarball.
+ * Extension packages ship `dist/` (verified: @aiti-ai/aiti-folder@latest), so CI
+ * can build the demo tier without compiling 60+ clients.
+ */
+async function installFromNpm(extId, sourceDir, assetDir) {
+  const pkgPath = join(sourceDir, "package.json");
+  if (!existsSync(pkgPath)) return false;
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+  if (!pkg.name) return false;
+  const packDir = join(demoDir, "public", "api", ".npm-packs");
+  mkdirSync(packDir, { recursive: true });
+  const specs = [`${pkg.name}@${pkg.version ?? "latest"}`, `${pkg.name}@latest`];
+  for (const spec of specs) {
+    try {
+      const out = execFileSync("npm", ["pack", spec, "--registry", "https://registry.npmjs.org", "--pack-destination", packDir], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim().split("\n").pop();
+      const tarball = join(packDir, out);
+      if (!existsSync(tarball)) continue;
+      const extractDir = join(packDir, `${extId}-x`);
+      rmSync(extractDir, { recursive: true, force: true });
+      mkdirSync(extractDir, { recursive: true });
+      execFileSync("tar", ["xzf", tarball, "-C", extractDir]);
+      const pkgRoot = join(extractDir, "package");
+      let copied = false;
+      for (const part of ["dist", "icons", "icon.svg", "assets"]) {
+        const from = join(pkgRoot, part);
+        if (!existsSync(from)) continue;
+        cpSync(from, join(assetDir, part), { recursive: true });
+        copied = true;
+      }
+      rmSync(tarball, { force: true });
+      rmSync(extractDir, { recursive: true, force: true });
+      if (copied) return true;
+    } catch { /* try the next spec */ }
+  }
+  return false;
+}
 
 /**
  * Chunked extensions ship a thin client entry plus sibling chunks. A stale
@@ -196,7 +240,20 @@ if (fullMode) {
       if (!existsSync(sourceDir)) continue;
       const assetDir = join(stagingRoot, ext.id, "assets");
       const rootDir = join(stagingRoot, ext.id);
-      if (existsSync(join(sourceDir, "dist"))) {
+      if (DIST_SOURCE === "npm") {
+        const ok = await installFromNpm(ext.id, sourceDir, assetDir);
+        // Bundled-only extensions are not on npm; a local checkout may still have
+        // their dist, so fall back to it (CI has neither and lists them without a
+        // client).
+        if (!ok && existsSync(join(sourceDir, "dist"))) {
+          cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
+          for (const part of ["icons", "icon.svg"]) {
+            if (existsSync(join(sourceDir, part))) cpSync(join(sourceDir, part), join(assetDir, part), { recursive: true });
+          }
+        } else if (!ok) {
+          console.warn(`[ext] ${ext.id}: not available on npm or as a built dist — catalog entry only`);
+        }
+      } else if (existsSync(join(sourceDir, "dist"))) {
         const clientRel = String(ext.clientUrl ?? "").replace(`/api/extensions/${ext.id}/assets/`, "").replace(/\?.*$/, "");
         const origin = copyDist(ext.id, sourceDir, assetDir, clientRel);
         if (origin === "deployed") console.log(`[ext] ${ext.id}: dist chunks completed from the deployed tree`);
@@ -234,6 +291,7 @@ if (fullMode) {
     }
   }
 
+  rmSync(join(demoDir, "public", "api", ".npm-packs"), { recursive: true, force: true });
   // Local (demo-only) extensions copy into the staging tree, so they must be
   // collected before the rename.
   const local = await localExtensions();

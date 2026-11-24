@@ -56,6 +56,11 @@ jobs:
       AITI_SRC: ${{ github.workspace }}/aiti-ai
       # Custom domain serves from the root: no base path for the export.
       PAGES_BASE_PATH: ""
+      # A fresh aiti-ai clone has no built extension dists (they are build
+      # artifacts), so take the client bundles from each extension's published
+      # npm tarball instead of its checkout. Extensions that are bundled-only
+      # (not on npm) still appear in the catalog, just without a client.
+      AITI_DIST_SOURCE: npm
     steps:
       - uses: actions/checkout@v4
       - name: Check out aiti-ai (frontend + extension source)
