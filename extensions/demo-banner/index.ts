@@ -12,13 +12,13 @@ export default {
   icon: "icon.svg",
   client: "dist/client.mjs",
   ui: {
-    // `pages` items are mounted permanently by the host as plain elements (no
-    // dialog chrome); the component decides whether to render.
-    pages: [{ id: "pill", label: "i18n:banner.label" }],
-    // Permanent entry in the sidebar footer (next to Models / Skills / Settings):
-    // the floating pill can be hidden, this one cannot, so the site link is
-    // never lost. Registered at runtime (see dist/client.mjs).
-    sidebarFooter: [{ id: "entry", label: "i18n:banner.label" }],
+    // The floating pill is a body-mounted widget (see dist/client.mjs): a slot
+    // item would be wrapped in the host's chrome container, whose injected
+    // buttons would cover the pill's own close button.
+    // Permanent entry in the top bar (the left sidebar is taken over by
+    // session-manager, and `sidebarFooter` only renders in the host's fallback
+    // sidebar). The floating pill can be hidden; this one cannot.
+    toolbar: [{ id: "entry", label: "i18n:banner.label", icon: "icon.svg" }],
     i18n: {
       en: {
         "ext.displayName": "aiti.pw entry",

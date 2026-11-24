@@ -6,16 +6,11 @@
       "version": "0.1.0",
       "clientUrl": "/api/extensions/demo-banner/assets/dist/client.mjs",
       "ui": {
-        "pages": [
-          {
-            "id": "pill",
-            "label": "i18n:banner.label"
-          }
-        ],
-        "sidebarFooter": [
+        "toolbar": [
           {
             "id": "entry",
-            "label": "i18n:banner.label"
+            "label": "i18n:banner.label",
+            "icon": "icon.svg"
           }
         ],
         "i18n": {
@@ -17630,8 +17625,8 @@
     "entries": [
       {
         "id": "demo-banner",
-        "url": "/api/extensions/demo-banner/assets/dist/client.mjs?rev=e4c64a7af4c3",
-        "rev": "e4c64a7af4c3",
+        "url": "/api/extensions/demo-banner/assets/dist/client.mjs?rev=757e29bbebcf",
+        "rev": "757e29bbebcf",
         "immediately": true
       },
       {

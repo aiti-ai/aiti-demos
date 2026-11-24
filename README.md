@@ -23,7 +23,7 @@ What you can click in the demo:
 - **Files** — a real file tree with Monaco editing, `⇋ HEAD` diffs, Markdown preview and Git status.
 - **Settings** — the model wizard, model health check, MCP, providers, quotas, extension manager.
 - **Extras** — service ports, share targets, new-model discovery, system status, live analytics.
-- **Way out** — a floating `aiti.pw` pill (bottom right, dismissible) plus a permanent `aiti.pw` entry in the sidebar footer, both from a demo-only extension in this repo (`extensions/demo-banner/`).
+- **Way out** — a floating `aiti.pw` pill (bottom right, dismissible) plus a permanent `aiti.pw` entry in the top bar, both from a demo-only extension in this repo (`extensions/demo-banner/`).
 
 ## What is real and what is mocked
 

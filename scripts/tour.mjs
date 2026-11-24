@@ -158,17 +158,20 @@ try {
   });
   await check("aiti-pw-entry", async () => {
     // The demo-only extension (extensions/demo-banner) puts a floating pill and a
-    // permanent footer entry in place; both must point at the site.
+    // permanent top-bar entry in place; both must point at the site.
     const entry = await page.evaluate(() => {
       const pill = document.querySelector("[data-demo-banner]");
-      const footer = document.querySelector("[data-demo-banner-footer]");
+      const bar = document.querySelector("[data-demo-banner-toolbar]");
       return {
         pill: Boolean(pill),
-        footer: Boolean(footer),
-        label: pill?.getAttribute("aria-label") ?? footer?.getAttribute("aria-label") ?? "",
+        bar: Boolean(bar),
+        label: pill?.getAttribute("aria-label")
+          ?? bar?.getAttribute("aria-label")
+          ?? bar?.getAttribute("title")
+          ?? "",
       };
     });
-    if (!entry.pill && !entry.footer) throw new Error("no aiti.pw entry rendered");
+    if (!entry.pill && !entry.bar) throw new Error("no aiti.pw entry rendered");
     if (!/aiti/i.test(entry.label)) throw new Error(`entry label unexpected: ${entry.label}`);
   });
 

@@ -64,24 +64,62 @@ export default function register(ctx) {
     }
   };
 
-  function Pill(props) {
-    const { useState, useEffect } = ctx;
-    const [closed, setClosed] = useState(readClosed);
-    const [hover, setHover] = useState(false);
-    const [entered, setEntered] = useState(false);
+  /**
+   * The floating pill is mounted directly on <body> (not through a slot): the host
+   * wraps slot items in its own chrome container (an extman wrench plus a close
+   * button), which sits on top of the pill's own ✕. A plain DOM widget has no
+   * chrome; the sidebar-footer entry below stays a real slot item, so the
+   * extension is still discoverable in the app center / extension manager.
+   */
+  function mountPill() {
+    if (typeof document === "undefined") return () => {};
+    if (readClosed()) return () => {};
 
-    useEffect(() => {
-      const raf = requestAnimationFrame(() => setEntered(true));
-      return () => cancelAnimationFrame(raf);
-    }, []);
-
-    if (closed) return null;
     const label = t("banner.text", "aiti.pw");
-    const tip = props?.tip ?? t("banner.tip", "aiti — self-hosted AI dev workbench · open aiti.pw");
-    const close = () => {
-      writeClosed(true);
-      setClosed(true);
-    };
+    const tip = t("banner.tip", "aiti — self-hosted AI dev workbench · open aiti.pw");
+    const hideLabel = t("banner.close", "Hide");
+
+    // Idempotent: the host can materialize the client more than once (startup
+    // batch + slot demand), and a second pill would cover the first one's ✕.
+    document.querySelectorAll("[data-demo-banner]").forEach((node) => node.remove());
+
+    const root = document.createElement("div");
+    root.setAttribute("data-demo-banner", "1");
+    root.setAttribute("role", "complementary");
+    root.setAttribute("aria-label", tip);
+    root.setAttribute("title", tip);
+    root.setAttribute("tabindex", "0");
+    root.style.cssText = [
+      "position:fixed", "right:16px", "bottom:84px", "z-index:60",
+      "display:flex", "align-items:center", "gap:6px",
+      "padding:6px 8px 6px 10px", "border-radius:999px",
+      "border:1px solid var(--border)", "background:var(--bg-panel)",
+      "color:var(--text-muted)", "box-shadow:0 6px 20px rgba(0,0,0,0.16)",
+      "font-size:12px", "line-height:1", "cursor:pointer", "user-select:none",
+      "opacity:0", "transform:translateY(6px)",
+      "transition:opacity .18s ease, transform .18s ease, color .12s ease, border-color .12s ease",
+    ].join(";");
+
+    const glyph = document.createElement("span");
+    glyph.style.cssText = "display:inline-flex;flex-shrink:0";
+    glyph.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M12 2v6"/><path d="m5.5 5.5 3 3"/><path d="m18.5 5.5-3 3"/><path d="M4 14a8 8 0 0 1 16 0v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/></svg>';
+
+    const text = document.createElement("span");
+    text.textContent = label;
+    text.style.cssText = "font-weight:600;letter-spacing:.2px";
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.textContent = "✕";
+    close.setAttribute("data-demo-banner-close", "1");
+    close.setAttribute("aria-label", hideLabel);
+    close.title = hideLabel;
+    close.style.cssText = [
+      "display:inline-flex", "align-items:center", "justify-content:center",
+      "width:16px", "height:16px", "padding:0", "margin-left:2px",
+      "border:none", "border-radius:999px", "background:transparent",
+      "color:inherit", "cursor:pointer", "font-size:12px", "opacity:.7",
+    ].join(";");
 
     const open = () => {
       try {
@@ -91,71 +129,34 @@ export default function register(ctx) {
       }
     };
 
-    return h("div", {
-      role: "complementary",
-      "aria-label": tip,
-      "data-demo-banner": "1",
-      style: {
-        position: "fixed",
-        right: 16,
-        bottom: 84,
-        zIndex: 60,
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "6px 8px 6px 10px",
-        borderRadius: 999,
-        border: "1px solid var(--border)",
-        background: "var(--bg-panel)",
-        color: hover ? "var(--text)" : "var(--text-muted)",
-        boxShadow: "0 6px 20px rgba(0,0,0,0.16)",
-        fontSize: 12,
-        lineHeight: 1,
-        cursor: "pointer",
-        userSelect: "none",
-        opacity: entered ? 1 : 0,
-        transform: entered ? "translateY(0)" : "translateY(6px)",
-        transition: "opacity .18s ease, transform .18s ease, color .12s ease, border-color .12s ease",
-        ...(hover ? { borderColor: "var(--accent)" } : {}),
-      },
-      onClick: open,
-      onKeyDown: (event) => {
-        if (event.key === "Enter" || event.key === " ") open();
-      },
-      onMouseEnter: () => setHover(true),
-      onMouseLeave: () => setHover(false),
-      tabIndex: 0,
-    }, [
-      icon(),
-      h("span", { key: "label", style: { fontWeight: 600, letterSpacing: 0.2 } }, label),
-      h("button", {
-        key: "close",
-        type: "button",
-        "data-demo-banner-close": "1",
-        title: t("banner.close", "Hide"),
-        "aria-label": t("banner.close", "Hide"),
-        onClick: (event) => {
-          event.stopPropagation();
-          close();
-        },
-        style: {
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 16,
-          height: 16,
-          padding: 0,
-          marginLeft: 2,
-          border: "none",
-          borderRadius: 999,
-          background: "transparent",
-          color: "inherit",
-          cursor: "pointer",
-          fontSize: 12,
-          opacity: 0.7,
-        },
-      }, "✕"),
-    ]);
+    root.addEventListener("click", open);
+    root.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
+    });
+    root.addEventListener("mouseenter", () => {
+      root.style.color = "var(--text)";
+      root.style.borderColor = "var(--accent)";
+    });
+    root.addEventListener("mouseleave", () => {
+      root.style.color = "var(--text-muted)";
+      root.style.borderColor = "var(--border)";
+    });
+    close.addEventListener("click", (event) => {
+      event.stopPropagation();
+      writeClosed(true);
+      root.remove();
+    });
+
+    root.append(glyph, text, close);
+    document.body.appendChild(root);
+    requestAnimationFrame(() => {
+      root.style.opacity = "1";
+      root.style.transform = "translateY(0)";
+    });
+    return () => root.remove();
   }
 
   const disposes = [];
@@ -168,12 +169,10 @@ export default function register(ctx) {
     }
   };
 
-  // `pages` (not `dialogs`): the host mounts those as plain elements, whereas a
-  // dialogs item gets dialog chrome injected (extman/close buttons) and would
-  // cover the pill's own ✕.
-  safeRegister("pages", [{ id: "pill", render: Pill, meta: { label: "i18n:banner.label" } }]);
-  // Permanent entry next to Models / Skills / Settings: the pill can be hidden,
-  // this one cannot, so the site link is never lost.
+  const unmountPill = mountPill();
+
+  // Permanent entry in the top bar: the pill can be hidden, this one cannot, so
+  // the site link is never lost.
   function FooterEntry() {
     const { useState } = ctx;
     const [hover, setHover] = useState(false);
@@ -182,7 +181,7 @@ export default function register(ctx) {
       type: "button",
       title: t("banner.tip", "aiti — self-hosted AI dev workbench · open aiti.pw"),
       "aria-label": label,
-      "data-demo-banner-footer": "1",
+      "data-demo-banner-toolbar": "1",
       onClick: () => {
         try {
           window.open(SITE, "_blank", "noopener,noreferrer");
@@ -208,9 +207,12 @@ export default function register(ctx) {
     }, [icon(), h("span", { key: "l" }, label)]);
   }
 
-  safeRegister("sidebarFooter", [{ id: "entry", render: FooterEntry, meta: { label: "i18n:banner.label" } }]);
+  // The top bar always renders (the left sidebar is taken over by session-manager,
+  // and the host only renders `sidebarFooter` in its own fallback sidebar).
+  safeRegister("toolbar", [{ id: "entry", render: FooterEntry, meta: { label: "i18n:banner.label" } }]);
 
   return () => {
+    try { unmountPill(); } catch { /* ignore */ }
     for (const dispose of disposes) {
       try { dispose(); } catch { /* ignore */ }
     }
