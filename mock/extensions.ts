@@ -13,6 +13,8 @@ import { gitReviewRoute } from "./git-review";
 import { aiInputRoute } from "./ai-input";
 import { sysmonRoute } from "./sysmon";
 import { modelWizardRoute } from "./model-wizard";
+import { getRealFetch } from "./runtime";
+import { serviceTunnelsRoute } from "./service-tunnels";
 
 let demoCounter = 0;
 
@@ -64,12 +66,19 @@ export async function extensionsRoute(request: MockRequest): Promise<Response> {
     });
   }
   if (action === "reload" && request.method === "POST") return json({ ok: true, invalidated: [] });
+  // Asset files live as real static files (public/api/extensions/...). The mock
+  // layer must not intercept them: fetch()-based loads (vendor scripts, models,
+  // fonts) fall through to the network, as native import()/img already do.
+  if (request.segments[3] === "assets") {
+    return getRealFetch()(request.url.href);
+  }
   if (action === "aiti-editor") return editorRoute(request);
   if (action === "aiti-models-import") return modelsImportRoute(request);
   if (action === "session-manager") return sessionManagerRoute(request);
   if (action === "aiti-git-review") return gitReviewRoute(request);
   if (action === "aiti-ai-input") return aiInputRoute(request);
   if (action === "aiti-sysmon") return sysmonRoute(request);
+  if (action === "service-tunnels") return serviceTunnelsRoute(request);
   if (action === "aiti-model-wizard" && request.segments[3] === "new-models") return modelWizardRoute(request);
   // The reference "demo" extension's self-check API (it is a real extension
   // bundle in the curated tier; its server hooks are replayed from constants).
