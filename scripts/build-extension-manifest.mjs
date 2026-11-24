@@ -100,6 +100,64 @@ function publish(root) {
   rmSync(retiredRoot, { recursive: true, force: true });
 }
 
+
+/**
+ * Local extensions live in this repo (`extensions/<id>/`). They are demo-only:
+ * never published, never part of aiti-ai. Merged into the static tier ahead of
+ * the recorded catalog so the host loads them like any other extension.
+ */
+async function localExtensions() {
+  const dir = join(demoDir, "extensions");
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const name of readdirSync(dir)) {
+    const extDir = join(dir, name);
+    const entry = join(extDir, "index.ts");
+    if (!existsSync(entry)) continue;
+    let mod;
+    try {
+      mod = await jiti.import(pathToFileURL(entry).href);
+    } catch (error) {
+      console.warn(`[ext] local ${name}: import failed (${String(error).slice(0, 120)})`);
+      continue;
+    }
+    const ext = mod.default;
+    if (!ext?.id || !ext?.client) {
+      console.warn(`[ext] local ${name}: missing default export with id/client`);
+      continue;
+    }
+    const clientRel = String(ext.client);
+    if (!existsSync(join(extDir, clientRel))) {
+      console.warn(`[ext] local ${ext.id}: client not built (${clientRel})`);
+      continue;
+    }
+    const pkgPath = join(extDir, "package.json");
+    const pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath, "utf8")) : {};
+    const assetDir = join(stagingRoot, ext.id, "assets");
+    mkdirSync(assetDir, { recursive: true });
+    cpSync(join(extDir, "dist"), join(assetDir, "dist"), { recursive: true });
+    for (const extra of ["icons", "icon.svg", "LICENSE", "README.md"]) {
+      if (existsSync(join(extDir, extra))) cpSync(join(extDir, extra), join(assetDir, extra), { recursive: true });
+    }
+    const clientUrl = `/api/extensions/${ext.id}/assets/${clientRel}`;
+    const rev = hashFiles(join(assetDir, "dist"));
+    out.push({
+      ext: {
+        id: ext.id,
+        name: ext.name ?? ext.id,
+        version: pkg.version ?? "0.0.0",
+        clientUrl,
+        ui: ext.ui ?? null,
+        source: "local",
+        icon: ext.icon ?? null,
+      },
+      row: { id: ext.id, url: `${clientUrl}?rev=${rev}`, rev, immediately: true },
+    });
+    console.log(`[ext] local extension: ${ext.id} (${clientRel})`);
+  }
+  return out;
+}
+
 if (fullMode) {
   const capturedManifestPath = join(demoDir, "mock", "model", "catalog", "extensionManifest.json");
   if (!existsSync(capturedManifestPath)) {
@@ -176,6 +234,9 @@ if (fullMode) {
     }
   }
 
+  // Local (demo-only) extensions copy into the staging tree, so they must be
+  // collected before the rename.
+  const local = await localExtensions();
   publish(stagingRoot);
   const publicReady = publicRoot;
   const extensions = captured.extensions.map((ext) => {
@@ -191,8 +252,14 @@ if (fullMode) {
     graph: { rev: captured.graph?.rev ?? "source", entries },
     failed: [],
   };
+  // Demo-only extensions from this repo take precedence (same id wins).
+  if (local.length) {
+    const localIds = new Set(local.map((item) => item.ext.id));
+    manifest.extensions = [...local.map((item) => item.ext), ...manifest.extensions.filter((ext) => !localIds.has(ext.id))];
+    manifest.graph = { ...manifest.graph, entries: [...local.map((item) => item.row), ...(manifest.graph?.entries ?? []).filter((row) => !localIds.has(row.id))] };
+  }
   writeFileSync(join(demoDir, "mock", "data", "extension-manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
-  console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${entries.length} client bundle(s) (${captureRun ? `capture ${captureRun}` : `source ${sourceRoot}`})`);
+  console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${manifest.graph.entries.length} client bundle(s) (${captureRun ? `capture ${captureRun}` : `source ${sourceRoot}`}${local.length ? `, ${local.length} local` : ""})`);
   process.exit(0);
 }
 

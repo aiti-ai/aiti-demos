@@ -1,0 +1,9 @@
+{
+  "name": "@aiti-ai/demo-banner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Demo-only frontend extension: a quiet floating entry to aiti.pw",
+  "aitiExtProtocol": "1.0",
+  "license": "MIT"
+}

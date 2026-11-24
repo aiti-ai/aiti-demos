@@ -156,6 +156,22 @@ try {
     if (await files.count()) await files.click({ timeout: 5_000 });
     await page.getByText("README.md", { exact: false }).first().waitFor({ timeout: 20_000 });
   });
+  await check("aiti-pw-entry", async () => {
+    // The demo-only extension (extensions/demo-banner) puts a floating pill and a
+    // permanent footer entry in place; both must point at the site.
+    const entry = await page.evaluate(() => {
+      const pill = document.querySelector("[data-demo-banner]");
+      const footer = document.querySelector("[data-demo-banner-footer]");
+      return {
+        pill: Boolean(pill),
+        footer: Boolean(footer),
+        label: pill?.getAttribute("aria-label") ?? footer?.getAttribute("aria-label") ?? "",
+      };
+    });
+    if (!entry.pill && !entry.footer) throw new Error("no aiti.pw entry rendered");
+    if (!/aiti/i.test(entry.label)) throw new Error(`entry label unexpected: ${entry.label}`);
+  });
+
   await check("extension-tier", async () => {
     // Return to the app document first: earlier steps may have left the tab on a
     // viewer URL where the mock network layer is not installed.
