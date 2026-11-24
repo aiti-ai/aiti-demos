@@ -17,7 +17,7 @@
  * extensions stay in the catalog without a client (clientUrl: null).
  */
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
@@ -36,6 +36,19 @@ const rootArg = args.find((a) => a.startsWith("--root="))?.slice("--root=".lengt
 const sourceRoot = resolve(rootArg ?? process.env.AITI_SRC ?? join(demoDir, "..", "aiti-ai"));
 
 const publicRoot = join(demoDir, "public", "api", "extensions");
+// Publish atomically. The editor's Monaco loader treats one 404 as a permanent
+// failure for the whole page session, so the old "rmSync then copy" left a
+// multi-second window where every asset 404'd. Build into a staging directory
+// and swap it in with a rename instead.
+const stagingRoot = join(demoDir, "public", "api", ".extensions.next");
+const retiredRoot = join(demoDir, "public", "api", ".extensions.prev");
+
+function publish(root) {
+  rmSync(retiredRoot, { recursive: true, force: true });
+  if (existsSync(publicRoot)) renameSync(publicRoot, retiredRoot);
+  renameSync(root, publicRoot);
+  rmSync(retiredRoot, { recursive: true, force: true });
+}
 
 if (fullMode) {
   const capturedManifestPath = join(demoDir, "mock", "model", "catalog", "extensionManifest.json");
@@ -58,8 +71,8 @@ if (fullMode) {
       console.error(`[ext] missing captured assets at ${rawAssets}`);
       process.exit(1);
     }
-    rmSync(publicRoot, { recursive: true, force: true });
-    cpSync(rawAssets, publicRoot, { recursive: true });
+    rmSync(stagingRoot, { recursive: true, force: true });
+    cpSync(rawAssets, stagingRoot, { recursive: true });
   } else {
     // Copy the real client bundles straight from the aiti-ai checkout:
     // extensions/<id>/dist + icons. No archive, no second mock.
@@ -67,14 +80,14 @@ if (fullMode) {
       console.error(`[ext] aiti-ai extensions not found at ${sourceRoot}`);
       process.exit(1);
     }
-    rmSync(publicRoot, { recursive: true, force: true });
-    mkdirSync(publicRoot, { recursive: true });
+    rmSync(stagingRoot, { recursive: true, force: true });
+    mkdirSync(stagingRoot, { recursive: true });
     for (const ext of captured.extensions) {
       if (skipIds.has(ext.id)) continue;
       const sourceDir = join(sourceRoot, "extensions", ext.id);
       if (!existsSync(sourceDir)) continue;
-      const assetDir = join(publicRoot, ext.id, "assets");
-      const rootDir = join(publicRoot, ext.id);
+      const assetDir = join(stagingRoot, ext.id, "assets");
+      const rootDir = join(stagingRoot, ext.id);
       if (existsSync(join(sourceDir, "dist"))) cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
       if (existsSync(join(sourceDir, "icons"))) cpSync(join(sourceDir, "icons"), join(assetDir, "icons"), { recursive: true });
       if (existsSync(join(sourceDir, "icon.svg"))) cpSync(join(sourceDir, "icon.svg"), join(assetDir, "icon.svg"));
@@ -109,10 +122,12 @@ if (fullMode) {
     }
   }
 
+  publish(stagingRoot);
+  const publicReady = publicRoot;
   const extensions = captured.extensions.map((ext) => {
     const path = ext.clientUrl?.replace(/\?.*$/, "");
     const relative = path?.replace(`/api/extensions/${ext.id}/assets/`, "") ?? "";
-    const exists = path && relative && existsSync(join(publicRoot, ext.id, "assets", relative));
+    const exists = path && relative && existsSync(join(publicReady, ext.id, "assets", relative));
     return { ...ext, clientUrl: exists && !skipClients.has(ext.id) ? ext.clientUrl : null };
   }).filter((ext) => !skipIds.has(ext.id));
   const available = new Set(extensions.filter((e) => e.clientUrl).map((e) => e.id));
@@ -145,8 +160,9 @@ const EXT_IDS = [
   "demo",
 ];
 
-rmSync(publicRoot, { recursive: true, force: true });
-mkdirSync(publicRoot, { recursive: true });
+// Curated mode publishes atomically too (see publish()).
+rmSync(stagingRoot, { recursive: true, force: true });
+mkdirSync(stagingRoot, { recursive: true });
 
 function walk(dir, out = []) {
   if (!existsSync(dir)) return out;
@@ -197,7 +213,7 @@ for (const id of EXT_IDS) {
     skipped.push(`${id} (client not built: ${clientRel})`);
     continue;
   }
-  const assetDir = join(publicRoot, ext.id, "assets");
+  const assetDir = join(stagingRoot, ext.id, "assets");
   mkdirSync(assetDir, { recursive: true });
   cpSync(join(dir, "dist"), join(assetDir, "dist"), { recursive: true });
   if (existsSync(join(dir, "icons"))) cpSync(join(dir, "icons"), join(assetDir, "icons"), { recursive: true });
@@ -229,6 +245,7 @@ for (const id of EXT_IDS) {
   entries.push({ id: ext.id, url: `${clientUrl}?rev=${rev}`, rev, immediately: true });
 }
 
+publish(stagingRoot);
 extensions.sort((a, b) => a.id.localeCompare(b.id));
 entries.sort((a, b) => a.id.localeCompare(b.id));
 const graphRev = createHash("sha256").update(entries.map((e) => `${e.id}:${e.rev}`).join("|")).digest("hex").slice(0, 12);

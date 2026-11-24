@@ -23,8 +23,11 @@ if [[ ! -f out/index.html ]]; then
 fi
 
 sudo mkdir -p "$TARGET"
-# --delete keeps removed chunks from lingering; nginx serves the directory.
-sudo rsync -a --delete "$HERE/out/" "$TARGET/"
+# --delay-updates stages every file and renames them at the end, and
+# --delete-after removes stale files only after the transfer: nginx never serves
+# a half-updated tree. That matters because the editor's Monaco loader treats a
+# single missing asset as a permanent failure for the page session.
+sudo rsync -a --delay-updates --delete-after "$HERE/out/" "$TARGET/"
 sudo nginx -t
 sudo systemctl reload nginx
 echo "[demo] published to https://demo.aiti.pw/ (root: $TARGET)"
