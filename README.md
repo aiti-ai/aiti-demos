@@ -57,8 +57,25 @@ npm run sync:check           # fail if generated/ is stale (used by CI)
 npm run extensions           # rebuild the static extension tier from ../aiti-ai/extensions
 npm run audit                # fixture / secret audit (paths, tokens, private IPs)
 npm run tour                 # Playwright regression against out/
-npm run deploy               # build + rsync to /var/www + reload nginx (demo.aiti.pw)
+npm run deploy               # optional: also publish to this host's nginx copy
 ```
+
+## Deployment
+
+`demo.aiti.pw` is served by **GitHub Pages**, built by the `Demo` workflow on every push to `main`:
+
+1. checks out this repo **and** `aiti-ai/aiti-ai` (the UI is synced from it);
+2. `npm run build` → sync frontend, build the extension tier, snapshot repo files, `next build` → `out/`;
+3. `npm run audit` (fixture / secret audit) and `npm run tour` (Playwright smoke test) must pass;
+4. uploads the Pages artifact and deploys it (main only; pull requests build without publishing).
+
+Two notes about the CI build: extension client bundles come from the published npm tarballs
+(`AITI_DIST_SOURCE=npm`) because a fresh clone has no built `dist/` — bundled-only extensions that
+are not on npm still appear in the catalog without a client; and the export runs with an empty base
+path because the custom domain serves from the root (`public/CNAME`).
+
+`scripts/deploy-demo.sh` still exists for publishing the same `out/` to a local nginx copy (useful on
+a LAN where DNS points at the operator host).
 
 ## How it is built
 

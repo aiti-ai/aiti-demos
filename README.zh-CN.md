@@ -57,8 +57,21 @@ npm run sync:check           # 校验 generated/ 是否落后（CI 用）
 npm run extensions           # 从 ../aiti-ai/extensions 重建静态扩展层
 npm run audit                # fixture / 密钥审计（路径、token、内网 IP）
 npm run tour                 # 对 out/ 跑 Playwright 回归
-npm run deploy               # 构建 + rsync 到 /var/www + reload nginx（demo.aiti.pw）
+npm run deploy               # 可选：同时发布到本机 nginx 副本
 ```
+
+## 部署
+
+`demo.aiti.pw` 由 **GitHub Pages** 承载，每次 push 到 `main` 由 `Demo` workflow 构建发布：
+
+1. 检出本仓 **以及** `aiti-ai/aiti-ai`（界面从它同步）；
+2. `npm run build` → 同步前端、构建扩展层、快照仓库文件、`next build` → `out/`；
+3. `npm run audit`（fixture / 密钥审计）与 `npm run tour`（Playwright 冒烟）必须通过；
+4. 上传 Pages 产物并部署（仅 main；PR 只构建不发布）。
+
+CI 构建的两点说明：扩展 client bundle 取自 npm 已发布 tarball（`AITI_DIST_SOURCE=npm`），因为全新克隆没有构建好的 `dist/`——只在包内分发、未上 npm 的扩展仍会出现在目录里，但没有 client；导出使用空 basePath，因为自定义域在根路径服务（`public/CNAME`）。
+
+`scripts/deploy-demo.sh` 仍保留，用于把同一份 `out/` 同步到本机 nginx 副本（内网 DNS 指向本机时有用）。
 
 ## 实现方式
 
