@@ -7,7 +7,7 @@
 // manifest.json maps each repository path to its asset.
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +21,16 @@ const MAX_FILE_BYTES = 4 * 1024 * 1024;
 // Keep extensions only where the browser needs the right content type to
 // render the file directly (<img>, <audio>, <iframe>); text is served as .txt.
 const MEDIA_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp", ".avif", ".pdf", ".mp3", ".wav", ".ogg", ".m4a", ".mp4", ".webm", ".mov", ".docx"]);
+
+/** Text scrub for published snapshot assets (see the plan's privacy section). */
+function scrubText(text) {
+  return text
+    .replace(/\/home\/[^/\s"'`]+/g, "/Users/demo")
+    .replace(/\b192\.168\.\d{1,3}\.\d{1,3}\b/g, "192.0.2.10")
+    .replace(/\b10\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, "10.0.0.10")
+    .replace(/\.alot\.pw\b/g, ".aiti.pw")
+    .replace(/\balot\.pw\b/g, "aiti.pw");
+}
 
 const tracked = execFileSync("git", ["-C", repoDir, "ls-files", "-z"], { encoding: "utf8" })
   .split("\0")
@@ -39,8 +49,16 @@ for (const path of tracked.sort()) {
   }
   if (size > MAX_FILE_BYTES) continue;
   const ext = extname(path);
-  const asset = createHash("sha1").update(path).digest("hex").slice(0, 16) + (MEDIA_EXT.has(ext.toLowerCase()) ? ext.toLowerCase() : ".txt");
-  copyFileSync(join(repoDir, path), join(assetDir, asset));
+  const isMedia = MEDIA_EXT.has(ext.toLowerCase());
+  const asset = createHash("sha1").update(path).digest("hex").slice(0, 16) + (isMedia ? ext.toLowerCase() : ".txt");
+  const target = join(assetDir, asset);
+  if (isMedia) {
+    copyFileSync(join(repoDir, path), target);
+  } else {
+    // Text assets are published on the demo host: scrub operator-only values
+    // (private home paths, internal domains, LAN addresses) while copying.
+    writeFileSync(target, scrubText(readFileSync(join(repoDir, path), "utf8")));
+  }
   files.push({ path, size, asset });
 }
 
