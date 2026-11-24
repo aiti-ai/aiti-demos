@@ -84,7 +84,7 @@ The recorder drives a **real, isolated instance** (its own agent dir, project an
 
 ## Analytics
 
-The demo reports page views the same way the docs site does: Baidu Analytics (`hm.js`, shared property) and a self-hosted Counterscale tracker. Build with `DEMO_ANALYTICS=off` to ship without either.
+The demo reports page views like the docs site does: Baidu Analytics (`hm.js`, with the demo **own** property id, so its traffic stays out of the docs reports — Baidu's official snippet) and a self-hosted Counterscale tracker (`data-site-id`). Build with `DEMO_ANALYTICS=off` to ship without either.
 
 ## Documentation
 

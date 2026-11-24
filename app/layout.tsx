@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { demoAssetPath } from "@demo/mock/base-path";
-import { BAIDU_INIT_SCRIPT, analyticsScriptTags } from "@demo/mock/analytics";
+import { analyticsScriptTags, baiduInitScript } from "@demo/mock/analytics";
 import "katex/dist/katex.min.css";
 import "./demo.css";
 
@@ -89,7 +89,9 @@ export default function RootLayout({
         />
         <script dangerouslySetInnerHTML={{ __html: FOLDER_SEED_SCRIPT }} />
         {/* Analytics: same setup as the aiti-docs site (Baidu + Counterscale). */}
-        <script dangerouslySetInnerHTML={{ __html: BAIDU_INIT_SCRIPT }} />
+        {baiduInitScript() && (
+          <script dangerouslySetInnerHTML={{ __html: baiduInitScript() }} />
+        )}
         {analyticsScriptTags().map((tag) => (
           <script
             key={tag.src}

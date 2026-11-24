@@ -84,7 +84,7 @@ scripts/                 同步、扩展层、审计、覆盖检查、tour、部
 
 ## 访问统计
 
-与文档站同一套：百度统计（`hm.js`，同一属性）与自托管 Counterscale。构建时加 `DEMO_ANALYTICS=off` 可完全关闭。
+与文档站同一套路：百度统计（`hm.js`，用**本演示站自己的属性 id**，数据不与文档站混在一起；官方 snippet 写法）与自托管 Counterscale（`data-site-id`）。构建时加 `DEMO_ANALYTICS=off` 可完全关闭。
 
 ## 文档
 
