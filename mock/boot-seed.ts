@@ -21,6 +21,7 @@ const DEMO_FOLDERS: Array<[string, boolean, boolean]> = [
 ];
 
 const COLLAPSE_PREFIX = "pi:sidebar-dock:collapsed:";
+const DOCK_PREF_PREFIX = "pi-web:ext-float:dockpref:v1:";
 const FOLDER_KEY_PREFIX = "aiti-folder:folder:";
 
 /**
@@ -52,11 +53,17 @@ export function seedDemoFolderDocks(): void {
     // Always nudge the dock once: the sidebar orchestrator may have built its
     // block list from an earlier snapshot of this manifest on a cold load.
     window.dispatchEvent(new Event("pi:sidebar-dock:folders-changed"));
-    // Block collapse state is its own key per block (seeded like the extension does).
+    // Block collapse state and dock preference are their own keys per block.
     for (const [p, , expanded] of DEMO_FOLDERS) {
       const collapseKey = `${COLLAPSE_PREFIX}${FOLDER_KEY_PREFIX}${p}`;
       if (window.localStorage.getItem(collapseKey) === null) {
         window.localStorage.setItem(collapseKey, expanded ? "0" : "1");
+      }
+      // Pin the block to the left sidebar; without a preference the folder opens
+      // as a floating window and covers dialogs (e.g. Settings › Models).
+      const prefKey = `${DOCK_PREF_PREFIX}${FOLDER_KEY_PREFIX}${p}`;
+      if (window.localStorage.getItem(prefKey) === null) {
+        window.localStorage.setItem(prefKey, `sidebar:${FOLDER_KEY_PREFIX}${p}`);
       }
     }
   } catch {

@@ -66,8 +66,10 @@ var cur=[];try{cur=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){}
 if(!Array.isArray(cur)||cur.length<=1){
 localStorage.setItem(key,JSON.stringify(want.map(function(w){return w[1]?{p:w[0],pin:1}:{p:w[0]}})));
 }
-for(var i=0;i<want.length;i++){var ck=C+"aiti-folder:folder:"+want[i][0];
-if(localStorage.getItem(ck)===null)localStorage.setItem(ck,want[i][2]?"0":"1");}
+for(var i=0;i<want.length;i++){var fk="aiti-folder:folder:"+want[i][0];
+var ck=C+fk;if(localStorage.getItem(ck)===null)localStorage.setItem(ck,want[i][2]?"0":"1");
+var pk="pi-web:ext-float:dockpref:v1:"+fk;
+if(localStorage.getItem(pk)===null)localStorage.setItem(pk,"sidebar:"+fk);}
 }catch(e){}})();`;
 
 export default function RootLayout({
