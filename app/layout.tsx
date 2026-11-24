@@ -53,7 +53,8 @@ export const viewport: Viewport = {
 
 
 /**
- * Runs before any app bundle: seed the demo's multi-folder docks.
+ * Runs before any app bundle: seed the demo's folder docks (single-open
+ * accordion — exactly one expanded block, see mock/boot-seed.ts).
  *
  * aiti-folder reads its manifest (`pi:sidebar-dock:folders`) at module init, so
  * seeding from React code races the extension import. An inline head script is
@@ -63,7 +64,7 @@ export const viewport: Viewport = {
 const FOLDER_SEED_SCRIPT = `(function(){try{
 var K="pi:sidebar-dock:folders",C="pi:sidebar-dock:collapsed:";
 var b=location.pathname.match(/^\\/([A-Za-z0-9._-]+)(?:\\/|$)/);var key=K+(b?"@/"+b[1]:"");
-var want=[["/Users/demo/code/pi-web",1,0],["/Users/demo/code/pi-web/docs",0,1],["/Users/demo/code/pi-web/extensions",0,1],["/Users/demo/pi-cwd-20260918",0,1]];
+var want=[["/Users/demo/code/pi-web",1,1],["/Users/demo/code/pi-web/docs",0,0],["/Users/demo/code/pi-web/extensions",0,0],["/Users/demo/pi-cwd-20260918",0,0]];
 var cur=[];try{cur=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){}
 if(!Array.isArray(cur)||cur.length<=1){
 localStorage.setItem(key,JSON.stringify(want.map(function(w){return w[1]?{p:w[0],pin:1}:{p:w[0]}})));

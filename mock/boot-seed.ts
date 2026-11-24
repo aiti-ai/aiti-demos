@@ -11,13 +11,15 @@
 const INSTANCES_KEY = "pi:sidebar-dock:folders";
 
 /** [path, pinned, expanded] — pinned blocks survive the unpinned FIFO quota
- *  (default 3); expanded blocks ship with their tree open so the demo shows
- *  several live folder trees at once instead of four collapsed headers. */
+ *  (default 3). Expansion follows the dock stack's single-open accordion
+ *  contract (aiti-float dockstack: "每次只能显示一个" — any expanded block
+ *  collapses the rest), so the seed expands exactly one block: everything
+ *  else ships collapsed and a visitor's own arrangement always wins. */
 const DEMO_FOLDERS: Array<[string, boolean, boolean]> = [
-  ["/Users/demo/code/pi-web", true, false],
-  ["/Users/demo/code/pi-web/docs", false, true],
-  ["/Users/demo/code/pi-web/extensions", false, true],
-  ["/Users/demo/pi-cwd-20260918", false, true],
+  ["/Users/demo/code/pi-web", true, true],
+  ["/Users/demo/code/pi-web/docs", false, false],
+  ["/Users/demo/code/pi-web/extensions", false, false],
+  ["/Users/demo/pi-cwd-20260918", false, false],
 ];
 
 const COLLAPSE_PREFIX = "pi:sidebar-dock:collapsed:";
