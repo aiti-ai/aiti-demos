@@ -80,12 +80,26 @@ a LAN where DNS points at the operator host).
 
 ### Boot performance
 
+The app is client-rendered (the page bails out to CSR), so on a cold load nothing would paint until
+the whole client graph had been parsed and executed. The static HTML therefore ships a **boot
+skeleton** (`app/BootSkeleton.tsx` + `mock/boot-skeleton.ts`): the workbench chrome — rail, session
+rows, transcript column, composer — paints with the first frame (~0.1s) and fades out when the real
+shell mounts. Same geometry as the real shell, so there is no reflow at the hand-over.
+
 The build pre-bundles the host's eager extension clients into one content-addressed file
 (`/api/extensions/client-bundle-<rev>.mjs`), keeps the multi-megabyte mock fixtures out of the main
 chunk and lazy-loads them, so a cold load is ~70 requests / ~2.7MB of JS instead of ~100 requests /
-~10MB. `npm run perf` measures it (DOMContentLoaded, time until the session list is populated,
-request count, JS transfer, and whether the batch bundle is in use); pass `--url` and `--resolve-ip`
-to measure a deployed copy through a pinned address.
+~10MB. Third-party analytics (Baidu, Counterscale) are appended after the window's `load` event at
+idle priority, so they never compete with the demo's own boot.
+
+`npm run perf` measures it (first contentful paint, DOMContentLoaded, time until the session list is
+populated, request count, JS transfer, and whether the batch bundle is in use); pass `--url` and
+`--resolve-ip` to measure a deployed copy through a pinned address.
+
+When the demo is published to a local nginx (`scripts/deploy-demo.sh`), `deploy/aiti-demos.conf`
+caches the hashed build output for a year and gives the recorded `/api/*` and `/demo-files/*` trees a
+10-minute TTL, so a reload reuses ~30 extension assets instead of revalidating them. GitHub Pages
+ignores those headers and pins its own (10 minutes) for the public copy.
 
 ## How it is built
 

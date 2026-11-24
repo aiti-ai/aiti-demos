@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import "@demo/mock/install";
 import { AppShell } from "@/components/AppShell";
 import { I18nProvider } from "@/hooks/useI18n";
@@ -7,6 +8,7 @@ import { setFullHistoryOpener, setMediaUrlResolver, setTitleDecorator } from "@/
 import { staticFileUrlForApi } from "@demo/mock/files";
 import { openDemoHistory } from "@demo/mock/export";
 import { prefetchDemoHeavyChunks } from "@demo/mock/boot-prefetch";
+import { dismissBootSkeleton } from "@demo/mock/boot-skeleton";
 import { seedDemoFolderDocks } from "@demo/mock/boot-seed";
 
 // Install the demo seams before React renders anything (module scope is fine:
@@ -26,6 +28,12 @@ if (typeof window !== "undefined") {
 prefetchDemoHeavyChunks();
 
 export function DemoRoot() {
+  // The static chrome (app/BootSkeleton.tsx) has been on screen since the first
+  // frame; now that the real shell is committed, hand over.
+  useEffect(() => {
+    dismissBootSkeleton();
+  }, []);
+
   return (
     <I18nProvider>
       <AppShell />

@@ -6,7 +6,8 @@
  *   node scripts/perf.mjs --runs 3           # repeat and report each run
  *   node scripts/perf.mjs --url <url>        # measure a deployed copy instead
  *
- * Metrics: DOMContentLoaded, "ready" (the session list has content), request
+ * Metrics: first contentful paint (the boot skeleton should paint with the
+ * HTML), DOMContentLoaded, "ready" (the session list has content), request
  * count, script transfer, and how many separate extension client bundles the
  * boot graph pulled (one batch bundle should cover most of them).
  */
@@ -91,6 +92,14 @@ const rows = [];
 for (let run = 1; run <= runs; run += 1) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, ignoreHTTPSErrors: true });
   const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.__perfPaint = { fcp: null };
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.name === "first-contentful-paint") window.__perfPaint.fcp = Math.round(entry.startTime);
+      }
+    }).observe({ type: "paint", buffered: true });
+  });
   const started = Date.now();
   await page.goto(base, { waitUntil: "domcontentloaded", timeout: 90_000 });
   const dcl = Date.now() - started;
@@ -113,13 +122,14 @@ for (let run = 1; run <= runs; run += 1) {
       byType[type].kb += (entry.transferSize ?? 0) / 1024;
     }
     return {
+      fcp: window.__perfPaint?.fcp ?? null,
       resources: resources.length,
       js: byType.script?.kb ?? 0,
       extBundles: resources.filter((e) => e.name.includes("/api/extensions/") && e.name.includes(".mjs")).length,
       batch: resources.some((e) => /client-bundle-[0-9a-f]+\.mjs/.test(e.name)),
     };
   });
-  rows.push({ run, dcl, ready, resources: stats.resources, jsKB: Math.round(stats.js), extBundles: stats.extBundles, batch: stats.batch });
+  rows.push({ run, fcp: stats.fcp, dcl, ready, resources: stats.resources, jsKB: Math.round(stats.js), extBundles: stats.extBundles, batch: stats.batch });
   await context.close();
 }
 await browser.close();
@@ -127,5 +137,8 @@ staticServer?.close();
 
 console.log(`[perf] ${base}`);
 for (const row of rows) {
-  console.log(`  run ${row.run}: dcl ${row.dcl}ms · ready ${row.ready ?? "—"}ms · ${row.resources} requests · js ${row.jsKB}KB · ${row.extBundles} extension bundle(s)${row.batch ? " (batch bundle in use)" : ""}`);
+  console.log(
+    `  run ${row.run}: fcp ${row.fcp ?? "—"}ms · dcl ${row.dcl}ms · ready ${row.ready ?? "—"}ms · ${row.resources} requests · ` +
+      `js ${row.jsKB}KB · ${row.extBundles} extension bundle(s)${row.batch ? " (batch bundle in use)" : ""}`,
+  );
 }

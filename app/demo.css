@@ -8,3 +8,288 @@
 @source "../generated";
 @source "../app";
 @source "../mock";
+/* ---------------------------------------------------------------------------
+   Boot skeleton (app/BootSkeleton.tsx)
+
+   The app bails out to client-side rendering, so a cold load shows nothing
+   until the whole client graph has run. These styles paint the shell's geometry
+   with the static HTML, then fade out on `data-demo-boot="done"` (set by
+   mock/boot-skeleton.ts once the real shell has mounted).
+--------------------------------------------------------------------------- */
+#demo-boot {
+  --db-block: color-mix(in srgb, var(--text) 10%, transparent);
+  --db-block-soft: color-mix(in srgb, var(--text) 6%, transparent);
+  --db-block-strong: color-mix(in srgb, var(--text) 16%, transparent);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 357px minmax(0, 1fr);
+  background: var(--bg);
+  font-family: var(--font-ui);
+  transition: opacity 180ms ease-out, visibility 0s linear 180ms;
+}
+
+html[data-demo-boot="done"] #demo-boot {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Safety net: a failed boot must not leave a fake UI on screen forever. */
+@keyframes db-give-up {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+#demo-boot {
+  animation: db-give-up 0s linear 12s forwards;
+}
+
+.db-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+}
+
+.db-head,
+.db-label,
+.db-dock,
+.db-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.db-brand {
+  margin-right: auto;
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 26px;
+  color: var(--text);
+}
+
+.db-pill {
+  flex: 0 0 auto;
+  width: 76px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--db-block-soft);
+}
+
+.db-pill-accent {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.db-icon {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--db-block-soft);
+}
+
+.db-label {
+  padding: 2px 2px 0;
+}
+
+.db-card {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.db-sessions,
+.db-docks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.db-docks {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.db-dockgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db-dockbody {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0 2px 10px 14px;
+}
+
+.db-session {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 9px 10px;
+  border-radius: 7px;
+}
+
+.db-session:first-child {
+  background: var(--db-block-soft);
+}
+
+.db-docks {
+  gap: 14px;
+  padding-top: 12px;
+  margin-top: 2px;
+  border-top: 1px solid var(--border);
+}
+
+.db-dock {
+  height: 26px;
+  padding: 0 2px;
+}
+
+.db-dot {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--db-block-soft);
+}
+
+.db-dot-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.db-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--db-block);
+}
+
+.db-bar-title {
+  height: 9px;
+}
+
+.db-bar-meta {
+  height: 6px;
+  background: var(--db-block-soft);
+}
+
+.db-bar-strong {
+  height: 10px;
+  background: var(--db-block-strong);
+}
+
+.db-foot {
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.db-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.db-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.db-thread {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 30px;
+  width: min(820px, 100% - 64px);
+  margin: 0 auto;
+  padding-top: 34px;
+}
+
+.db-bubble {
+  align-self: flex-end;
+  width: min(420px, 70%);
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.db-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.db-composer {
+  width: min(820px, 100% - 64px);
+  height: 62px;
+  margin: 20px auto 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.db-bar,
+.db-dot,
+.db-pill,
+.db-icon,
+.db-bubble,
+.db-composer {
+  animation: db-pulse 1.9s ease-in-out infinite;
+}
+
+@keyframes db-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-bar,
+  .db-dot,
+  .db-pill,
+  .db-icon,
+  .db-bubble,
+  .db-composer {
+    animation: none;
+  }
+}
+
+/* Phones and narrow windows use a different shell (the rail collapses). */
+@media (max-width: 820px) {
+  #demo-boot {
+    grid-template-columns: 0 minmax(0, 1fr);
+  }
+
+  .db-rail {
+    display: none;
+  }
+
+  .db-thread,
+  .db-composer {
+    width: calc(100% - 32px);
+  }
+}

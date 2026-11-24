@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { demoAssetPath } from "@demo/mock/base-path";
-import { analyticsScriptTags, baiduInitScript } from "@demo/mock/analytics";
+import { analyticsBootScript } from "@demo/mock/analytics";
+import { BootSkeleton } from "./BootSkeleton";
 import "katex/dist/katex.min.css";
 import "./demo.css";
 
@@ -73,6 +74,8 @@ var pk="pi-web:ext-float:dockpref:v1:"+fk;
 if(localStorage.getItem(pk)===null)localStorage.setItem(pk,"sidebar:"+fk);}
 }catch(e){}})();`;
 
+const ANALYTICS_BOOT_SCRIPT = analyticsBootScript();
+
 export default function RootLayout({
   children,
 }: {
@@ -88,22 +91,16 @@ export default function RootLayout({
           }}
         />
         <script dangerouslySetInnerHTML={{ __html: FOLDER_SEED_SCRIPT }} />
-        {/* Analytics: same setup as the aiti-docs site (Baidu + Counterscale). */}
-        {baiduInitScript() && (
-          <script dangerouslySetInnerHTML={{ __html: baiduInitScript() }} />
+        {/* Analytics: same setup as the aiti-docs site (Baidu + Counterscale),
+            loaded once the demo itself has finished booting. */}
+        {ANALYTICS_BOOT_SCRIPT && (
+          <script dangerouslySetInnerHTML={{ __html: ANALYTICS_BOOT_SCRIPT }} />
         )}
-        {analyticsScriptTags().map((tag) => (
-          <script
-            key={tag.src}
-            async
-            src={tag.src}
-            {...(tag.id ? { id: tag.id } : {})}
-            {...(tag.siteId ? { "data-site-id": tag.siteId } : {})}
-          />
-        ))}
       </head>
       <body translate="no" className="notranslate" suppressHydrationWarning>
         {children}
+        {/* Static chrome: paints with the HTML, removed by the app on mount. */}
+        <BootSkeleton />
       </body>
     </html>
   );

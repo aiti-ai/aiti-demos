@@ -57,7 +57,7 @@ npm run sync:check           # 校验 generated/ 是否落后（CI 用）
 npm run extensions           # 从 ../aiti-ai/extensions 重建静态扩展层
 npm run audit                # fixture / 密钥审计（路径、token、内网 IP）
 npm run tour                 # 对 out/ 跑 Playwright 回归
-npm run perf                 # 启动性能测量（请求数 / JS 体积 / 就绪时间）
+npm run perf                 # 启动性能测量（首绘 / 请求数 / JS 体积 / 就绪时间）
 npm run deploy               # 可选：同时发布到本机 nginx 副本
 ```
 
@@ -76,10 +76,20 @@ CI 构建的两点说明：扩展 client bundle 取自 npm 已发布 tarball（`
 
 ### 启动性能
 
-构建会把宿主的 eager 扩展 client 预打包成一个内容寻址文件（`/api/extensions/client-bundle-<rev>.mjs`），
+界面是纯客户端渲染（整页 bailout 到 CSR），冷加载时若只等 JS 执行完就是一段白屏。因此静态 HTML 里带了
+**启动骨架**（`app/BootSkeleton.tsx` + `mock/boot-skeleton.ts`）：左栏、会话行、正文列、输入框的几何
+形状跟着首帧（约 0.1s）就出来，真实外壳挂载后淡出；骨架与真实布局同尺寸，交接时不重排。
+
+构建另把宿主的 eager 扩展 client 预打包成一个内容寻址文件（`/api/extensions/client-bundle-<rev>.mjs`），
 并把几 MB 的 mock 数据移出主 chunk、改为按需加载，因此冷加载约 **70 个请求 / 约 2.7MB JS**（此前约
-100 个请求 / 10MB）。`npm run perf` 用于测量（DOMContentLoaded、侧栏会话出现的时刻、请求数、JS 传输量、
+100 个请求 / 10MB）。第三方统计（百度 + Counterscale）改为 `load` 之后空闲加载，不与界面抢连接。
+
+`npm run perf` 用于测量（首次内容绘制、DOMContentLoaded、侧栏会话出现的时刻、请求数、JS 传输量、
 是否命中批量 bundle）；加 `--url` 与 `--resolve-ip` 可测线上副本（绕过内网 DNS）。
+
+发布到本机 nginx 时（`scripts/deploy-demo.sh`），`deploy/aiti-demos.conf` 对带 hash 的构建产物设一年
+immutable，对 `/api/*`、`/demo-files/*` 这两个静态 mock 树设 10 分钟 TTL，刷新时约 30 个扩展资源直接复用
+而不再逐个复验。GitHub Pages 会忽略这些头，public 副本用它自己的 10 分钟缓存。
 
 ## 实现方式
 
