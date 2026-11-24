@@ -9,9 +9,9 @@ import "./demo.css";
 const notoSansMono = { variable: "--font-noto-mono" };
 
 export const metadata: Metadata = {
-  title: "Pi Web",
-  description: "Interactive demo of Pi Web, the browser UI for the pi coding agent",
-  applicationName: "Pi Web",
+  title: "Pi Web · aiti-ai demo (mock data)",
+  description: "Static aiti-ai demo: the real Pi Web UI and extension host, backed by recorded mock data (no server, no model calls)",
+  applicationName: "Pi Web · aiti-ai demo",
   icons: {
     icon: [
       {
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Pi Web",
+    title: "Pi Web · aiti-ai demo",
   },
   formatDetection: {
     telephone: false,

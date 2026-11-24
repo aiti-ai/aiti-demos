@@ -196,7 +196,7 @@ export function usageReport(providerId: string) {
       },
     };
   }
-  if (providerId === "demo-plan") {
+  if (providerId === "deepseek") {
     return {
       providerId,
       status: "ready",

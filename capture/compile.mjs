@@ -53,7 +53,16 @@ for (const runDir of runDirs) {
     [runDir, "/Users/demo"],
   );
 }
-replacements.push(["/Users/demo/code/pi-web", "/Users/demo/code/pi-web"], ["/Users/demo", "/Users/demo"]);
+// Derive the operator's home from the environment instead of hardcoding a
+// local path, so this scrubber works on any machine and carries no personal
+// paths in the source.
+const operatorHome = String(process.env.HOME ?? process.env.USERPROFILE ?? "").replace(/\/+$/, "");
+if (operatorHome) {
+  replacements.push(
+    [`${operatorHome}/workspace/aiti-ai`, "/Users/demo/code/pi-web"],
+    [operatorHome, "/Users/demo"],
+  );
+}
 const secretKeys = /^(api_?key|token|secret|password|authorization|cookie|access_?token|refresh_?token)$/i;
 
 function sanitizeText(text) {
@@ -114,8 +123,12 @@ const catalog = {
 };
 
 const PCT = [
-  [encodeURIComponent("/Users/demo"), "/Users/demo"],
-  [encodeURIComponent("/Users/demo/code/pi-web"), "/Users/demo/code/pi-web"],
+  ...(operatorHome
+    ? [
+      [encodeURIComponent(operatorHome), "/Users/demo"],
+      [encodeURIComponent(`${operatorHome}/workspace/aiti-ai`), "/Users/demo/code/pi-web"],
+    ]
+    : []),
 ];
 
 /** Replace operator-config-shaped recorded bodies with synthetic demo data. */
