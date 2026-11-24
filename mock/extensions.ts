@@ -8,6 +8,7 @@ import manifest from "./data/extension-manifest.json";
 import { type MockRequest, error, json } from "./http";
 import { editorRoute } from "./editor";
 import { modelsImportRoute } from "./models-import";
+import { sessionManagerRoute } from "./session-manager";
 
 let demoCounter = 0;
 
@@ -61,6 +62,7 @@ export async function extensionsRoute(request: MockRequest): Promise<Response> {
   if (action === "reload" && request.method === "POST") return json({ ok: true, invalidated: [] });
   if (action === "aiti-editor") return editorRoute(request);
   if (action === "aiti-models-import") return modelsImportRoute(request);
+  if (action === "session-manager") return sessionManagerRoute(request);
   // The reference "demo" extension's self-check API (it is a real extension
   // bundle in the curated tier; its server hooks are replayed from constants).
   if (action === "demo") {
