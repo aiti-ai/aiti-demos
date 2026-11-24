@@ -65,6 +65,10 @@ if (!base) {
   ({ server: staticServer, base } = await startStatic(outDir));
 }
 
+// Normalize the base so `${base}/?x` never turns into `//?x` (which the static
+// server answers with its own error page, breaking every later check).
+if (base) base = base.replace(/\/+$/, "");
+
 async function launchBrowser() {
   try {
     return await chromium.launch({ headless: true });
@@ -81,8 +85,29 @@ const page = await (await browser.newContext({ viewport: { width: 1440, height: 
 const errors = [];
 const failed = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
-page.on("console", (m) => { if (m.type() === "error") errors.push(m.text().slice(0, 240)); });
+// Third-party trackers emit benign console noise (Baidu's hm.js trips the
+// document "unload" permissions policy); it is not an app error.
+const IGNORED_CONSOLE = [/Permissions policy violation: unload/i, /ERR_BLOCKED_BY_CLIENT/i];
+page.on("console", (m) => {
+  if (m.type() !== "error") return;
+  const text = m.text();
+  if (IGNORED_CONSOLE.some((re) => re.test(text))) return;
+  errors.push(text.slice(0, 240));
+});
 page.on("response", (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
+
+
+/** Navigate and let the app settle: a second goto while the shell is still
+ *  booting leaves React mid-mount and every later check fails. */
+async function go(url) {
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.waitForFunction(
+    () => document.querySelectorAll("[data-ext-id]").length >= 1,
+    undefined,
+    { timeout: 60_000 },
+  ).catch(() => {});
+  await page.waitForTimeout(700);
+}
 
 const results = [];
 async function check(name, fn) {
@@ -97,13 +122,23 @@ async function check(name, fn) {
 }
 
 try {
-  await page.goto(base, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await go(base);
   await check("shell", async () => {
     await page.getByRole("button", { name: "Settings", exact: true }).last().waitFor({ timeout: 30_000 });
   });
   await check("session", async () => {
-    await page.goto(`${base}/?session=019d7e3a-5c10-7a41-8f2e-0a1b2c3d4e01`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    await page.getByText(/Welcome! Pi Web is a browser UI/).first().waitFor({ timeout: 20_000 });
+    await go(`${base}/?session=019d7e3a-5c10-7a41-8f2e-0a1b2c3d4e01`);
+    // A cold load over the public host compiles/fetches 56 extension bundles
+    // before the transcript mounts; wait for the content, not a fixed budget.
+    await page.getByText(/Welcome! Pi Web is a browser UI/).first().waitFor({ timeout: 60_000 }).catch(async (e) => {
+      const info = await page.evaluate(() => ({
+        url: location.href,
+        len: document.body.innerText.length,
+        entries: document.querySelectorAll("[data-entry-id]").length,
+        head: document.body.innerText.slice(0, 160).replace(/\n+/g, " | "),
+      }));
+      throw new Error(`${e.message.split("\n")[0]} :: ${JSON.stringify(info)}`);
+    });
   });
   await check("settings", async () => {
     await page.getByRole("button", { name: "Settings", exact: true }).last().click();
@@ -122,18 +157,35 @@ try {
     await page.getByText("README.md", { exact: false }).first().waitFor({ timeout: 20_000 });
   });
   await check("extension-tier", async () => {
-    // Curated tier: the reference demo extension is present. Full tier: the
-    // extension manager is the visible proof (60 real client bundles).
-    const demo = page.getByTitle("demo Self-check").first();
-    if (await demo.count()) {
-      await demo.click();
-      await page.getByText("demo Extension self-check", { exact: false }).first().waitFor({ timeout: 20_000 });
-      return;
+    // Return to the app document first: earlier steps may have left the tab on a
+    // viewer URL where the mock network layer is not installed.
+    await go(base);
+    // Data-level proof that the real extension tier loaded: the manifest answers
+    // with every catalogued extension and the host mounted extension entries.
+    const tier = await page.evaluate(async () => {
+      const res = await fetch("/api/extensions/manifest");
+      const type = res.headers.get("content-type") ?? "";
+      const text = await res.text();
+      if (!type.includes("json")) {
+        // Not the mock: the network layer was bypassed (fresh document, no install).
+        return { error: `manifest not mocked: HTTP ${res.status} ${type}`, body: text.slice(0, 60) };
+      }
+      const manifest = JSON.parse(text);
+      return {
+        total: (manifest.extensions || []).length,
+        withClient: (manifest.extensions || []).filter((e) => e.clientUrl).length,
+        mounted: document.querySelectorAll("[data-ext-id]").length,
+      };
+    });
+    if (tier.error) throw new Error(tier.error + " | " + (tier.body ?? ""));
+    if (tier.total < 50 || tier.withClient < 40) {
+      throw new Error(`extension tier incomplete: ${JSON.stringify(tier)}`);
     }
-    const extman = page.getByRole("button", { name: /Extensions/i }).first();
-    await extman.waitFor({ timeout: 20_000 });
-    await extman.click();
-    await page.getByText(/Extensions|Extension manager/i).first().waitFor({ timeout: 20_000 });
+    await page.waitForFunction(
+      () => document.querySelectorAll("[data-ext-id]").length >= 5,
+      undefined,
+      { timeout: 60_000 },
+    );
   });
 } finally {
   await browser.close();
