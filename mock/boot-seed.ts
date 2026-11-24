@@ -21,6 +21,31 @@ const DEMO_FOLDERS: Array<[string, boolean, boolean]> = [
 ];
 
 const COLLAPSE_PREFIX = "pi:sidebar-dock:collapsed:";
+
+/**
+ * Session-row "new activity" dots.
+ *
+ * The sidebar's blue dot means "this session's run finished in the background"
+ * — session-manager keeps that set in localStorage and does not clear it on
+ * open. Every tutorial transcript is a finished run, so the demo seeds the set:
+ * the list then reads like a returning visitor's (finished sessions with unread
+ * results) instead of carrying the amber "interrupted" markers that the
+ * session-manager payload used to hard-code.
+ *
+ * Seeds only an absent key — a visitor's own read/unread state always wins.
+ */
+const UNREAD_KEY = "pi-web:unread-session-ids";
+
+export function seedUnreadSessionDots(ids: readonly string[]): void {
+  if (typeof window === "undefined" || ids.length === 0) return;
+  try {
+    if (window.localStorage.getItem(UNREAD_KEY) === null) {
+      window.localStorage.setItem(UNREAD_KEY, JSON.stringify(ids));
+    }
+  } catch {
+    // Storage unavailable: the rows simply carry no dot.
+  }
+}
 const DOCK_PREF_PREFIX = "pi-web:ext-float:dockpref:v1:";
 const FOLDER_KEY_PREFIX = "aiti-folder:folder:";
 

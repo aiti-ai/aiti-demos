@@ -50,7 +50,12 @@ function buildPayload() {
       name: session.name,
       lastRole: last?.message?.role ?? "user",
       ...(last?.message?.model ? { model: last.message.model } : {}),
-      lastRun: { status: "interrupted", at: new Date(modifiedMs).toISOString() },
+      // Every tutorial transcript ends on a finished assistant turn: a normal
+      // stop. Anomaly markers (failed / aborted / interrupted) are reserved for
+      // those states, so `completed` leaves the row clean; the blue dot the rows
+      // carry comes from the unread set (mock/boot-seed.ts), exactly like a
+      // session whose background run finished.
+      lastRun: { status: "completed", at: new Date(modifiedMs).toISOString() },
       cwd: session.cwd,
       projectRoot: session.cwd,
       created: new Date(createdMs).toISOString(),
@@ -82,18 +87,28 @@ export async function sessionManagerRoute(request: MockRequest): Promise<Respons
   }
   if (sub === "workspaces") {
     await ensureSessions();
-    const byCwd = new Map<string, number>();
-    for (const s of allSessions()) byCwd.set(s.cwd, (byCwd.get(s.cwd) ?? 0) + 1);
+    // Unread ids arrive as `?unread=a,b` (the client's own new-activity set);
+    // seed the per-project counters from it so the header dot agrees with the
+    // row dots instead of always reporting zero.
+    const unreadParam = request.url.searchParams.get("unread") ?? "";
+    const unread = new Set(unreadParam.split(",").filter(Boolean));
+    const byCwd = new Map<string, { sessions: number; unread: number }>();
+    for (const s of allSessions()) {
+      const row = byCwd.get(s.cwd) ?? { sessions: 0, unread: 0 };
+      row.sessions += 1;
+      if (unread.has(s.id)) row.unread += 1;
+      byCwd.set(s.cwd, row);
+    }
     return json({
       rev: `demo-${sessionListVersion()}`,
-      workspaces: [...byCwd.entries()].map(([key, count]) => ({
+      workspaces: [...byCwd.entries()].map(([key, counts]) => ({
         key,
         root: key,
         name: key.split("/").pop() ?? key,
         lastModified: new Date().toISOString(),
-        sessionCount: count,
+        sessionCount: counts.sessions,
         runningCount: 0,
-        unreadCount: 0,
+        unreadCount: counts.unread,
       })),
     });
   }

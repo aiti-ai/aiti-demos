@@ -9,7 +9,8 @@ import { staticFileUrlForApi } from "@demo/mock/files";
 import { openDemoHistory } from "@demo/mock/export";
 import { prefetchDemoHeavyChunks } from "@demo/mock/boot-prefetch";
 import { dismissBootSkeleton } from "@demo/mock/boot-skeleton";
-import { seedDemoFolderDocks } from "@demo/mock/boot-seed";
+import { seedDemoFolderDocks, seedUnreadSessionDots } from "@demo/mock/boot-seed";
+import { SESSION_IDS } from "@demo/mock/sessions/ids";
 
 // Install the demo seams before React renders anything (module scope is fine:
 // both are pure setters, and the mock fetch layer is already installed above).
@@ -18,6 +19,8 @@ setFullHistoryOpener((sessionId) => openDemoHistory(sessionId));
 // Window title suffix: makes the tab unmistakably the static demo.
 setTitleDecorator((title) => `${title} · aiti-ai demo (mock data)`);
 seedDemoFolderDocks();
+// Session rows read their blue "new activity" dot from localStorage on mount.
+seedUnreadSessionDots(Object.values(SESSION_IDS));
 // Extensions can import (and rewrite the folder manifest) after this module on a
 // cold load; top the demo folders up once the app has settled.
 if (typeof window !== "undefined") {
