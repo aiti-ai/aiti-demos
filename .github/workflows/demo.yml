@@ -1,8 +1,12 @@
 name: Demo
 
-# Build the static showcase from this repo + the aiti-ai source checkout.
-# Artifact only: demo.aiti.pw is served from the operator host (LAN DNS), so
-# deployment is scripts/deploy-demo.sh rather than a GitHub runner.
+# Builds the static showcase and publishes it to GitHub Pages, which serves it at
+# https://demo.aiti.pw (custom domain; repo Settings → Pages → Source: GitHub
+# Actions, CNAME recorded in public/CNAME).
+#
+# The build needs the aiti-ai source tree: the UI is synced from it and the
+# extension tier is copied from its packages. It is checked out next to this repo
+# and pointed at with AITI_SRC.
 
 on:
   push:
@@ -12,6 +16,8 @@ on:
       - "mock/**"
       - "scripts/**"
       - "capture/**"
+      - "extensions/**"
+      - "public/**"
       - "package.json"
       - "package-lock.json"
       - "next.config.ts"
@@ -23,6 +29,7 @@ on:
       - "mock/**"
       - "scripts/**"
       - "capture/**"
+      - "extensions/**"
       - "package.json"
       - "package-lock.json"
       - "next.config.ts"
@@ -32,20 +39,27 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
+# One deploy at a time; a queued run supersedes nothing (never cancel a deploy
+# halfway through the artifact upload).
 concurrency:
-  group: demo-${{ github.ref }}
-  cancel-in-progress: true
+  group: demo-pages-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       AITI_SRC: ${{ github.workspace }}/aiti-ai
+      # Custom domain serves from the root: no base path for the export.
+      PAGES_BASE_PATH: ""
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - name: Check out aiti-ai (frontend + extension source)
+        uses: actions/checkout@v4
         with:
           repository: aiti-ai/aiti-ai
           path: aiti-ai
@@ -54,13 +68,28 @@ jobs:
           node-version: 22.19.0
           cache: npm
       - run: npm ci
+      # prebuild: sync the UI from aiti-ai, rebuild the extension tier, snapshot
+      # the repository files for the explorer, then next build → out/
       - run: npm run build
-      - run: npm run audit
+      - name: Fixture / secret audit
+        run: npm run audit
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - run: npm run tour
-      - uses: actions/upload-artifact@v4
+      - name: Static-site tour (smoke test)
+        run: npm run tour
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
-          name: aiti-demos-out
           path: out
-          retention-days: 14
+
+  deploy:
+    needs: build
+    # Deploy only from main (pull requests build but never publish).
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
