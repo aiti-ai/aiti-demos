@@ -1,49 +1,97 @@
 # aiti-demos
 
-Static showcase of **AITI Web** (the [aiti-ai](https://github.com/aiti-ai/aiti-ai) pi-web fork):
-the real host UI, the real extension host and real extension client bundles, backed by a
-recorded mock model instead of a server.
+> Static showcase of **AITI Web** — the real workbench UI and the real extension host, backed by a recorded mock model. No server, no model calls, no install. **Live: <https://demo.aiti.pw/>**
 
-Live (LAN, `*.aiti.pw` certificate): <https://demo.aiti.pw/>
+English · [简体中文](./README.zh-CN.md)
 
-## How it works
+Site <https://aiti.pw> · Demo <https://demo.aiti.pw> · Source <https://github.com/aiti-ai/aiti-ai>
 
-- `app/` is a thin Next.js static-export shell.
-- `generated/` is synced from a sibling `aiti-ai` checkout by `scripts/sync-frontend.mjs`
-  (gitignored; `--check` catches drift).
-- `public/api/extensions/<id>/assets/...` is copied **verbatim** from
-  `aiti-ai/extensions/<id>/dist` + `icons` + runtime assets. The host loads these with
-  native `import()`; `mock/data/extension-manifest.json` is the static manifest/graph.
-- `mock/` answers `/api/*` in the browser: hand-written state machines for the demo
-  sessions, plus `mock/model/routes.json` replaying recorded responses.
+![aiti-demos — the AITI Web workbench running as a static site](./docs/demo-hero.png)
 
-## Commands
+## About aiti
+
+This project is part of the **aiti** ecosystem — a personal AI development workbench powered by [pi](https://pi.dev): **aiti-agent** (a self-hosted web workbench built on the open-source [pi-web](https://github.com/aiti-ai/aiti-ai)) plus debug injection into mainstream dev tools (aiti-devtools) and a rich extension system.
+
+- Workbench & monorepo: <https://github.com/aiti-ai/aiti-ai>
+- Site: <https://aiti.pw>
+- This demo: <https://demo.aiti.pw>
+
+What you can click in the demo:
+
+- **Sessions** — 15 tutorial conversations (English / 简体中文) covering the interface, files and `@` mentions, models, branching, queues, worktrees, multi-agent backends, secrets and page debugging.
+- **Extensions** — the real full tier: 67 extensions in the catalog, 56 real client bundles loaded by the real extension host (app center, docks, settings takeovers, toolbars).
+- **Files** — a real file tree with Monaco editing, `⇋ HEAD` diffs, Markdown preview and Git status.
+- **Settings** — the model wizard, model health check, MCP, providers, quotas, extension manager.
+- **Extras** — service ports, share targets, new-model discovery, system status, live analytics.
+
+## What is real and what is mocked
+
+| Layer | In this demo |
+|---|---|
+| Workbench UI (`app/`, `components/`, `hooks/`, `lib/`) | **Real** — synced from the aiti-ai source tree |
+| Extension host, slots, client loader, services | **Real** |
+| Extension client bundles (56) | **Real** — copied verbatim from each package's `dist/` |
+| `/api/*` responses | **Mocked** — recorded from a real instance, sanitized, then replayed in the browser |
+| Agent turns, model calls, terminals, bridges | **Not executed** — canned scripts or recorded frames |
+
+Server-side extension logic does not run here. Panels that need it show recorded snapshots or degrade; the "capability map" in the demo says which is which.
+
+## Install / run locally
 
 ```bash
-# optional: a sibling aiti-ai checkout, or AITI_SRC=/path/to/aiti-ai
+# a sibling aiti-ai checkout is required (or point AITI_SRC at one)
+git clone https://github.com/aiti-ai/aiti-ai ../aiti-ai
+
 npm ci
-npm run dev          # sync + extension tier + file snapshot, then next dev :30146
-npm run build        # static export in out/
-npm run audit        # fixture/secret audit
-npm run tour         # Playwright regression against out/
-npm run capture:install:cn   # CN mirror fallback for Playwright's Chromium
-npm run deploy       # build + rsync to demo.aiti.pw (scripts/deploy-demo.sh)
+npm run dev      # sync frontend + extension tier + file snapshot, then next dev on :30146
+npm run build    # static export in out/
 ```
 
-## Recording (maintainers)
+Maintenance commands:
 
 ```bash
-node capture/seed.mjs --run my-run          # isolated agent/data/project
-node capture/run.mjs --run my-run --extensions --app-center-fresh
-node capture/compile.mjs --runs my-run      # sanitises into mock/model/
-node scripts/audit-fixtures.mjs
+npm run sync                 # pull the UI from ../aiti-ai into generated/ (gitignored)
+npm run sync:check           # fail if generated/ is stale (used by CI)
+npm run extensions           # rebuild the static extension tier from ../aiti-ai/extensions
+npm run audit                # fixture / secret audit (paths, tokens, private IPs)
+npm run tour                 # Playwright regression against out/
+npm run deploy               # build + rsync to /var/www + reload nginx (demo.aiti.pw)
 ```
 
-`capture/raw/**` is gitignored and never published; `mock/model/**` is sanitised.
-`demo`, `demo-lazy` and `sm-demo-source` are excluded from recording.
+## How it is built
 
-## Limits
+```text
+app/                     thin Next.js static-export shell
+generated/               UI synced from aiti-ai (gitignored; sync --check guards drift)
+public/api/extensions/   real extension dist + icons, served at the host's own asset URLs
+mock/                    the in-browser backend
+  sessions/              tutorial session scripts (bilingual)
+  model/routes.json      recorded responses, replayed per route
+  model/routes.en.json   English overrides for the CJK-bearing routes
+  boot-seed.ts           demo folders, heavy-chunk warm-up
+  analytics.ts           Baidu Analytics + Counterscale (DEMO_ANALYTICS=off disables)
+capture/                 the recorder (Playwright + CDP) and the compiler that sanitizes captures
+scripts/                 sync, extension tier, audit, coverage, tour, deploy
+```
 
-The mock replays recorded GET responses. Server-side extension logic, live agent turns,
-writes and bridges are not executed; panels that need them show recorded snapshots or
-degrade. See the internal plan for the full coverage matrix.
+The recorder drives a **real, isolated instance** (its own agent dir, project and ports), captures every `/api/*` response plus SSE frames and extension assets, then `capture/compile.mjs` normalizes paths and identifiers, scrubs credentials, and writes the mock model. `capture/raw/` never leaves the machine; only sanitized fixtures are committed.
+
+## Privacy
+
+- Recorded data is sanitized at compile time: operator paths, internal domains, RFC1918 addresses, provider inventories, masked key fragments and balances are replaced with demo values.
+- `scripts/audit-fixtures.mjs` fails the build on any path, token or private address that survives, and runs in CI.
+- The demo runs entirely in the browser: no credentials, no outbound agent calls.
+
+## Analytics
+
+The demo reports page views the same way the docs site does: Baidu Analytics (`hm.js`, shared property) and a self-hosted Counterscale tracker. Build with `DEMO_ANALYTICS=off` to ship without either.
+
+## Documentation
+
+- Documentation: <https://aiti.pw/>
+- Extension registry: <https://aiti.pw/extensions.html> · machine-readable <https://aiti.pw/extensions.json>
+- Internal plan for this demo (Chinese): `aiti-demos` plan in the policy workspace
+
+## License
+
+MIT
