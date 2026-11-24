@@ -50,8 +50,11 @@ const sourceRoot = resolve(rootArg ?? process.env.AITI_SRC ?? join(demoDir, ".."
  */
 function copyPlainClient(extId, sourceDir, assetDir, clientRel) {
   const bare = String(clientRel).replace(/^dist\//, "");
+  // Extensions without a declared client have an empty relative path; do not
+  // mistake `client/src/` itself for the entry file.
+  if (!bare) return false;
   const candidates = [join(sourceDir, "client", "src", bare), join(sourceDir, bare)];
-  const from = candidates.find((p) => existsSync(p));
+  const from = candidates.find((p) => existsSync(p) && statSync(p).isFile());
   if (!from) return false;
   mkdirSync(join(assetDir, "dist"), { recursive: true });
   cpSync(from, join(assetDir, "dist", bare));
