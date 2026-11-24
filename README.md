@@ -57,6 +57,7 @@ npm run sync:check           # fail if generated/ is stale (used by CI)
 npm run extensions           # rebuild the static extension tier from ../aiti-ai/extensions
 npm run audit                # fixture / secret audit (paths, tokens, private IPs)
 npm run tour                 # Playwright regression against out/
+npm run perf                 # boot-performance run (requests / JS / ready time)
 npm run deploy               # optional: also publish to this host's nginx copy
 ```
 
@@ -76,6 +77,15 @@ path because the custom domain serves from the root (`public/CNAME`).
 
 `scripts/deploy-demo.sh` still exists for publishing the same `out/` to a local nginx copy (useful on
 a LAN where DNS points at the operator host).
+
+### Boot performance
+
+The build pre-bundles the host's eager extension clients into one content-addressed file
+(`/api/extensions/client-bundle-<rev>.mjs`), keeps the multi-megabyte mock fixtures out of the main
+chunk and lazy-loads them, so a cold load is ~70 requests / ~2.7MB of JS instead of ~100 requests /
+~10MB. `npm run perf` measures it (DOMContentLoaded, time until the session list is populated,
+request count, JS transfer, and whether the batch bundle is in use); pass `--url` and `--resolve-ip`
+to measure a deployed copy through a pinned address.
 
 ## How it is built
 

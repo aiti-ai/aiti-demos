@@ -57,6 +57,7 @@ npm run sync:check           # 校验 generated/ 是否落后（CI 用）
 npm run extensions           # 从 ../aiti-ai/extensions 重建静态扩展层
 npm run audit                # fixture / 密钥审计（路径、token、内网 IP）
 npm run tour                 # 对 out/ 跑 Playwright 回归
+npm run perf                 # 启动性能测量（请求数 / JS 体积 / 就绪时间）
 npm run deploy               # 可选：同时发布到本机 nginx 副本
 ```
 
@@ -72,6 +73,13 @@ npm run deploy               # 可选：同时发布到本机 nginx 副本
 CI 构建的两点说明：扩展 client bundle 取自 npm 已发布 tarball（`AITI_DIST_SOURCE=npm`），因为全新克隆没有构建好的 `dist/`——只在包内分发、未上 npm 的扩展仍会出现在目录里，但没有 client；导出使用空 basePath，因为自定义域在根路径服务（`public/CNAME`）。
 
 `scripts/deploy-demo.sh` 仍保留，用于把同一份 `out/` 同步到本机 nginx 副本（内网 DNS 指向本机时有用）。
+
+### 启动性能
+
+构建会把宿主的 eager 扩展 client 预打包成一个内容寻址文件（`/api/extensions/client-bundle-<rev>.mjs`），
+并把几 MB 的 mock 数据移出主 chunk、改为按需加载，因此冷加载约 **70 个请求 / 约 2.7MB JS**（此前约
+100 个请求 / 10MB）。`npm run perf` 用于测量（DOMContentLoaded、侧栏会话出现的时刻、请求数、JS 传输量、
+是否命中批量 bundle）；加 `--url` 与 `--resolve-ip` 可测线上副本（绕过内网 DNS）。
 
 ## 实现方式
 

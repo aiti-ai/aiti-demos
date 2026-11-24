@@ -19,6 +19,10 @@ const outDir = join(demoDir, "out");
 const args = process.argv.slice(2);
 const urlArg = args.find((a) => a.startsWith("--url="))?.slice("--url=".length)
   ?? (args.includes("--url") ? args[args.indexOf("--url") + 1] : undefined);
+// --resolve-ip: pin the host to one address (e.g. test the Pages copy from a LAN
+// where DNS points at the operator host instead).
+const resolveIp = args.find((a) => a.startsWith("--resolve-ip="))?.slice("--resolve-ip=".length)
+  ?? (args.includes("--resolve-ip") ? args[args.indexOf("--resolve-ip") + 1] : undefined);
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -70,18 +74,27 @@ if (!base) {
 if (base) base = base.replace(/\/+$/, "");
 
 async function launchBrowser() {
+  const launchArgs = resolveIp
+    ? [`--host-resolver-rules=MAP ${new URL(urlArg ?? "http://127.0.0.1").hostname} ${resolveIp}`]
+    : [];
   try {
-    return await chromium.launch({ headless: true });
+    return await chromium.launch({ headless: true, args: launchArgs });
   } catch (error) {
     const fallback = process.env.PLAYWRIGHT_EXECUTABLE_PATH
       ?? ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable"].find((p) => existsSync(p));
     if (!fallback) throw error;
-    return chromium.launch({ headless: true, executablePath: fallback });
+    return chromium.launch({ headless: true, executablePath: fallback, args: launchArgs });
   }
 }
 
 const browser = await launchBrowser();
-const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "en-US" })).newPage();
+const page = await (await browser.newContext({
+  viewport: { width: 1440, height: 900 },
+  locale: "en-US",
+  // Pinning a host to an IP is used to test an origin whose certificate is not
+  // issued yet (Pages before its custom-domain cert lands).
+  ...(resolveIp ? { ignoreHTTPSErrors: true } : {}),
+})).newPage();
 const errors = [];
 const failed = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
