@@ -42,6 +42,28 @@ const sourceRoot = resolve(rootArg ?? process.env.AITI_SRC ?? join(demoDir, ".."
 
 
 
+
+/**
+ * Some extensions ship their client as a plain source file (no bundler): the
+ * `build:client` script is a copy from `client/src/` to `dist/`. A fresh CI
+ * checkout has no `dist/`, so mirror that copy when the entry is a single file.
+ */
+function copyPlainClient(extId, sourceDir, assetDir, clientRel) {
+  const bare = String(clientRel).replace(/^dist\//, "");
+  const candidates = [join(sourceDir, "client", "src", bare), join(sourceDir, bare)];
+  const from = candidates.find((p) => existsSync(p));
+  if (!from) return false;
+  mkdirSync(join(assetDir, "dist"), { recursive: true });
+  cpSync(from, join(assetDir, "dist", bare));
+  // Runtime helper files some extensions serve from the extension root (the
+  // devtools launcher) live in `assets/`; carry them along when present.
+  if (existsSync(join(sourceDir, "assets"))) {
+    cpSync(join(sourceDir, "assets"), assetDir, { recursive: true });
+    cpSync(join(sourceDir, "assets"), join(assetDir, ".."), { recursive: true });
+  }
+  return true;
+}
+
 /**
  * Install one extension's client bundles from its published npm tarball.
  * Extension packages ship `dist/` (verified: @aiti-ai/aiti-folder@latest), so CI
@@ -240,8 +262,10 @@ if (fullMode) {
       if (!existsSync(sourceDir)) continue;
       const assetDir = join(stagingRoot, ext.id, "assets");
       const rootDir = join(stagingRoot, ext.id);
+      const clientRel = String(ext.clientUrl ?? "").replace(`/api/extensions/${ext.id}/assets/`, "").replace(/\?.*$/, "");
       if (DIST_SOURCE === "npm") {
-        const ok = await installFromNpm(ext.id, sourceDir, assetDir);
+        const ok = (await installFromNpm(ext.id, sourceDir, assetDir))
+          || copyPlainClient(ext.id, sourceDir, assetDir, clientRel);
         // Bundled-only extensions are not on npm; a local checkout may still have
         // their dist, so fall back to it (CI has neither and lists them without a
         // client).
