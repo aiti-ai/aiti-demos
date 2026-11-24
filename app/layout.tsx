@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { demoAssetPath } from "@demo/mock/base-path";
+import { BAIDU_INIT_SCRIPT, analyticsScriptTags } from "@demo/mock/analytics";
 import "katex/dist/katex.min.css";
 import "./demo.css";
 
@@ -87,6 +88,17 @@ export default function RootLayout({
           }}
         />
         <script dangerouslySetInnerHTML={{ __html: FOLDER_SEED_SCRIPT }} />
+        {/* Analytics: same setup as the aiti-docs site (Baidu + Counterscale). */}
+        <script dangerouslySetInnerHTML={{ __html: BAIDU_INIT_SCRIPT }} />
+        {analyticsScriptTags().map((tag) => (
+          <script
+            key={tag.src}
+            async
+            src={tag.src}
+            {...(tag.id ? { id: tag.id } : {})}
+            {...(tag.siteId ? { "data-site-id": tag.siteId } : {})}
+          />
+        ))}
       </head>
       <body translate="no" className="notranslate" suppressHydrationWarning>
         {children}
