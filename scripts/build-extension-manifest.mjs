@@ -35,6 +35,56 @@ const rootArg = args.find((a) => a.startsWith("--root="))?.slice("--root=".lengt
   ?? (args.includes("--root") ? args[args.indexOf("--root") + 1] : undefined);
 const sourceRoot = resolve(rootArg ?? process.env.AITI_SRC ?? join(demoDir, "..", "aiti-ai"));
 
+
+/**
+ * Chunked extensions ship a thin client entry plus sibling chunks. A stale
+ * source `dist/` can miss those chunks (they are build outputs, not committed),
+ * and the copied tree then fails to import at runtime. When a chunk referenced
+ * by the entry is absent from the source dist, fall back to the deployed
+ * extension tree (the tree the app actually runs) for that extension's dist.
+ */
+function deployedExtensionsRoot() {
+  return process.env.AITI_DEPLOYED_EXTENSIONS_DIR
+    ?? join(process.env.HOME ?? "", ".pi", "web", "extensions");
+}
+
+function missingChunks(distDir, clientRel) {
+  // clientRel is relative to the extension dir (dist/<file>) or already bare.
+  const bare = clientRel.replace(/^dist\//, "");
+  const candidates = [join(distDir, bare), join(distDir, "dist", bare)];
+  const entry = candidates.find((p) => existsSync(p) && statSync(p).isFile());
+  if (!entry) return [];
+  const text = readFileSync(entry, "utf8");
+  return [...text.matchAll(/from\s*["'](\.\/[^"']+)["']/g)]
+    .map((m) => m[1])
+    .filter((rel) => !existsSync(join(dirname(entry), rel)));
+}
+
+function copyDist(extId, sourceDir, destAssetDir, clientRel) {
+  const destDist = join(destAssetDir, "dist");
+  const bare = clientRel.replace(/^dist\//, "");
+  const srcDist = join(sourceDir, "dist");
+  if (existsSync(srcDist)) cpSync(srcDist, destDist, { recursive: true });
+  // An unbuilt checkout has an empty (or absent) dist: the entry itself is missing.
+  if (!existsSync(join(destDist, bare))) {
+    const deployedDist = join(deployedExtensionsRoot(), extId, "dist");
+    if (existsSync(deployedDist)) {
+      cpSync(deployedDist, destDist, { recursive: true });
+      return "deployed";
+    }
+    return "missing";
+  }
+  const missing = missingChunks(destDist, clientRel);
+  if (!missing.length) return "source";
+  const deployedDist = join(deployedExtensionsRoot(), extId, "dist");
+  if (existsSync(deployedDist)) {
+    cpSync(deployedDist, join(destAssetDir, "dist"), { recursive: true });
+    if (!missingChunks(join(destAssetDir, "dist"), clientRel).length) return "deployed";
+  }
+  console.warn(`[ext] ${extId}: client chunks still missing (${missing.join(", ")})`);
+  return "incomplete";
+}
+
 const publicRoot = join(demoDir, "public", "api", "extensions");
 // Publish atomically. The editor's Monaco loader treats one 404 as a permanent
 // failure for the whole page session, so the old "rmSync then copy" left a
@@ -88,7 +138,11 @@ if (fullMode) {
       if (!existsSync(sourceDir)) continue;
       const assetDir = join(stagingRoot, ext.id, "assets");
       const rootDir = join(stagingRoot, ext.id);
-      if (existsSync(join(sourceDir, "dist"))) cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
+      if (existsSync(join(sourceDir, "dist"))) {
+        const clientRel = String(ext.clientUrl ?? "").replace(`/api/extensions/${ext.id}/assets/`, "").replace(/\?.*$/, "");
+        const origin = copyDist(ext.id, sourceDir, assetDir, clientRel);
+        if (origin === "deployed") console.log(`[ext] ${ext.id}: dist chunks completed from the deployed tree`);
+      }
       if (existsSync(join(sourceDir, "icons"))) cpSync(join(sourceDir, "icons"), join(assetDir, "icons"), { recursive: true });
       if (existsSync(join(sourceDir, "icon.svg"))) cpSync(join(sourceDir, "icon.svg"), join(assetDir, "icon.svg"));
       // Asset routing mirrors the host: a URL "/assets/<rel>" maps to the
