@@ -4,6 +4,7 @@ import type { SessionScript } from "../types";
 
 const DOCS = {
   guide: "https://aiti.pw/guide/features.html",
+  guideEn: "https://aiti.pw/en/guide/features.html",
   catalog: "https://aiti.pw/extensions/",
   draftKeeper: "https://aiti.pw/extensions/aiti-draft-keeper.html",
   draftKeeperEn: "https://aiti.pw/en/extensions/aiti-draft-keeper.html",
@@ -62,7 +63,7 @@ export const forkTourSession: SessionScript = {
 
 Most of the visible surface is the **extension host**: 46 slots and 60+ bundled extensions. The app drawer, session manager, floating docks, composer contract, model wizard, provider usage, MCP panel and the debug bridge are all extensions or extension-driven.
 
-The full breakdown (with upstream/ours attribution) is in the [feature guide](${DOCS.guide}) (Chinese).`,
+The full breakdown (with upstream/ours attribution) is in the [feature guide](${DOCS.guideEn}).`,
             zh: `这是 Pi Web 的 **aiti-ai 发行版**。上游底座仍在——会话、分支、文件、Git worktree、网页设置——上面叠了五组招牌能力：
 
 | 招牌能力 | 改变了什么 |
@@ -145,7 +146,7 @@ The full breakdown (with upstream/ours attribution) is in the [feature guide](${
 
 Read more:
 
-- [Feature guide](${DOCS.guide}) — every capability, split into upstream vs in-house.
+- [Feature guide](${DOCS.guideEn}) — every capability, split into upstream vs in-house.
 - [Extension catalog](${DOCS.catalog}) — one page per extension, with install and config details.
 - Deep dives: [draft keeper](${DOCS.draftKeeperEn}) · [queue keeper](${DOCS.queueKeeperEn}) · [input smart](${DOCS.aiInputEn}) · [message smart](${DOCS.msgSmartEn}) · [read-aloud](${DOCS.speekEn})
 
