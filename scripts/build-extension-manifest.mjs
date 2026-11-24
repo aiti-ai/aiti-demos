@@ -237,7 +237,18 @@ async function localExtensions() {
  * the site is served through a CDN.
  */
 async function buildEagerBundle(manifest) {
-  const rows = (manifest.graph?.entries ?? []).filter((row) => row.immediately !== false && !row.bundleExcluded);
+  const eager = (manifest.graph?.entries ?? []).filter((row) => row.immediately !== false && !row.bundleExcluded);
+  if (!eager.length) return;
+  // Default: batch every eager client (the host's own behaviour) — measured equal
+  // to a split at 300ms RTT and fewer round trips beyond that, which is what a
+  // CDN-served demo sees. AITI_DEMO_BATCH_ALL=0 batches only AITI_DEMO_BATCH_IDS,
+  // which shrank the batch to 61KB/5 clients but did not move time-to-ready.
+  const batchAll = process.env.AITI_DEMO_BATCH_ALL !== "0";
+  const critical = new Set(
+    (process.env.AITI_DEMO_BATCH_IDS ?? "session-manager,aiti-event-bus,aiti-float,aiti-draft-keeper,aiti-app-center,demo-banner")
+      .split(",").map((id) => id.trim()).filter(Boolean),
+  );
+  const rows = batchAll ? eager : eager.filter((row) => critical.has(row.id));
   if (!rows.length) return;
   const bundleMod = await jiti.import(pathToFileURL(join(sourceRoot, "lib", "ext", "client-bundle.ts")).href);
   if (typeof bundleMod.buildClientBundle !== "function") {
@@ -266,7 +277,7 @@ async function buildEagerBundle(manifest) {
   manifest.graph.bundle = { url: `/api/extensions/${file}`, rev: built.rev, ids: built.ids };
   if (built.offenders?.length) console.log(`[ext] bundle: excluded import.meta extensions: ${built.offenders.join(", ")}`);
   if (built.chunked?.length) console.log(`[ext] bundle: chunked extensions externalized: ${built.chunked.length}`);
-  console.log(`[ext] eager bundle: ${built.ids.length} clients in one file (${Math.round(built.code.length / 1024)}KB)`);
+  console.log(`[ext] eager bundle: ${built.ids.length}/${eager.length} clients in one file (${Math.round(built.code.length / 1024)}KB)`);
 }
 
 if (fullMode) {
