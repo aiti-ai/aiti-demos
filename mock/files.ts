@@ -76,9 +76,12 @@ let shardIndexPromise: Promise<ShardIndex> | null = null;
 const shardPromises = new Map<string, Promise<VirtualFile[]>>();
 let allShardsPromise: Promise<VirtualFile[]> | null = null;
 
-function shardIdFor(relativePath: string): string {
-  const slash = relativePath.indexOf("/");
-  return slash <= 0 ? "root" : relativePath.slice(0, slash);
+function shardIdFor(relativePath: string, shards: ReadonlyArray<{ id: string }>): string {
+  // A path inside a top-level directory belongs to that directory's shard;
+  // a bare top-level directory name ("docs") IS that shard. Only entries that
+  // match no shard id (top-level files, the empty root path) live in "root".
+  const wanted = relativePath.split("/")[0] || "root";
+  return shards.some((shard) => shard.id === wanted) ? wanted : "root";
 }
 
 function fetchShard(id: string): Promise<VirtualFile[]> {
@@ -126,8 +129,8 @@ function loadRepositorySnapshot(): Promise<VirtualFile[]> {
 
 /** Snapshot files under one top-level directory (fetches just that shard). */
 async function loadRepositoryShard(relativePath: string): Promise<VirtualFile[]> {
-  await loadShardIndex();
-  return fetchShard(shardIdFor(relativePath));
+  const index = await loadShardIndex();
+  return fetchShard(shardIdFor(relativePath, index.shards));
 }
 
 /** Files added or rewritten by the demo sessions, keyed by project-relative path. */
