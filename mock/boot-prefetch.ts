@@ -11,7 +11,11 @@
  * at different times than the app shell. Each attempt is skipped once the toast
  * is on screen, so it stops as soon as it worked (no polling).
  */
-const ATTEMPTS_MS = [2_000, 5_000, 9_000];
+// [first-load governance] Attempts moved past the first-content window: the
+// wizard warm-up pulls a heavy chunk + three large recorded bodies (externalized
+// catalogs), and at slow-network RTT that bandwidth used to delay the extension
+// batch and the session render by seconds. The toast still appears, just later.
+const ATTEMPTS_MS = [12_000, 18_000, 24_000];
 
 function toastVisible(): boolean {
   for (const el of document.querySelectorAll<HTMLElement>("div")) {
