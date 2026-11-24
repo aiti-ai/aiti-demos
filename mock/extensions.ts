@@ -15,6 +15,7 @@ import { sysmonRoute } from "./sysmon";
 import { modelWizardRoute } from "./model-wizard";
 import { getRealFetch } from "./runtime";
 import { serviceTunnelsRoute } from "./service-tunnels";
+import { msgShareRoute } from "./msg-share";
 
 let demoCounter = 0;
 
@@ -79,6 +80,7 @@ export async function extensionsRoute(request: MockRequest): Promise<Response> {
   if (action === "aiti-ai-input") return aiInputRoute(request);
   if (action === "aiti-sysmon") return sysmonRoute(request);
   if (action === "service-tunnels") return serviceTunnelsRoute(request);
+  if (action === "aiti-msg-share") return msgShareRoute(request);
   if (action === "aiti-model-wizard" && request.segments[3] === "new-models") return modelWizardRoute(request);
   // The reference "demo" extension's self-check API (it is a real extension
   // bundle in the curated tier; its server hooks are replayed from constants).
