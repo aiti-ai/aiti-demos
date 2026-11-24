@@ -227,6 +227,48 @@ async function localExtensions() {
   return out;
 }
 
+
+/**
+ * Pre-build the host's eager client bundle.
+ *
+ * The host loads `graph.bundle` as ONE script (its own optimization for the
+ * per-extension URLs). A static demo can build it ahead of time with the host's
+ * own builder, which turns ~40 boot requests into one — the dominant cost when
+ * the site is served through a CDN.
+ */
+async function buildEagerBundle(manifest) {
+  const rows = (manifest.graph?.entries ?? []).filter((row) => row.immediately !== false && !row.bundleExcluded);
+  if (!rows.length) return;
+  const bundleMod = await jiti.import(pathToFileURL(join(sourceRoot, "lib", "ext", "client-bundle.ts")).href);
+  if (typeof bundleMod.buildClientBundle !== "function") {
+    console.warn("[ext] host bundle builder unavailable — skipping the eager bundle");
+    return;
+  }
+  const entries = rows.map((row, order) => {
+    const id = row.id;
+    const assetDir = join(publicRoot, id, "assets");
+    const rel = String(row.url ?? "").replace(`/api/extensions/${id}/assets/`, "").split("?")[0];
+    return { id, dir: assetDir, file: join(assetDir, rel), rev: row.rev, priority: row.priority, order };
+  }).filter((entry) => existsSync(entry.file));
+  if (!entries.length) return;
+  const built = await bundleMod.buildClientBundle(entries);
+  if (!built?.code) return;
+  // The bundle externalizes chunked extensions' shared chunks as relative paths
+  // (`./<extId>/assets/dist/entry-*.js`), so it has to live at
+  // /api/extensions/<file> — relative to that directory they resolve to the
+  // per-extension asset URLs.
+  rmSync(join(demoDir, "public", "ext-bundle"), { recursive: true, force: true });
+  for (const stale of readdirSync(publicRoot)) {
+    if (stale.startsWith("client-bundle-")) rmSync(join(publicRoot, stale), { force: true });
+  }
+  const file = `client-bundle-${built.rev}.mjs`;
+  writeFileSync(join(publicRoot, file), built.code);
+  manifest.graph.bundle = { url: `/api/extensions/${file}`, rev: built.rev, ids: built.ids };
+  if (built.offenders?.length) console.log(`[ext] bundle: excluded import.meta extensions: ${built.offenders.join(", ")}`);
+  if (built.chunked?.length) console.log(`[ext] bundle: chunked extensions externalized: ${built.chunked.length}`);
+  console.log(`[ext] eager bundle: ${built.ids.length} clients in one file (${Math.round(built.code.length / 1024)}KB)`);
+}
+
 if (fullMode) {
   const capturedManifestPath = join(demoDir, "mock", "model", "catalog", "extensionManifest.json");
   if (!existsSync(capturedManifestPath)) {
@@ -331,19 +373,27 @@ if (fullMode) {
     return { ...ext, clientUrl: exists && !skipClients.has(ext.id) ? ext.clientUrl : null };
   }).filter((ext) => !skipIds.has(ext.id));
   const available = new Set(extensions.filter((e) => e.clientUrl).map((e) => e.id));
-  const entries = (captured.graph?.entries ?? []).filter((row) => available.has(row.id));
+  const entries = (captured.graph?.entries ?? []).filter((row) => available.has(row.id)).map((row) => ({
+    ...row,
+    ...(row.bundleExcluded ? { bundleExcluded: true } : {}),
+  }));
   const manifest = {
     extensions,
     graph: { rev: captured.graph?.rev ?? "source", entries },
     failed: [],
   };
+  // Boot-graph eagerness follows the captured graph. Trimming it (only the
+  // first-frame core set) saves ~350ms but hides the app-center cards of every
+  // extension that declares a panel slot (static declarations never become panel
+  // cards), which is exactly what this demo is for. The drawer stays complete.
   // Demo-only extensions from this repo take precedence (same id wins).
   if (local.length) {
     const localIds = new Set(local.map((item) => item.ext.id));
     manifest.extensions = [...local.map((item) => item.ext), ...manifest.extensions.filter((ext) => !localIds.has(ext.id))];
     manifest.graph = { ...manifest.graph, entries: [...local.map((item) => item.row), ...(manifest.graph?.entries ?? []).filter((row) => !localIds.has(row.id))] };
   }
-  writeFileSync(join(demoDir, "mock", "data", "extension-manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+  await buildEagerBundle(manifest);
+  writeFileSync(join(demoDir, "mock", "data", "extension-manifest.json"), JSON.stringify(manifest) + "\n");
   console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${manifest.graph.entries.length} client bundle(s) (${captureRun ? `capture ${captureRun}` : `source ${sourceRoot}`}${local.length ? `, ${local.length} local` : ""})`);
   process.exit(0);
 }

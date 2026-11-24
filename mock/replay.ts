@@ -5,33 +5,15 @@
  * Hand-written routes always win; the framework endpoints and asset files stay
  * with the static extension tier.
  *
- * Recorded bodies are zh-rich; mock/model/routes.en.json holds English
- * overrides for the CJK-bearing routes (built by mock/model/build-routes-en.mjs).
- * Under the en UI locale the en overrides win per route key; every other key
- * falls back to the recorded table. zh keeps routes.json unchanged.
+ * The recorded tables live in ./replay-tables.ts and load on demand: together
+ * they are ~1.7MB of JSON, so a static import would put them in the main chunk
+ * and parse them before the first paint.
  */
-import routes from "./model/routes.json";
-import routesEn from "./model/routes.en.json";
-import { currentDemoLocale } from "./locale";
 import type { MockRequest } from "./http";
+import { routeTable } from "./replay-tables";
 
-type Entry = {
-  step?: string;
-  status?: number;
-  type?: string;
-  body?: unknown;
-  catalog?: string;
-  asset?: unknown;
-};
-
-const recordedTable = routes as Record<string, Entry[]>;
-const enOverrides = routesEn as Record<string, Entry[]>;
-const enTable = { ...recordedTable, ...enOverrides };
-
-/** Locale-aware lookup table: en overrides win, everything else falls back. */
-function tableForLocale(): Record<string, Entry[]> {
-  return currentDemoLocale() === "en" ? enTable : recordedTable;
-}
+/** Writes are replayed only for read-only probes; anything destructive is refused. */
+const WRITE_GUARD = /\/(delete|remove|uninstall|reset|logout|shutdown|kill|purge)\b/i;
 
 function candidates(request: MockRequest): string[] {
   const query = request.url.search.replace(/^\?/, "");
@@ -41,21 +23,16 @@ function candidates(request: MockRequest): string[] {
   ];
 }
 
-/** GET-only guards that must never be replayed for writes. */
-const WRITE_GUARD = /\/(delete|remove|uninstall|reset|logout|shutdown|kill|purge)\b/i;
-
-export function replayRoutes(request: MockRequest): Response | null {
+export async function replayRoutes(request: MockRequest): Promise<Response | null> {
   // Reads replay always; writes replay only for extension-owned APIs whose
   // recorded POST bodies are pure reads-in-disguise (git-review /tasks, /refs,
-  // /hasChanges, /files; search and probe endpoints). Anything destructive is
-  // excluded so a click can never look like it mutated real state.
+  // /hasChanges, /files; search and probe endpoints).
   const isWrite = request.method !== "GET";
   if (isWrite) {
     if (!request.path.startsWith("/api/extensions/")) return null;
     if (WRITE_GUARD.test(request.path)) return null;
   }
-  // Extension framework endpoints and asset files stay with the static tier;
-  // extension-owned API reads are replayed from the recorded model.
+  // Extension framework endpoints and asset files stay with the static tier.
   if (request.path.startsWith("/api/extensions/")) {
     const action = request.segments[2];
     if (["manifest", "status", "client-bundle", "reload"].includes(action)) return null;
@@ -67,7 +44,7 @@ export function replayRoutes(request: MockRequest): Response | null {
   if (request.path.startsWith("/api/terminal")) return null;
   if (request.path.startsWith("/api/files")) return null;
 
-  const table = tableForLocale();
+  const table = await routeTable();
   for (const key of candidates(request)) {
     const entries = table[key];
     if (!entries?.length) continue;

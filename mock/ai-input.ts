@@ -9,19 +9,7 @@
  */
 import type { MockRequest } from "./http";
 import { json } from "./http";
-import zhRoutes from "./model/routes.json";
-import enRoutes from "./model/routes.en.json";
-import { currentDemoLocale } from "./locale";
-
-type Entry = { body?: unknown };
-const recordedTable = zhRoutes as unknown as Record<string, Entry[]>;
-const enTable = enRoutes as unknown as Record<string, Entry[]>;
-
-function recordedBody(key: string): Record<string, unknown> | null {
-  const table = currentDemoLocale() === "en" ? { ...recordedTable, ...enTable } : recordedTable;
-  const body = table[key]?.[0]?.body;
-  return body && typeof body === "object" ? (body as Record<string, unknown>) : null;
-}
+import { loadRecordedBody } from "./replay-tables";
 
 function withLoaded(body: Record<string, unknown> | null): Record<string, unknown> {
   const base = body ?? {};
@@ -43,14 +31,14 @@ export async function aiInputRoute(request: MockRequest): Promise<Response> {
   const sub = request.segments[3];
   if (sub === "asr") {
     const leaf = request.segments[4];
-    if (leaf === "info") return json(withLoaded(recordedBody("GET /api/extensions/aiti-ai-input/asr/info")));
+    if (leaf === "info") return json(withLoaded(await loadRecordedBody("GET /api/extensions/aiti-ai-input/asr/info")));
     if (leaf === "config") {
-      const body = recordedBody("GET /api/extensions/aiti-ai-input/asr/config");
+      const body = await loadRecordedBody("GET /api/extensions/aiti-ai-input/asr/config");
       return json({ ...(body ?? {}), ok: true });
     }
   }
   if (sub === "features") {
-    return json(recordedBody("GET /api/extensions/aiti-ai-input/features") ?? { ok: true });
+    return json((await loadRecordedBody("GET /api/extensions/aiti-ai-input/features")) ?? { ok: true });
   }
   return json({ ok: true });
 }

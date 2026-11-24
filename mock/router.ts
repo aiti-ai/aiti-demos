@@ -288,7 +288,7 @@ export async function handleApiRequest(
     const group = request.segments[1];
     const handler = ROUTES[group];
     let response = handler ? await handler(request) : await settingsRoutes(request);
-    if (response.status === 404 && (!handler || group === "extensions")) response = replayRoutes(request) ?? response;
+    if (response.status === 404 && (!handler || group === "extensions")) response = (await replayRoutes(request)) ?? response;
     if (signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
     return response;
   } catch (cause) {

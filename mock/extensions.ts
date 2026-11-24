@@ -4,7 +4,7 @@
  * public/api/extensions/<id>/assets/... so native import() and <img src>
  * resolve without a server (they never go through fetch()).
  */
-import manifest from "./data/extension-manifest.json";
+import { loadExtensionManifest } from "./extension-manifest-loader";
 import { type MockRequest, error, json } from "./http";
 import { editorRoute } from "./editor";
 import { modelsImportRoute } from "./models-import";
@@ -20,7 +20,8 @@ import { modelCheckRoute } from "./model-check";
 
 let demoCounter = 0;
 
-type ManifestExtension = (typeof manifest.extensions)[number];
+type ExtensionManifest = Awaited<ReturnType<typeof loadExtensionManifest>>;
+type ManifestExtension = ExtensionManifest["extensions"][number];
 
 function statusEntry(ext: ManifestExtension) {
   return {
@@ -39,7 +40,7 @@ function statusEntry(ext: ManifestExtension) {
   };
 }
 
-function statusPayload() {
+function statusPayload(manifest: ExtensionManifest) {
   return {
     loaded: true,
     extensionsRoot: "/Users/demo/.pi/web/extensions",
@@ -58,8 +59,13 @@ function statusPayload() {
 
 export async function extensionsRoute(request: MockRequest): Promise<Response> {
   const action = request.segments[2];
-  if (action === "manifest") return json(manifest);
-  if (action === "status") return json(statusPayload());
+  // The manifest is 1.1MB of JSON: load it on the first request instead of
+  // bundling it into the main chunk (see extension-manifest-loader.ts).
+  if (action === "manifest" || action === "status") {
+    const manifest = await loadExtensionManifest();
+    if (action === "manifest") return json(manifest);
+    return json(statusPayload(manifest));
+  }
   if (action === "client-bundle") {
     // Eager batch bundle: empty registry — the loader falls back to the
     // per-extension URLs from the graph.

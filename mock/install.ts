@@ -72,7 +72,11 @@ if (typeof window !== "undefined" && !window.__piWebDemoInstalled) {
 
   setStreamResolver(resolveApiStream);
   (window as unknown as { EventSource: unknown }).EventSource = MockEventSource;
-  warmDemoAssets();
+  // The repository snapshot manifest is ~400KB and only speeds up asset URL
+  // mapping; prime it after the shell has painted instead of at boot.
+  const primeLater = () => window.setTimeout(() => warmDemoAssets(), 1200);
+  if (document.readyState === "complete") primeLater();
+  else window.addEventListener("load", primeLater, { once: true });
 }
 
 export {};
