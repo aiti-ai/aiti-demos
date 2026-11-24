@@ -46,10 +46,11 @@ function icon() {
     "aria-hidden": "true",
     style: { flexShrink: 0 },
   }, [
-    h("path", { key: "a", d: "M12 2v6" }),
-    h("path", { key: "b", d: "m5.5 5.5 3 3" }),
-    h("path", { key: "c", d: "m18.5 5.5-3 3" }),
-    h("path", { key: "d", d: "M4 14a8 8 0 0 1 16 0v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" }),
+    // Install / download glyph (arrow into a tray) — the same shape as icon.svg,
+    // so the pill and the top-bar entry read as "get aiti" at a glance.
+    h("path", { key: "a", d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+    h("path", { key: "b", d: "m7 10 5 5 5-5" }),
+    h("path", { key: "c", d: "M12 15V3" }),
   ]);
 }
 
@@ -101,8 +102,8 @@ export default function register(ctx) {
     ].join(";");
 
     const glyph = document.createElement("span");
-    glyph.style.cssText = "display:inline-flex;flex-shrink:0";
-    glyph.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M12 2v6"/><path d="m5.5 5.5 3 3"/><path d="m18.5 5.5-3 3"/><path d="M4 14a8 8 0 0 1 16 0v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/></svg>';
+    glyph.style.cssText = "display:inline-flex;flex-shrink:0;color:var(--accent)";
+    glyph.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
 
     const text = document.createElement("span");
     text.textContent = label;
