@@ -99,18 +99,20 @@ The full breakdown (with upstream/ours attribution) is in the [feature guide](${
           },
           seconds: 22,
           text: {
-            en: `These five are the ones I use most, and they are all in-house extensions:
+            en: `These are the ones I use most, and they are all in-house:
 
 - **Draft Keeper** (\`aiti-draft-keeper\`) — the sole owner of the composer draft state machine. One shared slot per session, so tabs share the same draft; switching sessions, closing the page or crashing restores it verbatim; a rejected send merges the text back; stale slots are pruned after 7 days. Restore waits for host hydration and only writes on real input, so a restore can never delete what you just typed. [Details](${DOCS.draftKeeperEn})
 - **Queue Keeper** (\`aiti-queue-keeper\`) — while the agent is busy, queued messages can be reordered (drag), jump-sent as steer, converted to follow-up, recalled for editing, soft-deleted into a recycle bin (8s undo) and imported/exported. The queue itself is mirrored to a server-side sidecar; after a restart you decide per entry — resend / drop / later — and nothing is ever auto-delivered. [Details](${DOCS.queueKeeperEn})
 - **Input Smart** (\`aiti-ai-input\`) — two-tier autocomplete (instant local rules → AI continuation fallback), commands typed straight into the composer (\`model\`, \`compact\` — execute and the caret stays in the box), push-to-talk ASR with streaming recognition + 2-pass refinement, pluggable engines and workspace hotwords, plus a mobile newline pill. [Details](${DOCS.aiInputEn})
+- **Composer keys** — while a run is live, \`Enter\` queues as a follow-up and a second \`Enter\` on an empty composer promotes the queue head to a steer; \`Alt/Option+Enter\` steers immediately. With an empty composer, \`↑\` recalls a queued message (or pages input history) and \`Shift+↑\` opens the history menu; IME composition never sends by accident. The full table is in the [feature guide](${DOCS.guideEn}).
 - **Message Smart** (\`aiti-msg-smart\`) — click any paragraph, heading, table row or code line to copy / quote / highlight / pick an option (yes-no, A-B). Selections can be quoted as a reply; recognizers handle file paths, URLs and closed questions. The anchor banner (\`aiti-msg-anchor\`) tells you which input produced what is on screen, and the nav rail (\`aiti-msg-nav\`) jumps between user turns. [Details](${DOCS.msgSmartEn}) · [anchor](${DOCS.msgAnchorEn}) · [nav](${DOCS.msgNavEn})
 - **Read-aloud follow mode** (\`aiti-ai-speek\`) — one click on the 🔊 toolbar toggles listening mode: finished replies queue up in order, the current sentence is highlighted in the message flow and scrolls with the audio (audiobook style). The bar has prev / play / skip / stop, 0.75–2x rate and live voice switching; three engines (browser Web Speech / edge-tts / local ONNX with voice cloning). With follow mode off it subscribes to nothing and sends zero requests. [Details](${DOCS.speekEn})`,
-            zh: `这五组是我们日常用得最多、也最能拉开差距的部分（全是自研扩展）：
+            zh: `这几组是我们日常用得最多、也最能拉开差距的部分：
 
 - **草稿保管员** \`aiti-draft-keeper\`——composer 草稿状态机的唯一所有者。每会话一个共享槽位，多标签页打开同一会话天然同稿；切会话、关页面、崩溃重启后原样恢复；发送失败把原文合并回草稿；7 天陈旧槽位自动清理。恢复要等宿主水合完成、只写真实输入，所以「恢复」不会反过来删掉你刚打的字。[细节](${DOCS.draftKeeper})
 - **队列管家** \`aiti-queue-keeper\`——AI 忙时排队的消息可以拖拽排序、插队发送（steer）、转 follow-up、取回编辑、软删进回收站（8 秒撤销）、导入导出。队列镜像在服务端 sidecar，重启后逐条决定「重发 / 丢弃 / 稍后」，绝不自动投递。[细节](${DOCS.queueKeeper})
 - **输入智能** \`aiti-ai-input\`——两级自动补全（本地规则秒出 → AI 续写兜底）；命令直接打进输入框（打「模型」「压缩」就执行，光标不离开输入框）；按住说话的实时语音输入（流式识别 + 2-pass 精修 + 多引擎可插拔 + 工作区热词）；小屏还有换行胶囊。[细节](${DOCS.aiInput})
+- **按键语义**——AI 忙时 \`Enter\` 先排队为 follow-up，空输入再按一次 \`Enter\` 把队首升级为插队；\`Alt/Option+Enter\` 立即插队。空输入 \`↑\` 取回队列条目（或翻会话历史），\`Shift+↑\` 打开历史菜单；输入法组合中 Enter 不会误发送。完整速查表在[功能总览](${DOCS.guide})。
 - **消息智能** \`aiti-msg-smart\`——段落、标题、表格行、代码行直接点：复制 / 引用 / 行高亮 / 选项按钮（是·否、A·B）；划选文字可引用回复；文件路径、链接、封闭问句都有对应识别器。配合顶部锚点横幅 \`aiti-msg-anchor\` 和导航条 \`aiti-msg-nav\`，长会话不迷路。[细节](${DOCS.msgSmart}) · [锚点](${DOCS.msgAnchor}) · [导航](${DOCS.msgNav})
 - **跟读模式** \`aiti-ai-speek\`——点工具条 🔊 进入听书模式：完成的回复按顺序入队，当前句在消息流里高亮并自动滚动；播放条有上一句 / 暂停 / 跳过 / 停止、0.75–2x 语速、实时换音色；三档引擎（浏览器 Web Speech / edge-tts / 本地 ONNX，可克隆音色）；关闭跟读时零订阅、零请求。[细节](${DOCS.speek})`,
           },
