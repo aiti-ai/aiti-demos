@@ -111,6 +111,43 @@ async function installFromNpm(extId, sourceDir, assetDir) {
 }
 
 /**
+ * Copy Monaco's AMD bundle (min/vs) out of the published monaco-editor tarball.
+ *
+ * aiti-editor ships no monaco/ in git (gitignore) nor in its npm tarball; the
+ * assets are materialized from the monaco-editor devDependency at pack time. A
+ * demo build from a fresh checkout therefore has to fetch them itself.
+ */
+function materializeMonacoFromNpm(sourceDir, assetDir, rootDir) {
+  const pkg = JSON.parse(readFileSync(join(sourceDir, "package.json"), "utf8"));
+  const range = pkg.devDependencies?.["monaco-editor"] ?? pkg.dependencies?.["monaco-editor"] ?? "latest";
+  const packDir = join(demoDir, "public", "api", ".npm-packs");
+  mkdirSync(packDir, { recursive: true });
+  try {
+    const out = execFileSync(
+      "npm",
+      ["pack", `monaco-editor@${range}`, "--registry", "https://registry.npmjs.org", "--pack-destination", packDir],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+    ).trim().split("\n").pop();
+    const tarball = join(packDir, out);
+    if (!existsSync(tarball)) throw new Error("pack produced no tarball");
+    const extractDir = join(packDir, "monaco-x");
+    rmSync(extractDir, { recursive: true, force: true });
+    mkdirSync(extractDir, { recursive: true });
+    execFileSync("tar", ["xzf", tarball, "-C", extractDir]);
+    const vs = join(extractDir, "package", "min", "vs");
+    if (!existsSync(join(vs, "loader.js"))) throw new Error("tarball has no min/vs/loader.js");
+    cpSync(vs, join(assetDir, "monaco", "vs"), { recursive: true });
+    cpSync(vs, join(rootDir, "monaco", "vs"), { recursive: true });
+    console.log(`[ext] aiti-editor: monaco assets materialized from monaco-editor@${range}`);
+    rmSync(tarball, { force: true });
+    rmSync(extractDir, { recursive: true, force: true });
+  } catch (e) {
+    // The demo still works without the editor; say so instead of failing the build.
+    console.warn(`[ext] aiti-editor: monaco assets unavailable (${String(e.message).split("\n")[0]})`);
+  }
+}
+
+/**
  * Chunked extensions ship a thin client entry plus sibling chunks. A stale
  * source `dist/` can miss those chunks (they are build outputs, not committed),
  * and the copied tree then fails to import at runtime. When a chunk referenced
@@ -376,6 +413,12 @@ if (fullMode) {
         if (existsSync(join(sourceDir, "monaco", "vs"))) {
           cpSync(join(sourceDir, "monaco", "vs"), join(assetDir, "monaco", "vs"), { recursive: true });
           cpSync(join(sourceDir, "monaco", "vs"), join(rootDir, "monaco", "vs"), { recursive: true });
+        } else {
+          // monaco/ is gitignored (materialized from monaco-editor by the
+          // extension's prepack), so a fresh checkout and its npm tarball both
+          // lack it — the file preview would then have no editor at all. Pull
+          // the AMD bundle straight from the monaco-editor tarball.
+          materializeMonacoFromNpm(sourceDir, assetDir, rootDir);
         }
       }
       for (const name of readdirSync(sourceDir)) {
