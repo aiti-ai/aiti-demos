@@ -89,6 +89,10 @@ for (const [id, group] of shardGroups) {
 function shardId(path) {
   const slash = path.indexOf("/");
   if (slash <= 0) return "root";
-  return path.slice(0, slash);
+  const top = path.slice(0, slash);
+  // Shards are named after top-level directories, and some hosts refuse to
+  // serve dot-prefixed files: EdgeOne returns 404 for `.github.json` while
+  // GitHub Pages serves it. Encode the leading dot so both hosts work.
+  return top.startsWith(".") ? `dot-${top.slice(1)}` : top;
 }
 console.log(`[demo] copied ${files.length} project files into public/demo-files (${shardGroups.size} shards)`);
