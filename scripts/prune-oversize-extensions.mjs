@@ -166,7 +166,7 @@ writeFileSync(manifestPath, JSON.stringify(manifest));
 
 // Anything still above the cap would fail the upload again; surface it instead
 // of letting the deploy step fail with an opaque API error.
-const survivors = inventory().filter((row) => row.largest > limitBytes);
+const survivors = inventory().filter((row) => row.largest > limitBytes && !allow.has(row.id));
 console.log(`[prune] extensions ${before} -> ${manifest.extensions.length}`);
 if (survivors.length > 0) {
   for (const row of survivors) {
