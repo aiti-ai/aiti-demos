@@ -22,6 +22,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, r
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createJiti } from "jiti";
+import { pruneStaleGenerations } from "./lib/prune-stale-generations.mjs";
 
 // The host loads extension entries through jiti (TypeScript + require()); reuse
 // the same loader so metadata imports behave identically to production.
@@ -395,6 +396,17 @@ if (fullMode) {
   const local = await localExtensions();
   publish(stagingRoot);
   const publicReady = publicRoot;
+  // A tier completed from a deployed tree can carry every past chunk hash. Drop
+  // the generations the manifest does not reference before the rows are wired,
+  // so a 26MB bundle does not ship 90MB of dead siblings.
+  const protect = captured.extensions
+    .map((ext) => String(ext.clientUrl ?? "").replace(/\?.*$/, ""))
+    .filter((p) => p.startsWith("/api/extensions/"))
+    .map((p) => join(demoDir, "public", p.replace(/^\//, "")));
+  const stale = pruneStaleGenerations(publicReady, { protect });
+  if (stale.files > 0) {
+    console.log(`[ext] stale generations: ${stale.files} file(s), ${(stale.bytes / 1048576).toFixed(1)}MB across ${stale.extensions} extension(s)`);
+  }
   const extensions = captured.extensions.map((ext) => {
     const path = ext.clientUrl?.replace(/\?.*$/, "");
     const relative = path?.replace(`/api/extensions/${ext.id}/assets/`, "") ?? "";

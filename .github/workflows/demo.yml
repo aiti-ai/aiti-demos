@@ -96,9 +96,10 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
-      # EdgeOne Makers' free plan rejects any file over 25 MB and a couple of
-      # extension bundles exceed that. Build a second, pruned copy for that
-      # target; the Pages artifact above is already captured and stays as is.
+      # EdgeOne Makers' free plan rejects any file over 25 MB. Chunked extensions
+      # are split by package (largest: aiti-word-superdoc's 21.9MB engine chunk), so
+      # this is a guard, not a routine drop; it also clears stale chunk generations
+      # before measuring. The Pages artifact above is already captured and stays as is.
       - name: Prune oversize extensions
         run: node scripts/prune-oversize-extensions.mjs --limit-mb 25
       - name: Rebuild pruned site

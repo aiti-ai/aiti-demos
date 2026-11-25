@@ -18,20 +18,32 @@ Both targets publish from the same build. The `edgeone` job is skipped when the
 secret is missing or the run is a pull request, so the Pages path never depends
 on it.
 
-### Why the EdgeOne copy drops one extension
+### The 25 MB per-file cap (and why nothing is dropped any more)
 
-The free plan rejects **any single file over 25 MB**. `aiti-word-superdoc` ships
-three minified chunks at 24.6–25.4 MB, which fails the whole upload. The `build`
-job therefore:
+The free plan rejects **any single file over 25 MB**. `aiti-word-superdoc` used
+to ship one minified vendor chunk of 26.6 MB (superdoc 2.34 inlines its DOCX
+engine: `@superdoc/docx-engine` alone is 21.9 MB), which failed the whole upload.
+
+The extension's Vite config now groups `node_modules` **by package** instead of
+into one catch-all chunk, so the largest file is the engine at 21.9 MB and both
+targets can publish the same tree. The `build` job still keeps the prune step as
+a guard:
 
 1. builds the full site and uploads it as the Pages artifact;
-2. runs `node scripts/prune-oversize-extensions.mjs --limit-mb 25`, which removes
-   every extension whose largest file exceeds the cap from both
+2. runs `node scripts/prune-oversize-extensions.mjs --limit-mb 25`, which first
+   drops stale chunk generations (a tier assembled from a deployed tree carries
+   every past hash — 90 MB of dead files for this extension alone) and then
+   removes any extension that still has a file over the cap from both
    `public/api/extensions/` and `mock/data/extension-manifest.json`;
 3. rebuilds with `npx next build` (no `prebuild`, so the pruned manifest is not
    regenerated) and uploads that tree as the `edgeone-site` artifact.
 
-Pages keeps all 68 extensions; EdgeOne serves 67.
+Useful flags: `--dry-run`, `--verbose` (largest file per extension),
+`--keep-catalog` (keep the manifest card with `clientUrl: null` instead of
+deleting the entry) and `--allow <id,id>` (never prune a known offender).
+
+Both targets now serve all 68 extensions; the prune step is a no-op unless a
+dependency upgrade pushes a chunk over the cap again.
 
 ### MIME types: EdgeOne serves `.mjs` as octet-stream
 
