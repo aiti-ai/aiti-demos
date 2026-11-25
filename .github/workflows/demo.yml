@@ -87,6 +87,11 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Static-site tour (smoke test)
         run: npm run tour
+      # EdgeOne has no .mjs entry in its MIME table and its header rules do not
+      # match query strings, so the cache-busting client URLs (?rev=/?bust=)
+      # would load as application/octet-stream. Renaming to .js fixes both hosts.
+      - name: Normalize .mjs to .js
+        run: node scripts/normalize-mjs.mjs out
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -98,6 +103,8 @@ jobs:
         run: node scripts/prune-oversize-extensions.mjs --limit-mb 25
       - name: Rebuild pruned site
         run: npx next build
+      - name: Normalize .mjs to .js (pruned copy)
+        run: node scripts/normalize-mjs.mjs out
       # Direct-upload projects read edgeone.json from the uploaded tree, not from
       # the repo, so it has to travel inside the artifact. Without it EdgeOne
       # serves .mjs as application/octet-stream and browsers refuse to execute
