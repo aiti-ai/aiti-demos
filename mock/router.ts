@@ -32,6 +32,7 @@ import { settingsRoutes } from "./settings-routes";
 import { extensionsRoute } from "./extensions";
 import { replayRoutes } from "./replay";
 import { attachTerminalStream, terminalRoutes } from "./terminal";
+import { hostingRoute } from "./session-hosting";
 
 type Handler = (request: MockRequest) => Promise<Response> | Response;
 
@@ -90,6 +91,7 @@ async function sessionsRoute(request: MockRequest): Promise<Response> {
   if (sub === "state") {
     return session.live ? json({ running: true, state: await agentState(session) }) : json({ running: false });
   }
+  if (sub === "hosting") return hostingRoute(request, session);
   if (sub === "auto-name") {
     await delay(900);
     const title = autoTitle(session);
