@@ -1,9 +1,23 @@
 {
-  "nodeVersion": "22.21.1",
-  "installCommand": "npm install --no-audit --no-fund",
-  "buildCommand": "git clone --depth 1 https://github.com/aiti-ai/aiti-ai.git aiti-ai && AITI_SRC=$PWD/aiti-ai AITI_DIST_SOURCE=npm PAGES_BASE_PATH= npm run build",
-  "outputDirectory": "out",
   "headers": [
+    {
+      "source": "/*.mjs",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/*.wasm",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        }
+      ]
+    },
     {
       "source": "/_next/static/*",
       "headers": [

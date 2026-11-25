@@ -33,6 +33,29 @@ job therefore:
 
 Pages keeps all 68 extensions; EdgeOne serves 67.
 
+### MIME types: EdgeOne serves `.mjs` as octet-stream
+
+A direct-upload project does not rewrite response headers by itself, and by
+default every `.mjs` under `/api/extensions/**` is served as
+`application/octet-stream`. Browsers refuse to execute that as an ES module
+(`Strict MIME type checking is enforced for module scripts`), so **every
+extension client fails to load** — the sidebar never gets its session-manager
+takeover, and the console shows `[ext] client bundle import failed — falling
+back to per-extension bundles` for each bundle.
+
+Fix: `edgeone.json` in the **uploaded tree** (not just the repo) declares the
+content type:
+
+```json
+{ "headers": [ { "source": "/*.mjs", "headers": [ { "key": "Content-Type",
+  "value": "text/javascript; charset=utf-8" } ] } ] }
+```
+
+`*` matches across `/`, so one rule covers nested `assets/dist/*.mjs`. The
+workflow copies `edgeone.json` into `out/` before uploading for exactly this
+reason. Verified against a throwaway project: without the file the header stays
+`application/octet-stream`, with it the response is `text/javascript`.
+
 ### The project must be "direct upload"
 
 CLI deploys are only accepted by projects whose provider is `Upload`. A
@@ -97,4 +120,5 @@ step list stay valid.
 | `Provider 'Github' … Only projects with Provider 'Upload'` | project name collides with a Git-integrated project |
 | `localPath does not exist` | `download-artifact` does not keep the uploaded top-level folder; deploy `site/` (with `site/out` fallback) |
 | `401` on `<project>.edgeone.cool` | default domain requires a preview link (`eo_token`), 3 h TTL |
+| `Failed to load module script … application/octet-stream` | `.mjs` served without a JS content type; ship `edgeone.json` inside the uploaded tree |
 | Upload rejects one file | single file > 25 MB, see the prune step above |

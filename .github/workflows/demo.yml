@@ -98,6 +98,12 @@ jobs:
         run: node scripts/prune-oversize-extensions.mjs --limit-mb 25
       - name: Rebuild pruned site
         run: npx next build
+      # Direct-upload projects read edgeone.json from the uploaded tree, not from
+      # the repo, so it has to travel inside the artifact. Without it EdgeOne
+      # serves .mjs as application/octet-stream and browsers refuse to execute
+      # extension bundles as ES modules.
+      - name: Add edgeone.json to the uploaded tree
+        run: cp edgeone.json out/edgeone.json
       - uses: actions/upload-artifact@v4
         with:
           name: edgeone-site
