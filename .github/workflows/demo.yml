@@ -92,6 +92,12 @@ jobs:
       # would load as application/octet-stream. Renaming to .js fixes both hosts.
       - name: Normalize .mjs to .js
         run: node scripts/normalize-mjs.mjs out
+      # SPA routes (/new, /quickstart, …) have no per-route HTML: the shell routes
+      # client-side, and nginx serves any unknown path through try_files. EdgeOne
+      # has no such fallback (its rewrites explicitly do not cover SPA routing), so
+      # ship the app shell as 404.html — the router takes over from any path.
+      - name: Serve the app shell for unknown paths
+        run: cp out/index.html out/404.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -106,6 +112,8 @@ jobs:
         run: npx next build
       - name: Normalize .mjs to .js (pruned copy)
         run: node scripts/normalize-mjs.mjs out
+      - name: Serve the app shell for unknown paths (pruned copy)
+        run: cp out/index.html out/404.html
       # Direct-upload projects read edgeone.json from the uploaded tree, not from
       # the repo, so it has to travel inside the artifact. Without it EdgeOne
       # serves .mjs as application/octet-stream and browsers refuse to execute
