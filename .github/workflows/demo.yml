@@ -129,7 +129,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: edgeone-site
-          path: .
+          path: site
       - name: Deploy to EdgeOne Makers
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
@@ -138,8 +138,14 @@ jobs:
             echo "EDGEONE_API_TOKEN not set - skipping EdgeOne deploy"
             exit 0
           fi
+          # upload/download-artifact may or may not keep the top-level folder.
+          SITE=site
+          [ -d site/out ] && SITE=site/out
+          if [ ! -f "$SITE/index.html" ]; then
+            echo "::error::no index.html under $SITE"; ls -la site | head -20; exit 1
+          fi
           npm install --global edgeone@1.7.7
           # Must be a direct-upload project: a Git-integrated project with the same
           # name rejects folder/zip deploys ("Provider 'Github'"), so keep this
           # name distinct from the console-created Git project.
-          edgeone makers deploy ./out -n aiti-demos-cn -t "$EDGEONE_API_TOKEN" -e production --json
+          edgeone makers deploy "./$SITE" -n aiti-demos-cn -t "$EDGEONE_API_TOKEN" -e production --json
