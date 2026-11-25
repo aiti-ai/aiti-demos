@@ -139,4 +139,7 @@ jobs:
             exit 0
           fi
           npm install --global edgeone@1.7.7
-          edgeone makers deploy ./out -n aiti-demos -t "$EDGEONE_API_TOKEN" -e production --json
+          # Must be a direct-upload project: a Git-integrated project with the same
+          # name rejects folder/zip deploys ("Provider 'Github'"), so keep this
+          # name distinct from the console-created Git project.
+          edgeone makers deploy ./out -n aiti-demos-cn -t "$EDGEONE_API_TOKEN" -e production --json
