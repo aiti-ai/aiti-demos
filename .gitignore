@@ -1,6 +1,7 @@
 /node_modules
 /.next/
 /out/
+/aiti-ai/
 /generated/
 /public/demo-files/
 /public/icons/

@@ -91,6 +91,18 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
+      # EdgeOne Makers' free plan rejects any file over 25 MB and a couple of
+      # extension bundles exceed that. Build a second, pruned copy for that
+      # target; the Pages artifact above is already captured and stays as is.
+      - name: Prune oversize extensions
+        run: node scripts/prune-oversize-extensions.mjs --limit-mb 25
+      - name: Rebuild pruned site
+        run: npx next build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edgeone-site
+          path: out
+          retention-days: 3
 
   deploy:
     needs: build
@@ -103,3 +115,28 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Mirror the same build to EdgeOne Makers so the demo is also served from a
+  # mainland CDN. Requires a Makers project of the "direct upload" type and an
+  # API token in secrets; without the secret this job is a no-op, so the Pages
+  # pipeline keeps working unchanged.
+  edgeone:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: edgeone-site
+          path: .
+      - name: Deploy to EdgeOne Makers
+        env:
+          EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+        run: |
+          if [ -z "$EDGEONE_API_TOKEN" ]; then
+            echo "EDGEONE_API_TOKEN not set - skipping EdgeOne deploy"
+            exit 0
+          fi
+          npm install --global edgeone@1.7.7
+          edgeone makers deploy ./out -n aiti-demos -t "$EDGEONE_API_TOKEN" -e production --json
