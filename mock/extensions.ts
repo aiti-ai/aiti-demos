@@ -73,18 +73,23 @@ const localeFilteredCache = new Map<string, ExtensionManifest>();
 
 function localeFiltered(manifest: ExtensionManifest): ExtensionManifest {
   const locale = currentDemoLocale();
-  const cached = localeFilteredCache.get(locale);
+  // The demo locale is "en" | "zh", extension tables are keyed "en" | "zh-CN".
+  // Looking up i18n["zh"] always missed and fell through to the first table —
+  // English — so zh users saw static labels (sidebar footer entries such as
+  // Extensions / Phone) in English while the panel itself was localized.
+  const tableKey = locale === "zh" ? "zh-CN" : "en";
+  const cached = localeFilteredCache.get(tableKey);
   if (cached) return cached;
   const narrowed: ExtensionManifest = {
     ...manifest,
     extensions: manifest.extensions.map((ext) => {
       const i18n = (ext.ui as { i18n?: Record<string, unknown> } | null)?.i18n;
       if (!i18n) return ext;
-      const table = (i18n as Record<string, unknown>)[locale] ?? Object.values(i18n)[0] ?? {};
-      return { ...ext, ui: { ...ext.ui, i18n: { [locale]: table } } } as ManifestExtension;
+      const table = (i18n as Record<string, unknown>)[tableKey] ?? Object.values(i18n)[0] ?? {};
+      return { ...ext, ui: { ...ext.ui, i18n: { [tableKey]: table } } } as ManifestExtension;
     }),
   };
-  localeFilteredCache.set(locale, narrowed);
+  localeFilteredCache.set(tableKey, narrowed);
   return narrowed;
 }
 
