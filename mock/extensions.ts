@@ -18,6 +18,7 @@ import { getRealFetch } from "./runtime";
 import { serviceTunnelsRoute } from "./service-tunnels";
 import { msgShareRoute } from "./msg-share";
 import { modelCheckRoute } from "./model-check";
+import { extmanRoute } from "./extman";
 
 let demoCounter = 0;
 
@@ -121,6 +122,7 @@ export async function extensionsRoute(request: MockRequest): Promise<Response> {
   if (action === "aiti-msg-share") return msgShareRoute(request);
   if (action === "aiti-model-check") return modelCheckRoute(request);
   if (action === "aiti-model-wizard") return modelWizardRoute(request);
+  if (action === "aiti-extman") return extmanRoute(request);
   // The reference "demo" extension's self-check API (it is a real extension
   // bundle in the curated tier; its server hooks are replayed from constants).
   if (action === "demo") {
