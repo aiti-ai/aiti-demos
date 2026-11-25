@@ -71,6 +71,10 @@ function copyPlainClient(extId, sourceDir, assetDir, clientRel) {
  * Install one extension's client bundles from its published npm tarball.
  * Extension packages ship `dist/` (verified: @aiti-ai/aiti-folder@latest), so CI
  * can build the demo tier without compiling 60+ clients.
+ *
+ * Only called for extensions that declare a client: server-only extensions have
+ * no `dist/` in their tarball, so two `npm pack` round trips (declared version +
+ * @latest) always come back empty. The caller skips them up front.
  */
 async function installFromNpm(extId, sourceDir, assetDir) {
   const pkgPath = join(sourceDir, "package.json");
@@ -319,22 +323,36 @@ if (fullMode) {
       const assetDir = join(stagingRoot, ext.id, "assets");
       const rootDir = join(stagingRoot, ext.id);
       const clientRel = String(ext.clientUrl ?? "").replace(`/api/extensions/${ext.id}/assets/`, "").replace(/\?.*$/, "");
+      // `client` lives on the extension definition (index.ts), not in its
+      // package.json, so the captured clientUrl is the resolved truth. No client
+      // means the host graph has no entry for this id: the demo only lists it in
+      // the catalog, and nothing ever requests its client assets.
+      const serverOnly = !clientRel;
       if (DIST_SOURCE === "npm") {
-        const ok = (await installFromNpm(ext.id, sourceDir, assetDir))
-          || copyPlainClient(ext.id, sourceDir, assetDir, clientRel);
-        // Bundled-only extensions are not on npm; a local checkout may still have
-        // their dist, so fall back to it (CI has neither and lists them without a
-        // client).
-        if (!ok && existsSync(join(sourceDir, "dist"))) {
-          cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
-          for (const part of ["icons", "icon.svg"]) {
-            if (existsSync(join(sourceDir, part))) cpSync(join(sourceDir, part), join(assetDir, part), { recursive: true });
+        if (serverOnly) {
+          // Skip npm outright — a server-only tarball carries no `dist/`, so the
+          // two `npm pack` attempts (declared version + @latest) are dead weight
+          // (tens of seconds each on a cold registry cache). A local checkout may
+          // still have a built dist; carry it for parity with a checkout run.
+          if (existsSync(join(sourceDir, "dist"))) {
+            cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
           }
-        } else if (!ok) {
-          console.warn(`[ext] ${ext.id}: not available on npm or as a built dist — catalog entry only`);
+          console.log(`[ext] ${ext.id}: no client bundle (server-only extension) — catalog entry only`);
+        } else {
+          const ok = (await installFromNpm(ext.id, sourceDir, assetDir))
+            || copyPlainClient(ext.id, sourceDir, assetDir, clientRel);
+          // A local checkout may still have the dist (built or deployed) while CI
+          // has neither, so fall back to it before listing the row without a client.
+          if (!ok && existsSync(join(sourceDir, "dist"))) {
+            cpSync(join(sourceDir, "dist"), join(assetDir, "dist"), { recursive: true });
+            for (const part of ["icons", "icon.svg"]) {
+              if (existsSync(join(sourceDir, part))) cpSync(join(sourceDir, part), join(assetDir, part), { recursive: true });
+            }
+          } else if (!ok) {
+            console.warn(`[ext] ${ext.id}: client bundle unavailable on npm and no built dist — listed without a client`);
+          }
         }
       } else if (existsSync(join(sourceDir, "dist"))) {
-        const clientRel = String(ext.clientUrl ?? "").replace(`/api/extensions/${ext.id}/assets/`, "").replace(/\?.*$/, "");
         const origin = copyDist(ext.id, sourceDir, assetDir, clientRel);
         if (origin === "deployed") console.log(`[ext] ${ext.id}: dist chunks completed from the deployed tree`);
       }
