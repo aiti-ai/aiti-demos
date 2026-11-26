@@ -13,3 +13,4 @@ next-env.d.ts
 /public/api/
 
 /mock/assets/
+/mock/data/boot-preload.json

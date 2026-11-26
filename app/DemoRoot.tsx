@@ -11,6 +11,14 @@ import { prefetchDemoHeavyChunks } from "@demo/mock/boot-prefetch";
 import { dismissBootSkeleton } from "@demo/mock/boot-skeleton";
 import { seedDemoFolderDocks, seedUnreadSessionDots } from "@demo/mock/boot-seed";
 import { SESSION_IDS } from "@demo/mock/sessions/ids";
+import slotDeclarations from "@demo/mock/data/ext-slot-declarations.json";
+
+// Slot declarations normally arrive from the host's server registry (SSR seed).
+// A static export has no server, so the build derives the same table from the
+// extension manifest: takeover slots (the sidebar is the one that matters here)
+// then hold their skeleton from the very first frame instead of rendering the
+// native fallback while the takeover bundle is still on the wire.
+const extSlotDeclarations = slotDeclarations as Record<string, string[]>;
 
 // Install the demo seams before React renders anything (module scope is fine:
 // both are pure setters, and the mock fetch layer is already installed above).
@@ -39,7 +47,7 @@ export function DemoRoot() {
 
   return (
     <I18nProvider>
-      <AppShell />
+      <AppShell extSlotDeclarations={extSlotDeclarations} />
     </I18nProvider>
   );
 }

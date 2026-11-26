@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { demoAssetPath } from "@demo/mock/base-path";
 import { analyticsBootScript } from "@demo/mock/analytics";
@@ -77,6 +79,33 @@ if(localStorage.getItem(pk)===null)localStorage.setItem(pk,"sidebar:"+fk);}
 
 const ANALYTICS_BOOT_SCRIPT = analyticsBootScript();
 
+/**
+ * Scripts worth preloading from the first byte: the host's eager client bundle
+ * and the sidebarContent taker's entry (see writeHostSeeds in
+ * scripts/build-extension-manifest.mjs). Without the hints the extension graph
+ * only starts downloading after the app shell has settled, which on a slow link
+ * pushes the sidebar takeover tens of seconds out — long enough that visitors
+ * conclude it never takes over. Written by the extension build; absent in a
+ * bare `next dev` before the first `npm run extensions`. */
+function bootPreloadHrefs(): string[] {
+  const file = join(process.cwd(), "mock", "data", "boot-preload.json");
+  if (!existsSync(file)) return [];
+  try {
+    const parsed = JSON.parse(readFileSync(file, "utf8")) as { scripts?: string[] };
+    return (parsed.scripts ?? []).filter((href) => typeof href === "string" && href.startsWith("/"));
+  } catch {
+    return [];
+  }
+}
+const BOOT_PRELOAD = bootPreloadHrefs();
+/** Injected as an inline script instead of JSX <link>s: React hoists link
+ *  elements into the head, which would emit each hint twice in the static
+ *  export. The script runs while the parser is still in <head>, so the
+ *  preloads start as early as a literal tag would. */
+const BOOT_PRELOAD_SCRIPT = BOOT_PRELOAD.length
+  ? `(function(){try{var h=${JSON.stringify(BOOT_PRELOAD.map(demoAssetPath))};for(var i=0;i<h.length;i++){var l=document.createElement("link");l.rel="preload";l.as="script";/* ES modules always fetch in CORS mode, even same-origin: without this the preload is a no-cors fetch and the import() cannot reuse it. */l.crossOrigin="anonymous";l.fetchPriority="low";l.href=h[i];document.head.appendChild(l);}}catch(e){}})();`
+  : "";
+
 export default function RootLayout({
   children,
 }: {
@@ -92,6 +121,7 @@ export default function RootLayout({
           }}
         />
         <script dangerouslySetInnerHTML={{ __html: FOLDER_SEED_SCRIPT }} />
+        {BOOT_PRELOAD_SCRIPT && <script dangerouslySetInnerHTML={{ __html: BOOT_PRELOAD_SCRIPT }} />}
         {/* Analytics: same setup as the aiti-docs site (Baidu + Counterscale),
             loaded once the demo itself has finished booting. */}
         {ANALYTICS_BOOT_SCRIPT && (

@@ -271,6 +271,45 @@ async function localExtensions() {
 
 
 /**
+ * The two seeds the host normally gets from its own server, derived from the
+ * manifest we just built:
+ *
+ *  · `ext-slot-declarations.json` — slot → declaring extension ids, the exact
+ *    shape of the server registry's `slotDeclarations()`. The host uses it as
+ *    the SSR seed for takeover decisions: with a `sidebarContent` declarer the
+ *    sidebar renders its takeover skeleton on the first frame instead of the
+ *    native SessionSidebar. A static export has no server, so without this
+ *    seed the first frames fall back to the native sidebar — on a slow link
+ *    that fallback then sits on screen for tens of seconds while the takeover
+ *    bundle is still downloading (the "session-manager never takes over"
+ *    report).
+ *  · `boot-preload.json` — the eager client bundle plus the sidebarContent
+ *    taker's entry: preloaded from `<head>` so the takeover assets download in
+ *    parallel with the app shell instead of starting after it settles.
+ */
+function writeHostSeeds(manifest) {
+  const SLOT_META_KEYS = new Set(["i18n", "provides", "clientDependsOn", "clientImmediately"]);
+  const declarations = {};
+  for (const ext of manifest.extensions) {
+    for (const [key, value] of Object.entries(ext.ui ?? {})) {
+      if (SLOT_META_KEYS.has(key) || !Array.isArray(value) || value.length === 0) continue;
+      (declarations[key] ??= []).push(ext.id);
+    }
+  }
+  const dataDir = join(demoDir, "mock", "data");
+  writeFileSync(join(dataDir, "ext-slot-declarations.json"), JSON.stringify(declarations, null, 2) + "\n");
+
+  const scripts = [];
+  if (manifest.graph?.bundle?.url) scripts.push(manifest.graph.bundle.url);
+  for (const id of declarations.sidebarContent ?? []) {
+    const row = (manifest.graph?.entries ?? []).find((entry) => entry.id === id);
+    if (row?.url) scripts.push(row.url);
+  }
+  writeFileSync(join(dataDir, "boot-preload.json"), JSON.stringify({ scripts: [...new Set(scripts)] }, null, 2) + "\n");
+  console.log(`[ext] host seeds: ${Object.keys(declarations).length} slot(s) declared, ${scripts.length} preload hint(s)`);
+}
+
+/**
  * Pre-build the host's eager client bundle.
  *
  * The host loads `graph.bundle` as ONE script (its own optimization for the
@@ -490,6 +529,7 @@ if (fullMode) {
   }
   await buildEagerBundle(manifest);
   writeFileSync(join(demoDir, "mock", "data", "extension-manifest.json"), JSON.stringify(manifest) + "\n");
+  writeHostSeeds(manifest);
   console.log(`[ext] full manifest: ${manifest.extensions.length} extension(s), ${manifest.graph.entries.length} client bundle(s) (${captureRun ? `capture ${captureRun}` : `source ${sourceRoot}`}${local.length ? `, ${local.length} local` : ""})`);
   process.exit(0);
 }
@@ -606,6 +646,7 @@ const manifest = { extensions, graph: { rev: graphRev, entries }, failed: [] };
 const out = join(demoDir, "mock", "data", "extension-manifest.json");
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify(manifest, null, 2) + "\n");
+writeHostSeeds(manifest);
 
 console.log(`[ext] ${extensions.length} extension(s) wired: ${extensions.map((e) => e.id).join(", ") || "(none)"}`);
 if (skipped.length) console.log(`[ext] skipped: ${skipped.join("; ")}`);

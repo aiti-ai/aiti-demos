@@ -1,0 +1,205 @@
+{
+  "toolbar": [
+    "demo-banner",
+    "aiti-acp-agent",
+    "aiti-agent-manager",
+    "aiti-ai-input",
+    "aiti-ai-schedule",
+    "aiti-ai-speek",
+    "aiti-ai-usage",
+    "aiti-append-system",
+    "aiti-channels",
+    "aiti-cmd",
+    "aiti-configs",
+    "aiti-devtools",
+    "aiti-doc-center",
+    "aiti-feedback",
+    "aiti-git-review",
+    "aiti-git-trace",
+    "aiti-helper",
+    "aiti-mail",
+    "aiti-model-check",
+    "aiti-model-wizard",
+    "aiti-models-import",
+    "aiti-pair",
+    "aiti-prompts",
+    "aiti-subagents",
+    "aiti-sysmon",
+    "aiti-testagent",
+    "aiti-testagent-native",
+    "aiti-ui-env",
+    "service-tunnels",
+    "session-manager"
+  ],
+  "sidebarExplorerDock": [
+    "aiti-acp-agent",
+    "aiti-ai-schedule",
+    "aiti-channels",
+    "aiti-editor",
+    "aiti-git-trace",
+    "aiti-model-check",
+    "aiti-prompts",
+    "aiti-subagents",
+    "aiti-sysmon"
+  ],
+  "rightFileDock": [
+    "aiti-acp-agent",
+    "aiti-ai-input",
+    "aiti-ai-schedule",
+    "aiti-channels",
+    "aiti-doc-center",
+    "aiti-editor",
+    "aiti-git-review",
+    "aiti-git-trace",
+    "aiti-mail",
+    "aiti-model-check",
+    "aiti-pair",
+    "aiti-prompts",
+    "aiti-subagents",
+    "aiti-testagent",
+    "aiti-testagent-native",
+    "aiti-ui-env",
+    "service-tunnels"
+  ],
+  "dialogs": [
+    "aiti-acp-agent",
+    "aiti-agent-manager",
+    "aiti-ai-input",
+    "aiti-ai-speek",
+    "aiti-ai-usage",
+    "aiti-channels",
+    "aiti-cmd",
+    "aiti-configs",
+    "aiti-devtools",
+    "aiti-editor",
+    "aiti-extman",
+    "aiti-feedback",
+    "aiti-git-review",
+    "aiti-git-trace",
+    "aiti-mail",
+    "aiti-model-wizard",
+    "aiti-models-import",
+    "aiti-msg-share",
+    "aiti-prompts",
+    "aiti-recovery",
+    "aiti-subagents",
+    "aiti-testagent",
+    "aiti-testagent-native",
+    "aiti-ui-env",
+    "service-tunnels",
+    "session-manager"
+  ],
+  "newSessionBackendOptions": [
+    "aiti-acp-agent"
+  ],
+  "chatInputTop": [
+    "aiti-ai-input"
+  ],
+  "sessionStats": [
+    "aiti-ai-input",
+    "aiti-ai-usage",
+    "aiti-model-wizard"
+  ],
+  "pages": [
+    "aiti-ai-schedule",
+    "aiti-append-system",
+    "aiti-doc-center",
+    "aiti-model-check"
+  ],
+  "sessionTopbar": [
+    "aiti-ai-speek",
+    "session-manager"
+  ],
+  "assistantMessageActions": [
+    "aiti-ai-speek",
+    "aiti-msg-share"
+  ],
+  "terminalDock": [
+    "aiti-cmd"
+  ],
+  "fileViewer": [
+    "aiti-editor",
+    "aiti-folder"
+  ],
+  "sidebarFooter": [
+    "aiti-extman",
+    "aiti-quickstart",
+    "service-tunnels"
+  ],
+  "pathPicker": [
+    "aiti-folder"
+  ],
+  "commands": [
+    "aiti-folder",
+    "aiti-msg-share"
+  ],
+  "banners": [
+    "aiti-git-trace",
+    "aiti-model-wizard",
+    "service-tunnels"
+  ],
+  "modelSelectorFooter": [
+    "aiti-model-wizard"
+  ],
+  "userMessageActions": [
+    "aiti-msg-share"
+  ],
+  "sessionInfoPanel": [
+    "aiti-provider-usage"
+  ],
+  "queuePanel": [
+    "aiti-queue-keeper"
+  ],
+  "newSessionWidgets": [
+    "aiti-quickstart"
+  ],
+  "workspacePickerActions": [
+    "aiti-quickstart",
+    "session-manager"
+  ],
+  "recoveryDialog": [
+    "aiti-recovery"
+  ],
+  "sidebarTasks": [
+    "aiti-subagents"
+  ],
+  "settingsAgents": [
+    "aiti-subagents"
+  ],
+  "settingsAgentsFeature": [
+    "aiti-subagents"
+  ],
+  "sessionStatsInline": [
+    "aiti-sysmon"
+  ],
+  "sidebar": [
+    "session-manager"
+  ],
+  "sidebarProjects": [
+    "session-manager"
+  ],
+  "sidebarContent": [
+    "session-manager"
+  ],
+  "topbarMobileLeading": [
+    "session-manager"
+  ],
+  "sessionRowMeta": [
+    "session-manager"
+  ],
+  "sessionRowActions": [
+    "session-manager"
+  ],
+  "newSessionContextTrailing": [
+    "session-manager"
+  ],
+  "newSessionSelectors": [
+    "session-manager"
+  ],
+  "newSessionPreparers": [
+    "session-manager"
+  ],
+  "newSessionWorkspacePicker": [
+    "session-manager"
+  ]
+}
