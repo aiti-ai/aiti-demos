@@ -310,6 +310,28 @@ function writeHostSeeds(manifest) {
 }
 
 /**
+ * aiti-devtools serves its launcher/bridge helpers from the extension root
+ * (`/api/extensions/aiti-devtools/host-protocol.js`, `bridge-client.js`, …).
+ * The extension's own `assets/` directory went untracked upstream, but the
+ * copies are tracked in packages/aiti-devtools-core/assets — mirror them at
+ * both the runtime URL and the `/assets/` alias the host's asset router
+ * accepts. Without them the client 404s its helpers on every boot.
+ */
+function copyDevtoolsCoreAssets(sourceRoot, assetDir, rootDir) {
+  const from = join(sourceRoot, "packages", "aiti-devtools-core", "assets");
+  if (!existsSync(from)) {
+    console.warn("[ext] aiti-devtools: packages/aiti-devtools-core/assets missing — runtime helpers will 404");
+    return;
+  }
+  for (const file of readdirSync(from)) {
+    const src = join(from, file);
+    if (!statSync(src).isFile()) continue;
+    cpSync(src, join(rootDir, file));
+    cpSync(src, join(assetDir, file));
+  }
+}
+
+/**
  * Pre-build the host's eager client bundle.
  *
  * The host loads `graph.bundle` as ONE script (its own optimization for the
@@ -460,6 +482,7 @@ if (fullMode) {
           materializeMonacoFromNpm(sourceDir, assetDir, rootDir);
         }
       }
+      if (ext.id === "aiti-devtools") copyDevtoolsCoreAssets(sourceRoot, assetDir, rootDir);
       for (const name of readdirSync(sourceDir)) {
         if (!/\.(js|mjs|css|json|html|svg|png)$/.test(name)) continue;
         const file = join(sourceDir, name);
