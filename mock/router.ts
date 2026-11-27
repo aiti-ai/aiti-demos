@@ -89,7 +89,12 @@ async function sessionsRoute(request: MockRequest): Promise<Response> {
     return json({ context, tail, before: before ?? null });
   }
   if (sub === "state") {
-    return session.live ? json({ running: true, state: await agentState(session) }) : json({ running: false });
+    // All demo sessions are hosted local-pi sessions: always answer with the
+    // full state (agentState ensureLive()s). Gating on session.live raced the
+    // event-stream attach — a state fetch that arrived first returned
+    // { running: false } with no capabilities, and the host then never asked
+    // get_usage (the stats-row quota chip stayed dark for the whole page load).
+    return json({ running: true, state: await agentState(session) });
   }
   if (sub === "hosting") return hostingRoute(request, session);
   if (sub === "auto-name") {
@@ -120,7 +125,9 @@ async function agentRoute(request: MockRequest): Promise<Response> {
   if (sub === "lease") return json({ success: true, renewed: session ? 1 : 0 });
   if (sub === "bash-output") return error(demoOnlyMessage(), 404);
   if (request.method === "GET") {
-    if (!session?.live) return json({ running: false });
+    // Same reasoning as the sessions state route: demo sessions are always
+    // hosted — answer with the state instead of a live-gated running:false.
+    if (!session) return json({ running: false });
     return json({ running: true, state: await agentState(session) });
   }
   const command = await request.json<Record<string, unknown>>();
