@@ -6,10 +6,11 @@
   "scripts": {
     "sync": "node scripts/sync-frontend.mjs",
     "sync:check": "node scripts/sync-frontend.mjs --check",
+    "sync:meta": "node scripts/sync-catalog-meta.mjs",
     "prepare:files": "node scripts/prepare-demo-files.mjs",
-    "predev": "npm run sync && npm run extensions && npm run prepare:files",
+    "predev": "npm run sync && npm run sync:meta && npm run extensions && npm run prepare:files",
     "dev": "next dev -H 127.0.0.1 -p 30146",
-    "prebuild": "npm run sync && npm run extensions && npm run prepare:files",
+    "prebuild": "npm run sync && npm run sync:meta && npm run extensions && npm run prepare:files",
     "build": "next build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

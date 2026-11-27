@@ -147,6 +147,10 @@
   "sessionInfoPanel": [
     "aiti-provider-usage"
   ],
+  "sessionStatsInline": [
+    "aiti-provider-usage",
+    "aiti-sysmon"
+  ],
   "queuePanel": [
     "aiti-queue-keeper"
   ],
@@ -168,9 +172,6 @@
   ],
   "settingsAgentsFeature": [
     "aiti-subagents"
-  ],
-  "sessionStatsInline": [
-    "aiti-sysmon"
   ],
   "sidebar": [
     "session-manager"

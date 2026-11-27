@@ -26,9 +26,94 @@ import {
   type MockSession,
 } from "./sessions/store";
 import { readSessionToolSelectionFromEntries } from "./sessions/tool-selection";
+import { SESSION_IDS } from "./sessions/ids";
 import { composeReply, type ReplyPlan } from "./replies";
 import { runShellCommand } from "./shell";
 import { settings } from "./settings-state";
+
+// ---------------------------------------------------------------------------
+// Backend sessions (external backends with the get_usage protocol)
+// ---------------------------------------------------------------------------
+
+/** BackendUsageSnapshot shape (lib/ext/types.ts): canned account quota lifted
+ *  into the stats-row chip and the session-info quota block by the
+ *  aiti-provider-usage extension. */
+interface BackendUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+  costUsd?: number;
+  credits?: { remaining?: number; used?: number; usedPercent?: number; unit?: string; expiresAt?: number };
+  quotaExceeded?: boolean;
+  buckets?: Array<{ name: string; remaining?: number; total?: number; used?: number; usedPercent?: number }>;
+  plan?: string;
+  provider?: string;
+}
+
+/** Full SessionCapabilities map for a well-behaved local-parity backend: every
+ *  host control stays available (capabilities present turn the sessionCap
+ *  fallbacks off), except file attachments — the demo's .pi-attachments upload
+ *  route is the local one, so 📎 documents must keep that path. */
+const BACKEND_CAPABILITIES: Record<string, boolean> = {
+  steer: true,
+  followUp: true,
+  getMessages: true,
+  contextUsage: true,
+  setModel: true,
+  setThinkingLevel: true,
+  fork: true,
+  renameSession: true,
+  compact: true,
+  executeBash: true,
+  listTools: true,
+  setActiveTools: true,
+  navigateTree: true,
+  deleteSession: true,
+  getCommands: true,
+  respondPermission: true,
+  respondInteraction: true,
+  respondProviderHeaders: true,
+  getUsage: true,
+  listModels: true,
+  setPermissionMode: true,
+  steerQueueManage: true,
+  fileAttachments: false,
+};
+
+/** Sessions hosted by an external backend instead of the local pi runtime.
+ *  The "Models, quotas and secrets" tutorial doubles as the quota demo: its
+ *  claude-gateway relay account carries credits and quota buckets, which the
+ *  provider-usage extension renders as the stats-row chip and the
+ *  session-info "remaining quota" account block. */
+const BACKEND_SESSIONS: Record<string, { backendSource: string; usage: () => BackendUsage }> = {
+  [SESSION_IDS.modelsVault]: {
+    backendSource: "claude-gateway",
+    usage: () => ({
+      inputTokens: 18400,
+      outputTokens: 2140,
+      costUsd: 0.382,
+      credits: {
+        remaining: 665,
+        used: 2735,
+        usedPercent: 80,
+        unit: "credits",
+        expiresAt: Date.now() + 23 * 24 * 3600_000,
+      },
+      quotaExceeded: false,
+      buckets: [
+        { name: "user_quota", remaining: 0, total: 6000, used: 6000, usedPercent: 100 },
+        { name: "add_on_quota", remaining: 665, total: 3400, used: 2735, usedPercent: 80 },
+        { name: "org_resource_package", remaining: 41, total: 250, used: 209, usedPercent: 84 },
+      ],
+      plan: "Team",
+      provider: "claude-gateway",
+    }),
+  },
+};
+
+function backendInfoFor(sessionId: string): { backendSource: string; usage: BackendUsage } | null {
+  const entry = BACKEND_SESSIONS[sessionId];
+  return entry ? { backendSource: entry.backendSource, usage: entry.usage() } : null;
+}
 
 // ---------------------------------------------------------------------------
 // Event streams
@@ -113,6 +198,11 @@ export async function agentState(session: MockSession) {
   const live = ensureLive(session);
   const tokens = lastAssistantUsage(session);
   const contextWindow = contextWindowFor(live.model.provider, live.model.modelId);
+  // Backend sessions declare their capability map + backend source in get_state;
+  // the host answers capabilities.getUsage + backendSource by sending the
+  // get_usage command (answered below) and lifting the snapshot into the
+  // provider-usage slots.
+  const backend = backendInfoFor(session.id);
   return {
     sessionId: session.id,
     sessionFile: "",
@@ -133,6 +223,7 @@ export async function agentState(session: MockSession) {
     thinkingLevel: live.thinkingLevel,
     extensionStatuses: [],
     extensionWidgets: [],
+    ...(backend ? { backendSource: backend.backendSource, capabilities: BACKEND_CAPABILITIES } : {}),
   };
 }
 
@@ -364,6 +455,12 @@ export async function runAgentCommand(session: MockSession, command: Record<stri
       return ok(null);
     case "get_state":
       return ok(await agentState(session));
+    case "get_usage": {
+      // UsageReporter protocol: the host asks once per session open and after
+      // each run when the state declared capabilities.getUsage.
+      const backend = backendInfoFor(session.id);
+      return ok(backend ? { usage: backend.usage } : {});
+    }
     case "get_tools":
       return ok(toolsFor(session));
     case "get_commands":

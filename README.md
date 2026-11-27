@@ -22,7 +22,7 @@ What you can click in the demo:
 - **Extensions** — the real full tier: 67 extensions in the catalog, 56 real client bundles loaded by the real extension host (app center, docks, settings takeovers, toolbars).
 - **Files** — a real file tree with Monaco editing, `⇋ HEAD` diffs, Markdown preview and Git status.
 - **Settings** — the model wizard, model health check, MCP, providers, quotas, extension manager.
-- **Extras** — service ports, share targets, new-model discovery, system status, live analytics.
+- **Extras** — service ports, share targets, new-model discovery, system status, live analytics, provider usage (the stats-row quota chip and the session-info "remaining quota" panel replay canned per-provider reports; "Models, quotas and secrets" doubles as the backend-quota demo).
 - **Way out** — a floating `aiti.pw` pill (bottom right, dismissible) plus a permanent `aiti.pw` entry in the top bar, both from a demo-only extension in this repo (`extensions/demo-banner/`).
 
 ## What is real and what is mocked

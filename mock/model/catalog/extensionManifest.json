@@ -3,7 +3,7 @@
     {
       "id": "aiti-acp-agent",
       "name": "ACP Agents (通用 ACP 驱动)",
-      "version": "0.3.11",
+      "version": "0.3.12",
       "clientUrl": "/api/extensions/aiti-acp-agent/assets/dist/acp-manager.mjs?v=22849844cf8f",
       "ui": {
         "clientImmediately": true,
@@ -12,9 +12,7 @@
             "id": "aiti-acp-manage-open",
             "label": "ACP",
             "title": "i18n:acp.manage.title",
-            "icon": {
-              "svg": "<path d=\"M12 22v-5\"/><path d=\"M9 8V2\"/><path d=\"M15 8V2\"/><path d=\"M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z\"/>"
-            },
+            "icon": "icons/plug.svg",
             "feature": "behavior.showAcpManager"
           }
         ],
@@ -150,6 +148,7 @@
         },
         {
           "id": "behavior.showAcpManager",
+          "type": "boolean",
           "label": "显示「ACP Agents」工具条按钮",
           "description": "默认隐藏。打开后在顶部工具栏显示 ACP 管理入口（弹窗）；新会话页 Backend 下拉里的「Manage ACP Agents…」选项不受此开关影响，始终显示",
           "enabled": false
@@ -159,7 +158,7 @@
     {
       "id": "aiti-agent-badge",
       "name": "Agent Badge",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "clientUrl": "/api/extensions/aiti-agent-badge/assets/dist/aiti-agent-badge.mjs?v=ebade4ed7e3d",
       "ui": {
         "i18n": {
@@ -214,6 +213,12 @@
             "badge.field.session": "会话",
             "badge.field.cwd": "工作目录",
             "badge.field.detached": "跨重启",
+            "badge.field.quota": "额度",
+            "badge.quota.remaining": "剩 {remaining} {unit}",
+            "badge.quota.usedPercent": "已用 {pct}%",
+            "badge.quota.exceeded": "配额已耗尽",
+            "badge.quota.refreshHint": "点击刷新",
+            "badge.quota.stale": "刷新失败，显示上次结果",
             "badge.yes": "是",
             "badge.no": "否",
             "badge.switch.title": "切换托管方式",
@@ -290,6 +295,12 @@
             "badge.field.session": "Session",
             "badge.field.cwd": "Working dir",
             "badge.field.detached": "Survives restart",
+            "badge.field.quota": "Quota",
+            "badge.quota.remaining": "{remaining} {unit} left",
+            "badge.quota.usedPercent": "{pct}% used",
+            "badge.quota.exceeded": "quota exhausted",
+            "badge.quota.refreshHint": "Click to refresh",
+            "badge.quota.stale": "Refresh failed — showing the last result",
             "badge.yes": "Yes",
             "badge.no": "No",
             "badge.switch.title": "Switch hosting",
@@ -343,9 +354,7 @@
             "id": "aiti-agent-manager-panel",
             "label": "i18n:am.open.label",
             "title": "i18n:am.open.title",
-            "icon": {
-              "svg": "<path d=\"M12 8V4H8\"/><rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/><path d=\"M2 14h2\"/><path d=\"M20 14h2\"/><path d=\"M15 13v2\"/><path d=\"M9 13v2\"/>"
-            }
+            "icon": "icons/bot.svg"
           }
         ],
         "i18n": {
@@ -581,16 +590,14 @@
     {
       "id": "aiti-ai-input",
       "name": "AI input",
-      "version": "0.4.15",
+      "version": "0.4.16",
       "clientUrl": "/api/extensions/aiti-ai-input/assets/dist/aiti-ai-input-client.mjs?v=77d4349f9875",
       "ui": {
         "toolbar": [
           {
             "id": "aiti-asr-open",
             "label": "i18n:asr.open.label",
-            "icon": {
-              "svg": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\"/><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/>"
-            }
+            "icon": "icons/mic.svg"
           }
         ],
         "dialogs": [
@@ -806,6 +813,7 @@
       },
       "source": "user",
       "icon": "icon.svg",
+      "description": "Input enhancement for the AI chat composer: two-tier autocomplete (instant local → AI fallback), speech-input detection with spelling repair, streaming ASR with 2-pass refinement, switchable recognition engines (self-hosted / xfyun / Baidu / SiliconFlow / any OpenAI-compatible endpoint), hotwords, and usage reports.",
       "keywords": [
         "input",
         "composer",
@@ -817,27 +825,30 @@
         "补全",
         "语音"
       ],
-      "description": "Input enhancement for the AI chat composer: two-tier autocomplete (instant local → AI fallback), speech-input detection with spelling repair, streaming ASR with 2-pass refinement, switchable recognition engines (self-hosted / xfyun / Baidu / SiliconFlow / any OpenAI-compatible endpoint), hotwords, and usage reports.",
       "features": [
         {
           "id": "toolbar.enabled",
+          "type": "boolean",
           "label": "顶部工具条图标（语音识别引擎管理入口）",
           "description": "控制页面顶部工具条是否出现图标按钮（点开 = 引擎切换 + 引擎参数 + 通用配置（链路开关/环境变量））。关掉只收起这个入口，不影响语音输入本身（见 voice.enabled）。",
           "enabled": false
         },
         {
           "id": "voice.enabled",
+          "type": "boolean",
           "label": "语音输入法（按钮，贴在输入框上）",
           "description": "控制输入框上的 🎤 语音输入按钮（按住说话 → 实时识别/二次识别上屏整条录入链路）。**未完全测好→默认关**，需到 extman 手动开；关闭时按钮不挂载、也不会申请麦克风；转写文本的拼写修复另有 voice.fix 开关。",
           "enabled": false
         },
         {
           "id": "autocomplete.enabled",
+          "type": "boolean",
           "label": "AI 行内自动补全",
           "enabled": true
         },
         {
           "id": "autocomplete.localOnly",
+          "type": "boolean",
           "label": "仅本地补全（不用模型，0 出网）",
           "enabled": false
         },
@@ -852,26 +863,31 @@
         },
         {
           "id": "autocomplete.ctx.small",
+          "type": "boolean",
           "label": "上下文：小（~0.8k/次）",
           "enabled": false
         },
         {
           "id": "autocomplete.ctx.medium",
+          "type": "boolean",
           "label": "上下文：中（~2.9k/次，默认）",
           "enabled": true
         },
         {
           "id": "autocomplete.ctx.large",
+          "type": "boolean",
           "label": "上下文：大（~5.5k/次）",
           "enabled": false
         },
         {
           "id": "suggest.enabled",
+          "type": "boolean",
           "label": "收藏/命令联想（建议区显示）",
           "enabled": true
         },
         {
           "id": "ai-input.commandHints",
+          "type": "boolean",
           "label": "应用命令提示（输入时联想应用中心的应用/面板/开关，点击直接执行）",
           "description": "与收藏/命令联想独立的开关：输入词命中应用清单（工具条动作/面板/管理入口/功能开关）时在联想弹窗尾部追加「应用」候选，点击或 ↑↓/Tab 选中后回车直接执行，不向输入框插入文本。→ 自动接受会跳过应用候选（防误执行）。",
           "enabled": true
@@ -887,28 +903,33 @@
         },
         {
           "id": "ai-input.suggestRun",
+          "type": "boolean",
           "label": "suggest 命令 ⚡ 一键执行（候选项旁加执行按钮，危险命令二次确认）",
           "description": "开启后命令联想候选项旁出现 ⚡：点击直接执行该命令（走 aiti-cmd /run + 两段式确认；不自动触发）。",
           "enabled": false
         },
         {
           "id": "voice.fix",
+          "type": "boolean",
           "label": "语音与高速输入拼写修复（识别到语音或高速输入后修复错字/代码词音译）",
           "enabled": false
         },
         {
           "id": "voice.indicator",
+          "type": "boolean",
           "label": "语音/高速输入感知条（识别到语音或高速输入时顶部提示正在修复）",
           "enabled": false
         },
         {
           "id": "asr.streaming",
+          "type": "boolean",
           "label": "实时识别（按住麦克风边说边出；SenseVoice 伪实时分句秒出 / paraformer WS）",
           "description": "实时识别开。流式模型选 SenseVoice（默认）= VAD 停顿分句 + SenseVoice 秒出逐句上屏（快，纯中文好）；选 paraformer = 老 WS 逐 chunk 实时（质量差）。",
           "enabled": true
         },
         {
           "id": "asr.vad",
+          "type": "boolean",
           "label": "VAD 自动切句（说话停顿自动切句识别）",
           "description": "按住 🎤 说话，停顿约 0.7s 自动切句并识别上屏；不需要时可关。",
           "enabled": true
@@ -933,12 +954,14 @@
         },
         {
           "id": "asr.split",
+          "type": "boolean",
           "label": "伪实时分句（按住麦克风说话停顿自动切句，SenseVoice 秒出逐句上屏，松手收尾）",
           "description": "按住说话，停顿 ~0.7s 自动把该句发 SenseVoice 识别上屏（~0.3s/句），不用松手等整段；松手提交尾句。SenseVoice 纯中文快，术语/英文会拆字母。",
           "enabled": true
         },
         {
           "id": "asr.pass2",
+          "type": "boolean",
           "label": "语音二次识别（松手后稍延离线精修再上屏，2-pass 更准）",
           "enabled": true
         },
@@ -971,11 +994,13 @@
         },
         {
           "id": "asr.hotwords.includeUser",
+          "type": "boolean",
           "label": "热词提取包含：用户输入",
           "enabled": true
         },
         {
           "id": "asr.hotwords.includeAi",
+          "type": "boolean",
           "label": "热词提取包含：AI 输入",
           "enabled": true
         }
@@ -984,7 +1009,7 @@
     {
       "id": "aiti-ai-schedule",
       "name": "AI 自调度（计划管理）",
-      "version": "0.4.11",
+      "version": "0.4.13",
       "clientUrl": "/api/extensions/aiti-ai-schedule/assets/dist/aiti-ai-schedule.mjs?v=4d779f472ee6",
       "ui": {
         "clientImmediately": false,
@@ -993,9 +1018,7 @@
             "id": "aiti-ai-schedule-open",
             "label": "i18n:sh.app.label",
             "title": "i18n:sh.app.title",
-            "icon": {
-              "svg": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 7v5l3 3\"/>"
-            }
+            "icon": "icons/clock.svg"
           }
         ],
         "rightFileDock": [
@@ -1408,6 +1431,21 @@
       "source": "user",
       "icon": "icon.svg",
       "description": "pi-web resident scheduler — extension declarative scheduled tasks + AI plans (cron/interval/one-shot) + three-mode execution engine + AI self-service plan tool + management page",
+      "category": [
+        "auto"
+      ],
+      "keywords": [
+        "schedule",
+        "task",
+        "tasks",
+        "cron",
+        "timer",
+        "job",
+        "定时",
+        "任务",
+        "计划",
+        "调度"
+      ],
       "features": [
         {
           "id": "agentTools.enabled",
@@ -1421,7 +1459,7 @@
     {
       "id": "aiti-ai-speek",
       "name": "跟读模式（AI 输出朗读）",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "clientUrl": "/api/extensions/aiti-ai-speek/assets/dist/aiti-ai-speek-client.mjs?v=616c48b72002",
       "ui": {
         "toolbar": [
@@ -1429,9 +1467,7 @@
             "id": "follow",
             "label": "i18n:speek.followMode.label",
             "title": "i18n:speek.followMode.title",
-            "icon": {
-              "svg": "<polygon points=\"11 5 6 9 2 9 2 15 6 15 11 19 11 5\"/><path d=\"M15.54 8.46a5 5 0 0 1 0 7.07\"/><path d=\"M19.07 4.93a10 10 0 0 1 0 14.14\"/>"
-            }
+            "icon": "icons/volume-2.svg"
           }
         ],
         "sessionTopbar": [
@@ -1459,6 +1495,7 @@
             "it.bar.label": "跟读播放条",
             "ext.displayName": "AI 语音朗读",
             "speek.followMode.label": "跟读模式",
+            "speek.sch.ttsGc": "tts 缓存清理（过期 30 天 + 1GB LRU）",
             "speek.followMode.title": "跟读模式：AI 回复自动朗读（可暂停/跳过/切音色）",
             "speek.followOn": "跟读模式已开启，AI 回复将自动朗读",
             "speek.followOff": "开启跟读模式：AI 回复自动朗读",
@@ -1655,6 +1692,7 @@
             "it.read.label": "Read this reply aloud",
             "it.bar.label": "Read-aloud bar",
             "ext.displayName": "AI Read Aloud",
+            "speek.sch.ttsGc": "TTS cache GC (30-day expiry + 1GB LRU)",
             "feat.bar": "Read-aloud playback bar",
             "feat.read": "Read this reply aloud",
             "feat.settings": "Read-aloud settings",
@@ -1850,11 +1888,13 @@
       "features": [
         {
           "id": "steer.enabled",
+          "type": "boolean",
           "label": "朗读提示词注入（开启跟读时提示 AI 优化输出，如先给结论/口语化）",
           "enabled": true
         },
         {
           "id": "tts.edge",
+          "type": "boolean",
           "label": "edge-tts 后端音质档（已安装时自动开启；效果好于浏览器 Web Speech）",
           "enabled": true
         },
@@ -1868,6 +1908,7 @@
         },
         {
           "id": "tts.local",
+          "type": "boolean",
           "label": "本地 TTS 引擎（本机 CPU 合成，服务就绪时自动开启）",
           "enabled": false
         },
@@ -1925,6 +1966,7 @@
         },
         {
           "id": "tts.local.autoStart",
+          "type": "boolean",
           "label": "选中本地引擎时自动准备并启动服务（首次会联网下载约 300MB）",
           "enabled": true
         },
@@ -1951,11 +1993,13 @@
         },
         {
           "id": "tts.local.tn",
+          "type": "boolean",
           "label": "文本归一化（数字/日期读成中文；首次多装约 700MB，关闭后 venv 约 0.3GB）",
           "enabled": true
         },
         {
           "id": "process.enabled",
+          "type": "boolean",
           "label": "朗读过程（把 AI 的中间叙述也读出来，如「让我看一下…」「我先确认…」；跳过 thinking 与工具执行）",
           "enabled": false
         },
@@ -1972,7 +2016,7 @@
     {
       "id": "aiti-ai-usage",
       "name": "AI Usage",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-ai-usage/assets/dist/aiti-ai-usage.mjs?v=6578d082340c",
       "ui": {
         "clientImmediately": false,
@@ -1981,9 +2025,7 @@
             "id": "usage",
             "label": "i18n:au.app.label",
             "title": "i18n:au.app.title",
-            "icon": {
-              "svg": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\"/><path d=\"M18 17V9\"/><path d=\"M13 17V5\"/><path d=\"M8 17v-3\"/>"
-            }
+            "icon": "icons/chart-column.svg"
           }
         ],
         "sessionStats": [
@@ -2060,6 +2102,8 @@
             "au.close": "Close",
             "au.tokens": "Tokens",
             "au.cost": "Cost",
+            "au.credits": "credits",
+            "au.credits.note": "Billed credits consumed (Qoder-family accounts): not money, not the account balance (see the session info panel for remaining quota)",
             "au.msgs": "Messages",
             "au.requests": "Requests",
             "au.rateLimit": "429",
@@ -2127,6 +2171,7 @@
             "au.dim.day": "Day",
             "au.metric.tokens": "Tokens",
             "au.metric.cost": "Cost",
+            "au.metric.credits": "Credits",
             "au.metric.msgs": "Messages",
             "au.metric.reqs": "Requests",
             "au.metric.err429": "429s",
@@ -2219,6 +2264,8 @@
             "au.close": "关闭",
             "au.tokens": "Tokens",
             "au.cost": "费用",
+            "au.credits": "积分",
+            "au.credits.note": "已消耗的计费积分（Qoder 系账号）：非金额，也不是账号余额（余额见会话信息面板的剩余额度）",
             "au.msgs": "消息数",
             "au.requests": "请求数",
             "au.rateLimit": "限流",
@@ -2286,6 +2333,7 @@
             "au.dim.day": "日期",
             "au.metric.tokens": "Tokens",
             "au.metric.cost": "费用",
+            "au.metric.credits": "积分",
             "au.metric.msgs": "消息数",
             "au.metric.reqs": "请求数",
             "au.metric.err429": "限流",
@@ -2330,7 +2378,7 @@
     {
       "id": "aiti-app-center",
       "name": "应用中心",
-      "version": "0.2.13",
+      "version": "0.2.15",
       "clientUrl": "/api/extensions/aiti-app-center/assets/dist/aiti-app-center-client.mjs?v=1a01108b993c",
       "ui": {
         "clientImmediately": false,
@@ -2449,7 +2497,10 @@
       },
       "source": "user",
       "icon": "icons/layout-grid.svg",
-      "category": "system",
+      "description": "The app drawer (start menu) shown in the blank state after every left-column dock block is collapsed — a single-row switch between the Apps view (action/panel/manage entry cards, hover quick-pin + info page) and the Toggles view (feature toggles grouped by extension), tag-style categories (8 fixed internal categories with i18n + custom categories + default other), search scoped per view, and edit-mode reorder/hide/restore",
+      "category": [
+        "system"
+      ],
       "keywords": [
         "apps",
         "launcher",
@@ -2460,7 +2511,6 @@
         "命令",
         "开始菜单"
       ],
-      "description": "The app drawer (start menu) shown in the blank state after every left-column dock block is collapsed — a single-row switch between the Apps view (action/panel/manage entry cards, hover quick-pin + info page) and the Toggles view (feature toggles grouped by extension), tag-style categories (8 fixed internal categories with i18n + custom categories + default other), search scoped per view, and edit-mode reorder/hide/restore",
       "features": null
     },
     {
@@ -2474,9 +2524,7 @@
             "id": "aiti-append-system-open",
             "label": "i18n:ap.open.label",
             "title": "i18n:ap.open.title",
-            "icon": {
-              "svg": "<path d=\"M12 20h9\"/><path d=\"M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z\"/>"
-            }
+            "icon": "icons/pen-line.svg"
           }
         ],
         "i18n": {
@@ -2513,6 +2561,7 @@
       "features": [
         {
           "id": "behavior.showToolbar",
+          "type": "boolean",
           "label": "顶部工具条显示「提示词」按钮",
           "description": "默认隐藏：面板从扩展管理器「打开」进入；打开后顶部工具条常显按钮",
           "enabled": false
@@ -2605,7 +2654,7 @@
     {
       "id": "aiti-channels",
       "name": "IM 渠道（cc-connect 大前端）",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-channels/assets/dist/aiti-channels-client.mjs?v=eb0ef06c5640",
       "ui": {
         "clientImmediately": false,
@@ -2614,9 +2663,7 @@
             "id": "aiti-channels-open",
             "label": "i18n:channels.open",
             "title": "i18n:channels.app.title",
-            "icon": {
-              "svg": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/>"
-            }
+            "icon": "icons/message-circle.svg"
           }
         ],
         "sidebarExplorerDock": [
@@ -2984,24 +3031,28 @@
       "features": [
         {
           "id": "behavior.proxy-bridge",
+          "type": "boolean",
           "label": "cc-connect 托管",
           "description": "接管 cc-connect 进程生命周期（start/stop/restart/探活，不做 systemd）",
           "enabled": true
         },
         {
           "id": "behavior.embed-ui",
+          "type": "boolean",
           "label": "管理台嵌入",
           "description": "面板 🖥️ 管理台 Tab 内嵌 cc-connect 原生 Web UI（独立子域 iframe）",
           "enabled": true
         },
         {
           "id": "tool.aiti-im-list",
+          "type": "boolean",
           "label": "aiti-im-list · 渠道/项目/会话清单",
           "description": "列出 IM 渠道/项目/活跃会话（cc-connect）：进程状态、项目清单、活跃会话；发消息前先拿 session_key",
           "enabled": true
         },
         {
           "id": "tool.aiti-im-send",
+          "type": "boolean",
           "label": "aiti-im-send · 发渠道消息",
           "description": "经 cc-connect socket API 向钉钉/飞书/微信等 IM 渠道发文本/文件",
           "enabled": true
@@ -3018,7 +3069,7 @@
     {
       "id": "aiti-claude-code-agent",
       "name": "Claude Code (resume)",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -3079,7 +3130,7 @@
     {
       "id": "aiti-cmd",
       "name": "aiti 命令管理器（真 TTY 终端 + 常用命令）",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "clientUrl": "/api/extensions/aiti-cmd/assets/dist/aiti-cmd-client.mjs?v=c30403ddbdca",
       "ui": {
         "clientImmediately": true,
@@ -3088,9 +3139,7 @@
             "id": "aiti-cmd-open",
             "label": "i18n:cmd.open.label",
             "title": "i18n:cmd.open.title",
-            "icon": {
-              "svg": "<polyline points=\"4 17 10 11 4 5\"/><line x1=\"12\" y1=\"19\" x2=\"20\" y2=\"19\"/>"
-            }
+            "icon": "icons/terminal.svg"
           }
         ],
         "i18n": {
@@ -4019,6 +4068,7 @@
       "features": [
         {
           "id": "tool.aiti_cmd_run",
+          "type": "boolean",
           "label": "agent 工具：aiti_cmd_run（AI 会话内经后端 runner 执行命令；危险命令二次确认）",
           "description": "关闭后新 agent 会话不再注入该工具（已注入会话即时拒绝）。",
           "enabled": true
@@ -4162,7 +4212,6 @@
           "type": "string",
           "label": "Auth Token（凭据）",
           "description": "CODEBUDDY_AUTH_TOKEN：已有 OAuth token（CLI 侧优先级高于 API key）。一般留空。",
-          "placeholder": "",
           "enabled": true,
           "value": ""
         },
@@ -4189,7 +4238,7 @@
     {
       "id": "aiti-codex-agent",
       "name": "Codex CLI",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -4250,7 +4299,7 @@
     {
       "id": "aiti-configs",
       "name": "配置版本化 + 崩溃自检（安全网）",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-configs/assets/dist/aiti-configs-client.mjs?v=e235509a34d3",
       "ui": {
         "clientImmediately": false,
@@ -4259,13 +4308,14 @@
             "id": "aiti-configs-open",
             "label": "i18n:cfg.open.label",
             "title": "i18n:cfg.open.title",
-            "icon": {
-              "svg": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>"
-            }
+            "icon": "icons/shield.svg"
           }
         ],
         "i18n": {
           "zh-CN": {
+            "cfg.sch.sentry": "配置崩溃哨兵（自检指纹 + 可选桥检测）",
+            "cfg.sch.staleWarn": "配置变更滞留提醒",
+            "cfg.sch.autoCommit": "配置定时兜底提交",
             "it.open.label": "配置",
             "cfg.open.label": "配置",
             "cfg.open.title": "aiti-configs：配置版本化（status/commit/恢复）+ 自检报告 + 历史版本安全盾",
@@ -4343,6 +4393,9 @@
             "（请立即备份！）": "（请立即备份！）"
           },
           "en": {
+            "cfg.sch.sentry": "Config crash sentinel (self-check fingerprint + optional bridge probe)",
+            "cfg.sch.staleWarn": "Uncommitted config-change reminder",
+            "cfg.sch.autoCommit": "Scheduled config fallback commit",
             "it.open.label": "Configs",
             "cfg.open.label": "Config",
             "cfg.open.title": "aiti-configs: config versioning (status/commit/restore) + self-check + history shield",
@@ -4558,7 +4611,7 @@
     {
       "id": "aiti-cursor-agent",
       "name": "Cursor Agent",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -4899,9 +4952,7 @@
             "id": "aiti-open",
             "label": "AITI",
             "title": "i18n:dt.open.title",
-            "icon": {
-              "svg": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/>"
-            }
+            "icon": "icons/wrench.svg"
           }
         ],
         "i18n": {
@@ -4995,96 +5046,112 @@
         },
         {
           "id": "tool.aiti_page_exec",
+          "type": "boolean",
           "label": "page_exec · 页面执行",
           "description": "在已连接页面执行类 CDP 命令（DOM/CSS/Input/Page/Runtime/Storage/Performance/Browser 域）",
           "enabled": true
         },
         {
           "id": "tool.aiti_page_snapshot",
+          "type": "boolean",
           "label": "page_snapshot · 页面现场",
           "description": "拉取已连接页面基础现场（URL/选区/模拟条件）",
           "enabled": true
         },
         {
           "id": "tool.aiti_self_ui",
+          "type": "boolean",
           "label": "self_ui · 窗口弹窗清单",
           "description": "扫描目标页面（缺省 AI 主窗口 xxx/ai）打开的弹窗/表单/按钮——ai-helper 回填定位",
           "enabled": true
         },
         {
           "id": "tool.aiti_form_fill",
+          "type": "boolean",
           "label": "form_fill · 弹窗表单回填",
           "description": "把字段值回填到目标页面（缺省 AI 主窗口 xxx/ai）的弹窗表单（React 兼容）+ 可选点按钮——AI 结果直接操作扩展弹窗",
           "enabled": true
         },
         {
           "id": "tool.aiti_bridge_status",
+          "type": "boolean",
           "label": "bridge_status · 桥状态",
           "description": "查询已连接页面与挂起请求（按标题/URL 匹配 pageId；sessions 含 device——浏览器·屏幕·在线·语言，快速识别设备）",
           "enabled": true
         },
         {
           "id": "tool.aiti_page_logs",
+          "type": "boolean",
           "label": "page_logs · 页面日志",
           "description": "查询目标页面已采集的 console 日志（含连桥前缓冲重放）",
           "enabled": true
         },
         {
           "id": "tool.aiti_page_network",
+          "type": "boolean",
           "label": "page_network · 页面网络",
           "description": "查询目标页面已采集的 ajax/fetch 请求完成态（status/耗时/错误）",
           "enabled": true
         },
         {
           "id": "tool.aiti_user_pick_element",
+          "type": "boolean",
           "label": "user_pick_element · 点选元素",
           "description": "请当前页面的人类用户点选一个页面元素（Inspector 点选模式）",
           "enabled": true
         },
         {
           "id": "tool.aiti_user_confirm",
+          "type": "boolean",
           "label": "user_confirm · 确认",
           "description": "向人类用户提一个是/否问题（可附补充说明）",
           "enabled": true
         },
         {
           "id": "tool.aiti_user_choose",
+          "type": "boolean",
           "label": "user_choose · 多选一",
           "description": "给人类用户一组选项让其选择（单选/多选/自定义）",
           "enabled": true
         },
         {
           "id": "tool.aiti_user_input",
+          "type": "boolean",
           "label": "user_input · 输入",
           "description": "请人类用户输入一段文本",
           "enabled": true
         },
         {
           "id": "tool.aiti_user_presence",
+          "type": "boolean",
           "label": "user_presence · 在场探测",
           "description": "探测人类用户是否在场/在线（长任务前确认）",
           "enabled": true
         },
         {
           "id": "tool.aiti_user_notify",
+          "type": "boolean",
           "label": "user_notify · 通知",
           "description": "非阻塞浏览器通知（不等待回答）",
           "enabled": true
         },
         {
           "id": "tool.aiti_aiti_hello",
+          "type": "boolean",
           "label": "aiti_hello · 注册",
           "description": "agent 自我介绍/注册/绑定目标页（建议会话开始时调用）",
           "enabled": true
         },
         {
           "id": "tool.aiti_aiti_inbox",
+          "type": "boolean",
           "label": "aiti_inbox · 消息主通道",
           "description": "拉取发给本 agent 会话的消息（含异步作答/页面事件订阅）",
           "enabled": true
         },
         {
           "id": "tool.aiti_file_stat",
+          "type": "boolean",
           "label": "file_stat · 文件校验",
           "description": "查询文件存在性/类型/大小/修改时间（绝对路径）",
           "enabled": true
@@ -5094,7 +5161,7 @@
     {
       "id": "aiti-doc-center",
       "name": "文档中心",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-doc-center/assets/dist/aiti-doc-center-client.mjs?v=b8396d63e710",
       "ui": {
         "clientImmediately": false,
@@ -5215,9 +5282,11 @@
             "dc.ftActionTitle": "标签（文档中心：查看/增删，非 md 文件打 tag 后进索引）",
             "it.docs.title": "文档",
             "it.aiti-doc-center-page.label": "文档中心",
-            "ext.displayName": "文档中心"
+            "ext.displayName": "文档中心",
+            "dc.sch.scan": "文档中心定期收集整理"
           },
           "en": {
+            "dc.sch.scan": "Doc center periodic scan & indexing",
             "it.docs.title": "Docs",
             "feat.scan.roots.desc": "Comma/newline separated (supports ~). For precise tag layering use root|alias form; scans all workspace roots when empty",
             "feat.scan.excludes.desc": "Comma-separated dir names or globs (*.tmp); also honors .gitignore automatically",
@@ -5417,10 +5486,11 @@
     {
       "id": "aiti-editor",
       "name": "aiti-editor",
-      "version": "1.0.14",
+      "version": "1.0.16",
       "clientUrl": "/api/extensions/aiti-editor/assets/dist/aiti-editor-client.mjs?v=c6332b37bb35",
       "ui": {
         "clientImmediately": false,
+        "prefetchOnIdle": true,
         "fileViewer": [
           {
             "id": "aiti-editor",
@@ -5457,6 +5527,12 @@
         ],
         "i18n": {
           "zh-CN": {
+            "目标文件已存在：\n{p}\n覆盖？": "目标文件已存在：\n{p}\n覆盖？",
+            "解释这段代码：\n": "解释这段代码：\n",
+            "重构这段代码：\n": "重构这段代码：\n",
+            "解释": "解释",
+            "重构": "重构",
+            "表格优化": "表格优化",
             "it.file.label": "文件",
             "it.image-preview.label": "图片预览",
             "it.image-preview.title": "图片预览",
@@ -5471,26 +5547,19 @@
             "-副本": "-副本",
             "7za 缺失时自动下载 portable 版（客户机零安装）": "7za 缺失时自动下载 portable 版（客户机零安装）",
             "AI 帮我安装（推荐）": "AI 帮我安装（推荐）",
-            "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历": "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历",
             "EXIF 信息读取": "EXIF 信息读取",
-            "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）": "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）",
             "HTML 预览": "HTML 预览",
             "JSON 值": "JSON 值",
             "JSON 键": "JSON 键",
             "LibreOffice 启动失败：{msg}": "LibreOffice 启动失败：{msg}",
-            "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）": "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）",
-            "Mermaid 图表": "Mermaid 图表",
-            "Monaco 在线文本/代码编辑器（含 Markdown 双模式）": "Monaco 在线文本/代码编辑器（含 Markdown 双模式）",
             "Monaco 编辑器加载失败": "Monaco 编辑器加载失败",
             "PDF 只读预览": "PDF 只读预览",
             "PDF 只读预览（浏览器原生渲染，可缩放 / 打印 / 下载）": "PDF 只读预览（浏览器原生渲染，可缩放 / 打印 / 下载）",
             "Range 流式播放（拖进度条不整载）": "Range 流式播放（拖进度条不整载）",
             "VNC 会话获取失败": "VNC 会话获取失败",
             "VNC 启动失败：{msg}": "VNC 启动失败：{msg}",
-            "YAML / TOML / SQL 一键格式化": "YAML / TOML / SQL 一键格式化",
             "aiti-ai-speek 未安装或未启用——已打开扩展管理，请启用后重试": "aiti-ai-speek 未安装或未启用——已打开扩展管理，请启用后重试",
             "aiti-helper 未就绪（未部署或未加载）：刷新页面后重试，或按上方命令手动安装。": "aiti-helper 未就绪（未部署或未加载）：刷新页面后重试，或按上方命令手动安装。",
-            "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）": "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）",
             "git 变更视图（工作区 vs HEAD；默认「最新」显示最终版）": "git 变更视图（工作区 vs HEAD；默认「最新」显示最终版）",
             "iframe 指向服务端磁盘文档：原生相对解析与站内导航（未保存编辑不可见）": "iframe 指向服务端磁盘文档：原生相对解析与站内导航（未保存编辑不可见）",
             "readFile 失败 ({status})": "readFile 失败 ({status})",
@@ -5523,7 +5592,6 @@
             "主窗口未响应（aiti-cmd 未启用？）": "主窗口未响应（aiti-cmd 未启用？）",
             "主面板已关闭，无法写入输入框": "主面板已关闭，无法写入输入框",
             "主面板已关闭，无法发送": "主面板已关闭，无法发送",
-            "二进制文件不接管（交给对应查看器 / 编辑器扩展）": "二进制文件不接管（交给对应查看器 / 编辑器扩展）",
             "二进制文件（只读预览）": "二进制文件（只读预览）",
             "仅浏览器可解码的格式": "仅浏览器可解码的格式",
             "从磁盘重读最新内容（有未保存编辑时会先询问：合并/加载磁盘/保留）": "从磁盘重读最新内容（有未保存编辑时会先询问：合并/加载磁盘/保留）",
@@ -5532,7 +5600,6 @@
             "作者脚本已剥离（快速态剥 srcdoc／真预览态服务端剥响应）；预览自身的报错回传与链接改道不受影响": "作者脚本已剥离（快速态剥 srcdoc／真预览态服务端剥响应）；预览自身的报错回传与链接改道不受影响",
             "作者脚本执行中（仍无同源能力：fetch/localStorage/读父页 DOM 不可用）": "作者脚本执行中（仍无同源能力：fetch/localStorage/读父页 DOM 不可用）",
             "保存": "保存",
-            "保存冲突检测（外部修改 → 409 → 合并或覆盖）": "保存冲突检测（外部修改 → 409 → 合并或覆盖）",
             "保存失败 ({status})": "保存失败 ({status})",
             "保存并关闭": "保存并关闭",
             "保存并刷新": "保存并刷新",
@@ -5558,7 +5625,6 @@
             "加密 / 带密码压缩包不支持": "加密 / 带密码压缩包不支持",
             "加载磁盘": "加载磁盘",
             "单文件上限 50MB": "单文件上限 50MB",
-            "单文件超过 1MB 只读": "单文件超过 1MB 只读",
             "压缩包": "压缩包",
             "压缩包为空": "压缩包为空",
             "压缩包内文件点击提取并打开": "压缩包内文件点击提取并打开",
@@ -5594,6 +5660,68 @@
             "复制失败": "复制失败",
             "复制文件全部内容到剪贴板（超过 1MB 拒绝）": "复制文件全部内容到剪贴板（超过 1MB 拒绝）",
             "复制路径": "复制路径",
+            "aiti-editor 接管失败": "aiti-editor 接管失败",
+            "文件": "文件",
+            "格式": "格式",
+            "尺寸": "尺寸",
+            "缩放": "缩放",
+            "旋转": "旋转",
+            "（适应窗口）": "（适应窗口）",
+            "源码": "源码",
+            "预览图表": "预览图表",
+            "查看源码": "查看源码",
+            "渲染失败": "渲染失败",
+            "正在渲染": "正在渲染",
+            "Mermaid 图表": "Mermaid 图表",
+            "内容目录": "内容目录",
+            "@ 到聊天": "@ 到聊天",
+            "@ 到新会话": "@ 到新会话",
+            "文件有未保存的修改": "文件有未保存的修改",
+            "列数不一致：第 {row} 行有 {got} 列，期望 {want} 列": "列数不一致：第 {row} 行有 {got} 列，期望 {want} 列",
+            "YAML 语法错误": "YAML 语法错误",
+            "vendor 加载失败：{url}": "vendor 加载失败：{url}",
+            "vendor 全局未挂载：{name}": "vendor 全局未挂载：{name}",
+            "Monaco 在线文本/代码编辑器（含 Markdown 双模式）": "Monaco 在线文本/代码编辑器（含 Markdown 双模式）",
+            "单文件超过 1MB 只读": "单文件超过 1MB 只读",
+            "二进制文件不接管（交给对应查看器 / 编辑器扩展）": "二进制文件不接管（交给对应查看器 / 编辑器扩展）",
+            "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）": "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）",
+            "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）": "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）",
+            "保存冲突检测（外部修改 → 409 → 合并或覆盖）": "保存冲突检测（外部修改 → 409 → 合并或覆盖）",
+            "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）": "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）",
+            "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历": "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历",
+            "YAML / TOML / SQL 一键格式化": "YAML / TOML / SQL 一键格式化",
+            "feat.editor.text": "文本文件编辑",
+            "feat.editor.text.desc": "接管文本类文件为 Monaco 在线编辑器（未命中时回退核心只读查看器）",
+            "feat.editor.binary": "二进制文件查看",
+            "feat.editor.binary.desc": "使用注册的 provider 渲染图片/视频/音频/PDF 等二进制文件（关闭后回退核心查看器）",
+            "feat.editor.mdPreviewSmart": "Markdown 预览智能点击",
+            "feat.editor.mdPreviewSmart.desc": "预览里点击段落/标题/代码行弹出动作卡（复制/引用/新会话/文件/链接），引用自动带 @文件#行号；需安装并启用 aiti-msg-smart",
+            "feat.soffice.path": "soffice 路径（LibreOffice）",
+            "feat.soffice.path.desc": "老格式转换（.doc→.docx/.pdf、.xls→.xlsx、.ppt→.pptx）所用 soffice 可执行文件路径",
+            "feat.soffice.path.placeholder": "留空=自动从 PATH 查找；或填绝对路径如 /usr/bin/soffice",
+            "下载": "下载",
+            "上一页": "上一页",
+            "下一页": "下一页",
+            "加载中…": "加载中…",
+            "统计中…": "统计中…",
+            "引用本页": "引用本页",
+            "返回信息": "返回信息",
+            "大文件只读": "大文件只读",
+            "第 {a}–{b} 行": "第 {a}–{b} 行",
+            "已插入引用": "已插入引用",
+            "文件较大（{size}），已暂停加载全文，避免页面卡顿。": "文件较大（{size}），已暂停加载全文，避免页面卡顿。",
+            "只显示部分（只读）": "只显示部分（只读）",
+            "用编辑器打开（只读）": "用编辑器打开（只读）",
+            "在聊天中引用": "在聊天中引用",
+            "我了解风险，仍用编辑器打开": "我了解风险，仍用编辑器打开",
+            "用编辑器打开大文件？": "用编辑器打开大文件？",
+            "文件 {size} 超过编辑器安全上限。强制打开会占用大量内存，页面可能明显卡顿甚至无响应（上限 {max}MB）。确定继续？": "文件 {size} 超过编辑器安全上限。强制打开会占用大量内存，页面可能明显卡顿甚至无响应（上限 {max}MB）。确定继续？",
+            "我了解风险，继续打开": "我了解风险，继续打开",
+            "已按你的选择强制打开（大文件，可能较卡）": "已按你的选择强制打开（大文件，可能较卡）",
+            "正在读取文件…（大文件可能需要数秒，页面暂无响应属正常）": "正在读取文件…（大文件可能需要数秒，页面暂无响应属正常）",
+            "分块只读查看不会加载全文；@ 引用、文件 chip、下载等能力不受影响。": "分块只读查看不会加载全文；@ 引用、文件 chip、下载等能力不受影响。",
+            "读取失败：{msg}": "读取失败：{msg}",
+            "正在加载文件片段…": "正在加载文件片段…",
             "多编码打开与保存（UTF-8 / UTF-16 / GBK / Latin-1，含 BOM）": "多编码打开与保存（UTF-8 / UTF-16 / GBK / Latin-1，含 BOM）",
             "大小": "大小",
             "大纲": "大纲",
@@ -5712,6 +5840,7 @@
             "正在加载…": "正在加载…",
             "正在加载压缩包内容…": "正在加载压缩包内容…",
             "正在加载文件内容…": "正在加载文件内容…",
+            "正在加载编辑器…": "正在加载编辑器…",
             "正在渲染 Mermaid 图表": "正在渲染 Mermaid 图表",
             "正在获取 HEAD 基线…": "正在获取 HEAD 基线…",
             "正在转换（soffice）…首次约需数秒": "正在转换（soffice）…首次约需数秒",
@@ -5823,25 +5952,143 @@
             "，{n} 个目录": "，{n} 个目录",
             "，含未保存编辑": "，含未保存编辑"
           },
+          "zh-TW": {
+            "目标文件已存在：\n{p}\n覆盖？": "目標檔案已存在：\n{p}\n覆寫？",
+            "原生图片查看器": "原生圖片檢視器",
+            "缩放 / 平移 / 100% 复位": "縮放 / 平移 / 100% 復位",
+            "EXIF 信息读取": "EXIF 資訊讀取",
+            "仅浏览器可解码的格式": "僅瀏覽器可解碼的格式",
+            "原生视频播放器": "原生影片播放器",
+            "Range 流式播放（拖进度条不整载）": "Range 串流播放（拖動進度條不整載）",
+            "文件变化实时跟随（watch）": "檔案變更即時跟隨（watch）",
+            "取决于浏览器解码器（mp4/webm/ogg 系友好；部分 .avi/.mkv 可能无法解码）": "取決於瀏覽器解碼器（mp4/webm/ogg 系友善；部分 .avi/.mkv 可能無法解碼）",
+            "原生音频播放器": "原生音訊播放器",
+            "取决于浏览器解码器（.mid 多数浏览器不可播）": "取決於瀏覽器解碼器（.mid 多數瀏覽器無法播放）",
+            "PDF 只读预览": "PDF 唯讀預覽",
+            "浏览器内置 PDF 引擎渲染": "由瀏覽器內建 PDF 引擎轉譯",
+            "只读（编辑 / 批注请用专业 PDF 工具）": "唯讀（編輯 / 註解請用專業 PDF 工具）",
+            "压缩包浏览（纯 JS 优先 + 7-Zip 兜底）": "壓縮檔瀏覽（純 JS 優先 + 7-Zip 兜底）",
+            "zip/tar/7z/rar/cab/iso 等列出清单": "列出 zip/tar/7z/rar/cab/iso 清單",
+            "压缩包内文件点击提取并打开": "點擊壓縮檔內檔案即可解壓並開啟",
+            "7za 缺失时自动下载 portable 版（客户机零安装）": "缺少 7za 時自動下載 portable 版（客戶機零安裝）",
+            "加密 / 带密码压缩包不支持": "加密 / 帶密碼壓縮檔不支援",
+            "只读（解包请用命令行）": "唯讀（解壓請用命令列）",
+            "老格式（.doc / .ppt / .pptx / .odt / .odp）经 soffice 转 PDF 只读预览": "老格式（.doc / .ppt / .pptx / .odt / .odp）經 soffice 轉 PDF 唯讀預覽",
+            "PDF 只读预览（浏览器原生渲染，可缩放 / 打印 / 下载）": "PDF 唯讀預覽（瀏覽器原生轉譯，可縮放 / 列印 / 下載）",
+            "转换结果按 mtime 键控缓存——二次打开秒开": "轉換結果依 mtime 鍵控快取——二次開啟秒開",
+            "单文件上限 50MB": "單檔上限 50MB",
+            "只读：编辑请先另存 / 转换为 .docx（Word）": "唯讀：編輯請先另存 / 轉換為 .docx（Word）",
+            "首次打开需数秒（soffice 无头转换）；排版保真取决于 LibreOffice 对原格式的还原度": "首次開啟需數秒（soffice 無頭轉換）；排版保真取決於 LibreOffice 對原格式的還原度",
+            "并发转换时会提示稍后重试": "並行轉換時會提示稍後重試",
+            "旧格式转 PDF 预览": "老格式轉 PDF 預覽",
+            "解释这段代码：\n": "解釋這段程式碼：\n",
+            "重构这段代码：\n": "重構這段程式碼：\n",
+            "解释": "解釋",
+            "重构": "重構",
+            "表格优化": "表格最佳化",
+            "aiti-editor 接管失败": "aiti-editor 接管失敗",
+            "文件": "檔案",
+            "格式": "格式",
+            "尺寸": "尺寸",
+            "缩放": "縮放",
+            "旋转": "旋轉",
+            "（适应窗口）": "（適應視窗）",
+            "源码": "原始碼",
+            "预览图表": "預覽圖表",
+            "查看源码": "檢視原始碼",
+            "渲染失败": "轉譯失敗",
+            "正在渲染": "正在轉譯",
+            "Mermaid 图表": "Mermaid 圖表",
+            "内容目录": "內容目錄",
+            "@ 到聊天": "@ 到聊天",
+            "@ 到新会话": "@ 到新對話",
+            "文件有未保存的修改": "檔案有未儲存的修改",
+            "列数不一致：第 {row} 行有 {got} 列，期望 {want} 列": "欄數不一致：第 {row} 行有 {got} 欄，期望 {want} 欄",
+            "YAML 语法错误": "YAML 語法錯誤",
+            "vendor 加载失败：{url}": "vendor 載入失敗：{url}",
+            "vendor 全局未挂载：{name}": "vendor 全域未掛載：{name}",
+            "Monaco 在线文本/代码编辑器（含 Markdown 双模式）": "Monaco 線上文字/程式碼編輯器（含 Markdown 雙模式）",
+            "单文件超过 1MB 只读": "單檔超過 1MB 唯讀",
+            "二进制文件不接管（交给对应查看器 / 编辑器扩展）": "二進位檔案不接管（交給對應檢視器 / 編輯器擴充）",
+            "语法高亮与补全（40+ 语言，TS/JS 智能提示、JSON 大纲、CSV 彩虹列）": "語法高亮與補全（40+ 語言，TS/JS 智慧提示、JSON 大綱、CSV 彩虹欄）",
+            "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）": "Markdown 編輯 / 分割 / 預覽（GFM、TOC、捲動同步、變更區塊定位、匯出 HTML/PDF）",
+            "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）": "HTML 編輯 / 分割 / 預覽（快速態看緩衝、真預覽態走目錄級預覽路由；視窗預設、錯誤回傳、相對連結改道 dock）",
+            "多编码打开与保存（UTF-8 / UTF-16 / GBK / Latin-1，含 BOM）": "多編碼開啟與儲存（UTF-8 / UTF-16 / GBK / Latin-1，含 BOM）",
+            "保存冲突检测（外部修改 → 409 → 合并或覆盖）": "儲存衝突偵測（外部修改 → 409 → 合併或覆寫）",
+            "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）": "git 變更檢視（工作區 vs HEAD：行級標註 / 左右 / 合併 / 大綱）",
+            "未保存内容自动缓存（停手 2s + 页面关闭兜底，刷新后恢复）": "未儲存內容自動快取（停手 2s + 頁面關閉兜底，重新整理後恢復）",
+            "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历": "AI 選區（問 AI / 解釋 / 重構 / 新對話）、@ 提及、同目錄 ‹› 巡覽",
+            "YAML / TOML / SQL 一键格式化": "YAML / TOML / SQL 一鍵格式化",
+            "feat.editor.text": "文字檔編輯",
+            "feat.editor.text.desc": "接管文字類檔案為 Monaco 線上編輯器（未命中時回退核心唯讀檢視器）",
+            "feat.editor.binary": "二進位檔案檢視",
+            "feat.editor.binary.desc": "使用註冊的 provider 轉譯圖片/影片/音訊/PDF 等二進位檔案（關閉後回退核心檢視器）",
+            "feat.editor.mdPreviewSmart": "Markdown 預覽智慧點擊",
+            "feat.editor.mdPreviewSmart.desc": "在預覽中點擊段落/標題/程式碼行彈出動作卡（複製/引用/新對話/檔案/連結），引用自動帶 @檔案#行號；需安裝並啟用 aiti-msg-smart",
+            "feat.soffice.path": "soffice 路徑（LibreOffice）",
+            "feat.soffice.path.desc": "老格式轉換（.doc→.docx/.pdf、.xls→.xlsx、.ppt→.pptx）所用 soffice 執行檔路徑",
+            "feat.soffice.path.placeholder": "留空=自動從 PATH 尋找；或填絕對路徑如 /usr/bin/soffice",
+            "it.file.label": "檔案",
+            "it.image-preview.label": "圖片預覽",
+            "it.image-preview.title": "圖片預覽",
+            "it.fileviewer.label": "編輯器",
+            "it.fileviewer.title": "aiti-editor：文字檔線上編輯（Monaco），二進位可擴充渲染",
+            "ext.displayName": "檔案編輯器",
+            "ed.file.label": "檔案",
+            "ed.image.label": "圖片預覽",
+            "HTML 预览": "HTML 預覽",
+            "左侧编辑·右侧预览": "左側編輯 · 右側預覽",
+            "编辑": "編輯",
+            "预览": "預覽",
+            "分栏": "分欄",
+            "快速": "快速",
+            "真预览": "真預覽",
+            "渲染页面预览": "渲染頁面",
+            "渲染预览": "渲染預覽",
+            "编辑源码": "編輯原始碼",
+            "刷新": "重新整理",
+            "保存并刷新": "儲存並重新整理",
+            "清空": "清空",
+            "复制": "複製",
+            "复制失败": "複製失敗",
+            "已复制上报内容": "已複製回報內容",
+            "脚本": "腳本",
+            "●开": "●開",
+            "○关": "○關",
+            "缓冲 · 未保存可见": "緩衝 · 未儲存可見",
+            "当前预览文档：{p}": "目前預覽文件：{p}",
+            "预览上报 · {n}": "預覽回報 · {n}",
+            "预览内 console／报错回传（上限 {n} 条，最新在前）": "預覽內 console／錯誤回報（上限 {n} 條，最新在前）",
+            "票据未就绪或已过期——重开文件或切回「快速」": "票據未就緒或已過期——重開檔案或切回「快速」",
+            "票据未就绪，真预览暂不可用": "票據未就緒，真預覽暫不可用",
+            "等待预览装载…（久候无响应多为脚本出错或资源路径越出预览目录）": "等待預覽載入…（久候無反應多為腳本出錯或資源路徑越出預覽目錄）",
+            "链接指向预览目录之外，未改道": "連結指向預覽目錄之外，未改道",
+            "编辑器缓冲直接进 srcdoc：未保存即所见，相对资源走预览路由": "編輯器緩衝直接進 srcdoc：未儲存即所見，相對資源走預覽路由",
+            "iframe 指向服务端磁盘文档：原生相对解析与站内导航（未保存编辑不可见）": "iframe 指向伺服器磁碟文件：原生相對解析與站內導航（未儲存編輯不可見）",
+            "作者脚本执行中（仍无同源能力：fetch/localStorage/读父页 DOM 不可用）": "作者腳本執行中（仍無同源能力：fetch/localStorage/讀父頁 DOM 不可用）",
+            "作者脚本已剥离（快速态剥 srcdoc／真预览态服务端剥响应）；预览自身的报错回传与链接改道不受影响": "作者腳本已剝離（快速態剝 srcdoc／真預覽態伺服器剝回應）；預覽自身的錯誤回報與連結改道不受影響",
+            "用当前缓冲重建预览": "用目前緩衝重建預覽",
+            "重新拉取磁盘文档（换破缓存参数）": "重新拉取磁碟文件（換破快取參數）",
+            "真预览读的是磁盘文件，当前有未保存修改": "真預覽讀的是磁碟文件，目前有未儲存修改",
+            "视口宽度预设（只改宽度，不伪造 UA／像素比——设备模拟是 devtools 的活）": "視窗寬度預設（只改寬度，不偽造 UA／像素比——裝置模擬是 devtools 的活）"
+          },
           "en": {
-            "it.file.label": "Files",
+            "目标文件已存在：\n{p}\n覆盖？": "Target file already exists:\n{p}\nOverwrite?",
+            "解释这段代码：\n": "Explain this code:\n",
+            "重构这段代码：\n": "Refactor this code:\n",
+            "解释": "Explain",
+            "重构": "Refactor",
+            "表格优化": "Format table",
+            "it.file.label": "File",
             "it.image-preview.label": "Image preview",
             "it.image-preview.title": "Image preview",
             "it.fileviewer.label": "Editor",
-            "it.fileviewer.title": "aiti-editor: online text editing (Monaco); binaries rendered by extensions",
+            "it.fileviewer.title": "aiti-editor: online text/code editing (Monaco), extensible rendering for binaries",
             "ext.displayName": "File Editor",
             "feat.aiti-editor": "Editor",
             "feat.file": "Files",
             "feat.image-preview": "Image preview",
-            "feat.editor.text": "Text file editing",
-            "feat.soffice.path": "soffice path (LibreOffice)",
-            "feat.editor.binary": "Binary file viewer",
-            "feat.editor.mdPreviewSmart": "Markdown preview smart click",
-            "feat.editor.text.desc": "Takes over text files with the Monaco in-browser editor (falls back to the core read-only viewer when not matched)",
-            "feat.soffice.path.desc": "Legacy format conversion (.doc→.docx/.pdf, .xls→.xlsx, .ppt→.pptx); auto-detected when empty",
-            "feat.editor.binary.desc": "Renders images/video/audio/PDF and other binary files with registered providers (falls back to the core viewer when off)",
-            "feat.editor.mdPreviewSmart.desc": "Clicking a paragraph/heading/code line in the preview pops an action card (copy/quote/new session/file/edit…)",
-            "ed.file.label": "Files",
+            "ed.file.label": "File",
             "ed.image.label": "Image preview",
             " 编辑": " Edit",
             " 适": " fit",
@@ -5849,28 +6096,21 @@
             "-副本": "-copy",
             "7za 缺失时自动下载 portable 版（客户机零安装）": "Auto-downloads portable 7za when missing (zero install on the client machine)",
             "AI 帮我安装（推荐）": "AI install for me (recommended)",
-            "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历": "AI selection (ask / explain / refactor / new session), @mentions, same-directory ‹› walk",
             "EXIF 信息读取": "EXIF reading",
-            "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）": "HTML edit / split / preview (fast mode reads the buffer, true preview goes through the directory-level preview route; viewport presets, error reporting, relative-link redirect into the dock)",
             "HTML 预览": "HTML preview",
             "JSON 值": "JSON value",
             "JSON 键": "JSON key",
             "LibreOffice 启动失败：{msg}": "LibreOffice failed to start: {msg}",
-            "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）": "Markdown edit / split / preview (GFM, TOC, scroll sync, change-block navigation, export to HTML/PDF)",
-            "Mermaid 图表": "Mermaid diagram",
-            "Monaco 在线文本/代码编辑器（含 Markdown 双模式）": "Monaco online text/code editor (with Markdown dual mode)",
             "Monaco 编辑器加载失败": "Failed to load the Monaco editor",
             "PDF 只读预览": "PDF read-only preview",
             "PDF 只读预览（浏览器原生渲染，可缩放 / 打印 / 下载）": "Read-only PDF preview (browser-native rendering; zoom / print / download)",
             "Range 流式播放（拖进度条不整载）": "Range streaming (seeking doesn't download the whole file)",
             "VNC 会话获取失败": "Failed to get the VNC session",
             "VNC 启动失败：{msg}": "VNC failed to start: {msg}",
-            "YAML / TOML / SQL 一键格式化": "One-click YAML / TOML / SQL formatting",
             "aiti-ai-speek 未安装或未启用——已打开扩展管理，请启用后重试": "aiti-ai-speek is not installed or disabled — Extension Manager opened, please enable it and retry",
             "aiti-helper 未就绪（未部署或未加载）：刷新页面后重试，或按上方命令手动安装。": "aiti-helper is not ready (not deployed or not loaded): refresh the page and retry, or install manually with the commands above.",
-            "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）": "git change view (workspace vs HEAD: inline markers / side-by-side / inline / outline)",
             "git 变更视图（工作区 vs HEAD；默认「最新」显示最终版）": "git change view (workspace vs HEAD; default \"Latest\" shows the final version)",
-            "iframe 指向服务端磁盘文档：原生相对解析与站内导航（未保存编辑不可见）": "iframe points to the on-disk document: native relative resolution and in-site navigation (unsaved edits not visible)",
+            "iframe 指向服务端磁盘文档：原生相对解析与站内导航（未保存编辑不可见）": "iframe points to the server-side disk doc: native relative resolution and in-site navigation (unsaved edits not visible)",
             "readFile 失败 ({status})": "readFile failed ({status})",
             "ticket 签发失败": "ticket issuance failed",
             "vendor 加载失败: {p}": "vendor load failed: {p}",
@@ -5901,19 +6141,17 @@
             "主窗口未响应（aiti-cmd 未启用？）": "Main window not responding (aiti-cmd disabled?)",
             "主面板已关闭，无法写入输入框": "Main panel closed, cannot write to the input box",
             "主面板已关闭，无法发送": "Main panel closed, cannot send",
-            "二进制文件不接管（交给对应查看器 / 编辑器扩展）": "Binary files not taken over (left to the matching viewer / editor extensions)",
             "二进制文件（只读预览）": "Binary file (read-only preview)",
             "仅浏览器可解码的格式": "Only browser-decodable formats",
             "从磁盘重读最新内容（有未保存编辑时会先询问：合并/加载磁盘/保留）": "Reload latest content from disk (with unsaved edits you'll be asked: merge / load disk / keep mine)",
             "以编码保存（另存为新编码）": "Save with encoding (save as a new encoding)",
             "以编码重新打开（不保存当前改动）": "Reopen with encoding (current edits are not saved)",
-            "作者脚本已剥离（快速态剥 srcdoc／真预览态服务端剥响应）；预览自身的报错回传与链接改道不受影响": "Author scripts stripped (fast mode strips srcdoc / true preview strips responses server-side); error reporting and link redirection of the preview itself are unaffected",
-            "作者脚本执行中（仍无同源能力：fetch/localStorage/读父页 DOM 不可用）": "Author scripts running (still no same-origin powers: fetch/localStorage/parent DOM are unavailable)",
+            "作者脚本已剥离（快速态剥 srcdoc／真预览态服务端剥响应）；预览自身的报错回传与链接改道不受影响": "Author scripts stripped (fast mode strips the srcdoc / served mode strips responses); the preview's own error reporting and link redirect are unaffected",
+            "作者脚本执行中（仍无同源能力：fetch/localStorage/读父页 DOM 不可用）": "Author scripts running (still no same-origin: fetch/localStorage/parent DOM unavailable)",
             "保存": "Save",
-            "保存冲突检测（外部修改 → 409 → 合并或覆盖）": "Save conflict detection (external modification → 409 → merge or overwrite)",
             "保存失败 ({status})": "Save failed ({status})",
             "保存并关闭": "Save and close",
-            "保存并刷新": "Save and refresh",
+            "保存并刷新": "Save & refresh",
             "保存当前编辑内容（Ctrl+S）": "Save current edits (Ctrl+S)",
             "保留当前": "Keep mine",
             "修改时间": "Modified",
@@ -5936,7 +6174,6 @@
             "加密 / 带密码压缩包不支持": "Encrypted / password-protected archives not supported",
             "加载磁盘": "Load from disk",
             "单文件上限 50MB": "50MB per-file limit",
-            "单文件超过 1MB 只读": "Read-only above 1MB per file",
             "压缩包": "Archive",
             "压缩包为空": "Archive is empty",
             "压缩包内文件点击提取并打开": "Click an archived file to extract and open it",
@@ -5972,6 +6209,68 @@
             "复制失败": "Copy failed",
             "复制文件全部内容到剪贴板（超过 1MB 拒绝）": "Copy the whole file content to clipboard (rejected over 1MB)",
             "复制路径": "Copy path",
+            "aiti-editor 接管失败": "aiti-editor could not take over this file",
+            "文件": "File",
+            "格式": "Format",
+            "尺寸": "Dimensions",
+            "缩放": "Zoom",
+            "旋转": "Rotation",
+            "（适应窗口）": " (fit to window)",
+            "源码": "Source",
+            "预览图表": "Preview diagram",
+            "查看源码": "View source",
+            "渲染失败": "Render failed",
+            "正在渲染": "Rendering",
+            "Mermaid 图表": "Mermaid diagram",
+            "内容目录": "Contents",
+            "@ 到聊天": "@ to chat",
+            "@ 到新会话": "@ to new session",
+            "文件有未保存的修改": "This file has unsaved changes",
+            "列数不一致：第 {row} 行有 {got} 列，期望 {want} 列": "Column count mismatch: line {row} has {got} columns, expected {want}",
+            "YAML 语法错误": "YAML syntax error",
+            "vendor 加载失败：{url}": "Failed to load vendor: {url}",
+            "vendor 全局未挂载：{name}": "Vendor global not mounted: {name}",
+            "Monaco 在线文本/代码编辑器（含 Markdown 双模式）": "Monaco text/code editor (with Markdown dual mode)",
+            "单文件超过 1MB 只读": "Files over 1MB open read-only",
+            "二进制文件不接管（交给对应查看器 / 编辑器扩展）": "Binary files are not taken over (their own viewer/editor extensions handle them)",
+            "Markdown 编辑 / 分栏 / 预览（GFM、TOC、滚动同步、变更块定位、导出 HTML/PDF）": "Markdown edit / split / preview (GFM, TOC, scroll sync, change-block jump, export HTML/PDF)",
+            "HTML 编辑 / 分栏 / 预览（快速态看缓冲、真预览态走目录级预览路由；视口预设、报错回传、相对链接改道 dock）": "HTML edit / split / preview (fast mode renders the buffer, served mode uses the directory-level preview route; viewport presets, error reporting, relative links reroute to the dock)",
+            "保存冲突检测（外部修改 → 409 → 合并或覆盖）": "Save conflict detection (external change → 409 → merge or overwrite)",
+            "git 变更视图（工作区 vs HEAD：行级标注 / 左右 / 合并 / 大纲）": "Git change view (worktree vs HEAD: line markers / side-by-side / inline / outline)",
+            "AI 选区（问 AI / 解释 / 重构 / 新会话）、@ 提及、同目录 ‹› 遍历": "AI selection (ask AI / explain / refactor / new session), @ mentions, ‹› sibling navigation",
+            "YAML / TOML / SQL 一键格式化": "One-click YAML / TOML / SQL formatting",
+            "feat.editor.text": "Text file editing",
+            "feat.editor.text.desc": "Take over text files as a Monaco online editor (falls back to the core read-only viewer when not matched)",
+            "feat.editor.binary": "Binary file viewing",
+            "feat.editor.binary.desc": "Render images/video/audio/PDF via registered providers (turn off to fall back to the core viewer)",
+            "feat.editor.mdPreviewSmart": "Markdown preview smart click",
+            "feat.editor.mdPreviewSmart.desc": "Click a paragraph/heading/code line in the preview to open the action card (copy/quote/new session/file/link); quotes include @file#line. Requires aiti-msg-smart.",
+            "feat.soffice.path": "soffice path (LibreOffice)",
+            "feat.soffice.path.desc": "Executable used for legacy conversions (.doc→.docx/.pdf, .xls→.xlsx, .ppt→.pptx)",
+            "feat.soffice.path.placeholder": "Empty = auto-detect from PATH; or an absolute path like /usr/bin/soffice",
+            "下载": "Download",
+            "上一页": "Previous",
+            "下一页": "Next",
+            "加载中…": "Loading…",
+            "统计中…": "Counting…",
+            "引用本页": "Quote this page",
+            "返回信息": "Back to info",
+            "大文件只读": "Large file (read-only)",
+            "第 {a}–{b} 行": "Lines {a}–{b}",
+            "已插入引用": "Reference inserted",
+            "文件较大（{size}），已暂停加载全文，避免页面卡顿。": "This file is large ({size}); loading the full text is paused to keep the page responsive.",
+            "只显示部分（只读）": "Show part (read-only)",
+            "用编辑器打开（只读）": "Open in editor (read-only)",
+            "在聊天中引用": "Reference in chat",
+            "我了解风险，仍用编辑器打开": "I know the risk — open in editor anyway",
+            "用编辑器打开大文件？": "Open a large file in the editor?",
+            "文件 {size} 超过编辑器安全上限。强制打开会占用大量内存，页面可能明显卡顿甚至无响应（上限 {max}MB）。确定继续？": "This file ({size}) is above the safe editor limit. Forcing it open can consume a lot of memory and may freeze the page (hard cap {max}MB). Continue?",
+            "我了解风险，继续打开": "I understand the risk, continue",
+            "已按你的选择强制打开（大文件，可能较卡）": "Force-opened as requested (large file; may be slow)",
+            "正在读取文件…（大文件可能需要数秒，页面暂无响应属正常）": "Reading the file… (large files can take seconds; a brief unresponsive page is expected)",
+            "分块只读查看不会加载全文；@ 引用、文件 chip、下载等能力不受影响。": "Chunked read-only viewing never loads the whole file; @ references, file chips and download keep working.",
+            "读取失败：{msg}": "Read failed: {msg}",
+            "正在加载文件片段…": "Loading file section…",
             "多编码打开与保存（UTF-8 / UTF-16 / GBK / Latin-1，含 BOM）": "Multi-encoding open & save (UTF-8 / UTF-16 / GBK / Latin-1, with BOM)",
             "大小": "Size",
             "大纲": "Outline",
@@ -6003,7 +6302,7 @@
             "已唤起 AI 助手并自动发起安装任务——切到 AI 助手弹窗查看进度；装完回本页点「重试转换」。": "AI assistant invoked and the install task has started — switch to the AI assistant dialog to follow progress; come back here and click \"Retry conversion\" once done.",
             "已在虚拟环境打开，正在跳转远程查看…": "Opened in the virtual desktop; redirecting to remote view…",
             "已复制": "Copied",
-            "已复制上报内容": "Report content copied",
+            "已复制上报内容": "Report copied",
             "已复制内容": "Content copied",
             "已复制到剪贴板": "Copied to clipboard",
             "已复制路径": "Path copied",
@@ -6090,6 +6389,7 @@
             "正在加载…": "Loading…",
             "正在加载压缩包内容…": "Loading archive contents…",
             "正在加载文件内容…": "Loading file content…",
+            "正在加载编辑器…": "Loading editor…",
             "正在渲染 Mermaid 图表": "Rendering Mermaid diagram",
             "正在获取 HEAD 基线…": "Getting HEAD baseline…",
             "正在转换（soffice）…首次约需数秒": "Converting (soffice)… first run takes a few seconds",
@@ -6103,21 +6403,21 @@
             "浏览器原生 <video>": "Browser-native <video>",
             "深度遍历共 {n} 个文件（仅文件，不含文件夹）": "Depth walk: {n} files (files only, no folders)",
             "清空": "Clear",
-            "渲染页面预览": "Rendered page preview",
+            "渲染页面预览": "Rendered page",
             "渲染预览": "Rendered preview",
             "点击打开 {name}": "Click to open {name}",
             "点击打开该目录": "Click to open this directory",
             "点击用此编辑器打开（仅本次）": "Click to open with this editor (this time only)",
-            "用当前缓冲重建预览": "Rebuild the preview from the current buffer",
+            "用当前缓冲重建预览": "Rebuild preview from the current buffer",
             "目录": "Directory",
             "目标文件已存在：\\n{p}\\n覆盖？": "Target file already exists:\\n{p}\\nOverwrite?",
             "相机": "Camera",
-            "真预览": "True preview",
-            "真预览读的是磁盘文件，当前有未保存修改": "True preview reads the on-disk file; there are unsaved edits",
+            "真预览": "Served preview",
+            "真预览读的是磁盘文件，当前有未保存修改": "Served preview reads the disk file; there are unsaved changes",
             "磁盘上的文件已不存在（可能被移动或删除）": "The file on disk no longer exists (moved or deleted)",
             "磁盘上的文件已被修改": "The file on disk has been modified",
-            "票据未就绪或已过期——重开文件或切回「快速」": "Ticket not ready or expired — reopen the file or switch back to \"Fast\"",
-            "票据未就绪，真预览暂不可用": "Ticket not ready; true preview unavailable for now",
+            "票据未就绪或已过期——重开文件或切回「快速」": "Ticket not ready or expired — reopen the file or switch back to Fast",
+            "票据未就绪，真预览暂不可用": "Ticket not ready — served preview unavailable",
             "票据签发失败": "Ticket issuance failed",
             "移动到": "Move to",
             "移动到...": "Move to...",
@@ -6125,7 +6425,7 @@
             "窗口": "Window",
             "窗口太窄，并排不可读，已用合并视图展示（拉宽窗口恢复并排）": "Window too narrow for side-by-side; shown as inline view (widen the window to restore side-by-side)",
             "立即以 steer 发送到当前会话": "Send to the current session as steer immediately",
-            "等待预览装载…（久候无响应多为脚本出错或资源路径越出预览目录）": "Waiting for the preview to load… (no response usually means a script error or a resource path escaping the preview directory)",
+            "等待预览装载…（久候无响应多为脚本出错或资源路径越出预览目录）": "Waiting for preview… (no response usually means a script error or a resource path outside the preview dir)",
             "类型": "Type",
             "缓冲 · 未保存可见": "Buffer · unsaved visible",
             "编码": "Encoding",
@@ -6134,7 +6434,7 @@
             "编辑器实例未就绪，请稍后再试": "Editor instance not ready, try again shortly",
             "编辑器未返回视图（render 需返回 { el, dispose }）": "Editor returned no view (render must return { el, dispose })",
             "编辑器渲染失败": "Editor render failed",
-            "编辑器缓冲直接进 srcdoc：未保存即所见，相对资源走预览路由": "Editor buffer goes straight into srcdoc: what you see is what's unsaved; relative resources go through the preview route",
+            "编辑器缓冲直接进 srcdoc：未保存即所见，相对资源走预览路由": "Editor buffer straight into srcdoc: unsaved-as-seen, relative assets via the preview route",
             "编辑模式（当前编辑器具备编辑能力）": "Edit mode (current editor has edit capability)",
             "编辑源码": "Edit source",
             "缩小": "Zoom out",
@@ -6153,7 +6453,7 @@
             "虚拟环境打开（重试）": "Open in virtual desktop (retry)",
             "虚拟环境打开（需 aiti-ui-env 扩展）": "Open in virtual desktop (requires aiti-ui-env)",
             "行数": "Lines",
-            "视口宽度预设（只改宽度，不伪造 UA／像素比——设备模拟是 devtools 的活）": "Viewport width presets (width only, no fake UA/pixel ratio — device emulation is devtools' job)",
+            "视口宽度预设（只改宽度，不伪造 UA／像素比——设备模拟是 devtools 的活）": "Viewport width presets (width only, no UA/DPR spoofing — device emulation is devtools' job)",
             "视图模式": "View mode",
             "视频": "Video",
             "解析中…": "Parsing…",
@@ -6181,102 +6481,60 @@
             "重命名...": "Rename...",
             "重命名失败": "Rename failed",
             "重新加载": "Reload",
-            "重新拉取磁盘文档（换破缓存参数）": "Re-fetch the on-disk document (cache-busting param)",
+            "重新拉取磁盘文档（换破缓存参数）": "Re-fetch the disk doc (cache-busting)",
             "重试": "Retry",
             "重试会自动清除加载缓存；若反复失败请刷新页面（或检查网络）": "Retrying clears the load cache automatically; if it keeps failing, refresh the page (or check the network)",
             "重试加载": "Retry load",
             "重试转换": "Retry conversion",
             "钉住": "Pin",
-            "链接指向预览目录之外，未改道": "Link points outside the preview directory; not redirected",
+            "链接指向预览目录之外，未改道": "Link points outside the preview dir; not redirected",
             "镜头": "Lens",
             "限制": "Limits",
             "音频": "Audio",
             "预览": "Preview",
             "预览 + 编辑": "Preview + Edit",
             "预览上报 · {n}": "Preview reports · {n}",
-            "预览内 console／报错回传（上限 {n} 条，最新在前）": "console/errors reported from the preview (cap {n}, newest first)",
+            "预览内 console／报错回传（上限 {n} 条，最新在前）": "In-preview console/error reports (cap {n}, newest first)",
             "预览模式（{name}）": "Preview mode ({name})",
             "首次打开需数秒（soffice 无头转换）；排版保真取决于 LibreOffice 对原格式的还原度": "First open takes a few seconds (headless soffice conversion); layout fidelity depends on LibreOffice's support for the original format",
             "（网络中断 / 404 / 被拦截）": "(network interruption / 404 / blocked)",
             "，{n} 个目录": ", {n} directories",
             "，含未保存编辑": ", including unsaved edits"
-          },
-          "zh-TW": {
-            "it.file.label": "檔案",
-            "it.image-preview.label": "圖片預覽",
-            "it.image-preview.title": "圖片預覽",
-            "it.fileviewer.label": "編輯器",
-            "it.fileviewer.title": "aiti-editor：文字檔線上編輯（Monaco），二進位可擴充渲染",
-            "ext.displayName": "檔案編輯器",
-            "ed.file.label": "檔案",
-            "ed.image.label": "圖片預覽",
-            "HTML 预览": "HTML 預覽",
-            "左侧编辑·右侧预览": "左側編輯 · 右側預覽",
-            "编辑": "編輯",
-            "预览": "預覽",
-            "分栏": "分欄",
-            "快速": "快速",
-            "真预览": "真預覽",
-            "渲染页面预览": "渲染頁面",
-            "渲染预览": "渲染預覽",
-            "编辑源码": "編輯原始碼",
-            "刷新": "重新整理",
-            "保存并刷新": "儲存並重新整理",
-            "清空": "清空",
-            "复制": "複製",
-            "复制失败": "複製失敗",
-            "已复制上报内容": "已複製回報內容",
-            "脚本": "腳本",
-            "●开": "●開",
-            "○关": "○關",
-            "缓冲 · 未保存可见": "緩衝 · 未儲存可見",
-            "当前预览文档：{p}": "目前預覽文件：{p}",
-            "预览上报 · {n}": "預覽回報 · {n}",
-            "预览内 console／报错回传（上限 {n} 条，最新在前）": "預覽內 console／錯誤回報（上限 {n} 條，最新在前）",
-            "票据未就绪或已过期——重开文件或切回「快速」": "票據未就緒或已過期——重開檔案或切回「快速」",
-            "票据未就绪，真预览暂不可用": "票據未就緒，真預覽暫不可用",
-            "等待预览装载…（久候无响应多为脚本出错或资源路径越出预览目录）": "等待預覽載入…（久候無反應多為腳本出錯或資源路徑越出預覽目錄）",
-            "链接指向预览目录之外，未改道": "連結指向預覽目錄之外，未改道",
-            "编辑器缓冲直接进 srcdoc：未保存即所见，相对资源走预览路由": "編輯器緩衝直接進 srcdoc：未儲存即所見，相對資源走預覽路由",
-            "iframe 指向服务端磁盘文档：原生相对解析与站内导航（未保存编辑不可见）": "iframe 指向伺服器磁碟文件：原生相對解析與站內導航（未儲存編輯不可見）",
-            "作者脚本执行中（仍无同源能力：fetch/localStorage/读父页 DOM 不可用）": "作者腳本執行中（仍無同源能力：fetch/localStorage/讀父頁 DOM 不可用）",
-            "作者脚本已剥离（快速态剥 srcdoc／真预览态服务端剥响应）；预览自身的报错回传与链接改道不受影响": "作者腳本已剝離（快速態剝 srcdoc／真預覽態伺服器剝回應）；預覽自身的錯誤回報與連結改道不受影響",
-            "用当前缓冲重建预览": "用目前緩衝重建預覽",
-            "重新拉取磁盘文档（换破缓存参数）": "重新拉取磁碟文件（換破快取參數）",
-            "真预览读的是磁盘文件，当前有未保存修改": "真預覽讀的是磁碟文件，目前有未儲存修改",
-            "视口宽度预设（只改宽度，不伪造 UA／像素比——设备模拟是 devtools 的活）": "視窗寬度預設（只改寬度，不偽造 UA／像素比——裝置模擬是 devtools 的活）"
           }
         }
       },
       "source": "user",
       "icon": "icon.svg",
-      "description": "文件编辑器：Monaco 在线编辑（接管文本文件；非文本回退核心查看器）。设计 docs/pi-web-file-editor-design.md",
+      "description": "File editor: Monaco online editing (takes over text files; non-text falls back to the core viewer). Design docs/pi-web-file-editor-design.md",
       "features": [
         {
           "id": "editor.text",
-          "label": "文本文件编辑",
-          "description": "接管文本类文件为 Monaco 在线编辑器（未命中时回退核心只读查看器）",
+          "type": "boolean",
+          "label": "Text file editing",
+          "description": "Take over text files as a Monaco online editor (falls back to the core read-only viewer when not matched)",
           "enabled": true
         },
         {
           "id": "soffice.path",
           "type": "string",
-          "label": "soffice 路径（LibreOffice）",
-          "description": "老格式转换（.doc→.docx/.pdf、.xls→.xlsx、.ppt→.pptx）所用 soffice 可执行文件路径",
-          "placeholder": "留空=自动从 PATH 查找；或填绝对路径如 /usr/bin/soffice",
+          "label": "soffice path (LibreOffice)",
+          "description": "Executable used for legacy conversions (.doc→.docx/.pdf, .xls→.xlsx, .ppt→.pptx)",
+          "placeholder": "Empty = auto-detect from PATH; or an absolute path like /usr/bin/soffice",
           "enabled": true,
           "value": ""
         },
         {
           "id": "editor.binary",
-          "label": "二进制文件查看",
-          "description": "使用注册的 provider 渲染图片/视频/音频/PDF 等二进制文件（关闭后回退核心查看器）",
+          "type": "boolean",
+          "label": "Binary file viewing",
+          "description": "Render images/video/audio/PDF via registered providers (turn off to fall back to the core viewer)",
           "enabled": true
         },
         {
           "id": "editor.mdPreviewSmart",
-          "label": "Markdown 预览智能点击",
-          "description": "预览里点击段落/标题/代码行弹出动作卡（复制/引用/新会话/文件/链接），引用自动带 @文件#行号；需安装并启用 aiti-msg-smart",
+          "type": "boolean",
+          "label": "Markdown preview smart click",
+          "description": "Click a paragraph/heading/code line in the preview to open the action card (copy/quote/new session/file/link); quotes include @file#line. Requires aiti-msg-smart.",
           "enabled": true
         }
       ]
@@ -6304,7 +6562,7 @@
     {
       "id": "aiti-extman",
       "name": "aiti 扩展管理器",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "clientUrl": "/api/extensions/aiti-extman/assets/dist/aiti-extman-client.mjs?v=86ee81a5a0c4",
       "ui": {
         "clientImmediately": false,
@@ -6313,9 +6571,7 @@
             "id": "aiti-extman-open",
             "label": "i18n:ext.shortLabel",
             "title": "i18n:ext.sidebarTitle",
-            "icon": {
-              "svg": "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/>"
-            }
+            "icon": "icons/wrench.svg"
           }
         ],
         "dialogs": [
@@ -6395,6 +6651,13 @@
             "ext.clientState": "Client state",
             "ext.dir": "Directory",
             "ext.configDir": "Config dir",
+            "ext.settings": "Settings",
+            "ext.settingsHint": "size / behavior options",
+            "ext.settingsSave": "Save",
+            "ext.settingsSaving": "Saving…",
+            "ext.settingsSaved": "Saved",
+            "ext.settingsReset": "Reset",
+            "ext.settingsApplyHint": "Applies on the next open/action",
             "ext.sourceUrl": "Source",
             "ext.deps": "Dependencies",
             "ext.clientDeps": "client inject",
@@ -6590,6 +6853,13 @@
             "ext.clientState": "client 状态",
             "ext.dir": "目录",
             "ext.configDir": "配置目录",
+            "ext.settings": "设置",
+            "ext.settingsHint": "尺寸/行为参数",
+            "ext.settingsSave": "保存",
+            "ext.settingsSaving": "保存中…",
+            "ext.settingsSaved": "已保存",
+            "ext.settingsReset": "恢复",
+            "ext.settingsApplyHint": "下次打开/操作时生效",
             "ext.sourceUrl": "来源地址",
             "ext.deps": "依赖",
             "ext.clientDeps": "client 注入依赖",
@@ -6725,7 +6995,7 @@
     {
       "id": "aiti-feedback",
       "name": "报告问题",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "clientUrl": "/api/extensions/aiti-feedback/assets/dist/aiti-feedback-client.mjs?v=3614a021eeb1",
       "ui": {
         "clientImmediately": false,
@@ -6734,9 +7004,7 @@
             "id": "aiti-feedback-open",
             "label": "i18n:fb.open.label",
             "title": "i18n:fb.open.title",
-            "icon": {
-              "svg": "<path d=\"M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z\"/><path d=\"M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1\"/>"
-            }
+            "icon": "icons/discussion.svg"
           }
         ],
         "dialogs": [
@@ -6856,15 +7124,12 @@
       "source": "user",
       "icon": "icon.svg",
       "description": "data-ext-float contract take-over — drag/edge resize/position persistence/click-to-front/double-click reset/auto maximize button, small-screen auto fullscreen + system back closes the float; the DockStack unified sidebar block-stack service",
-      "provides": [
-        "aiti-float.dockstack"
-      ],
       "features": null
     },
     {
       "id": "aiti-folder",
       "name": "aiti-folder",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-folder/assets/dist/aiti-folder-client.mjs?v=2895d43aa2a4",
       "ui": {
         "fileViewer": [
@@ -6952,6 +7217,7 @@
             "files.menuGit": "Git",
             "files.openParentDir": "打开上级目录",
             "files.openTerminal": "打开终端",
+            "files.openInFileManager": "在系统文件管理器中打开",
             "files.pin": "钉住",
             "files.unpin": "取消钉住",
             "files.pinDone": "已钉住（不受批量关闭影响）",
@@ -7087,6 +7353,7 @@
             "files.menuGit": "Git",
             "files.openParentDir": "Open parent folder",
             "files.openTerminal": "Open in Terminal",
+            "files.openInFileManager": "Open in File Manager",
             "files.pin": "Pin",
             "files.unpin": "Unpin",
             "files.pinDone": "Pinned (protected from batch close)",
@@ -7161,9 +7428,6 @@
       "source": "user",
       "icon": "icon.svg",
       "description": "文件夹浏览器（fileViewer folder 接管）+ 目录选择器能力（pathPicker FolderSwitcher）。复用核心端点，UI 全在扩展。",
-      "optionalDependsOn": [
-        "aiti-git-ops"
-      ],
       "features": null
     },
     {
@@ -7181,15 +7445,12 @@
       "source": "user",
       "icon": "icons/git-branch.svg",
       "description": "Whitelisted git write engine — checkout precheck / stash / plan breakpoints / audit / changed topic, consumed by folder and session-manager",
-      "provides": [
-        "aiti-git-ops.api"
-      ],
       "features": null
     },
     {
       "id": "aiti-git-review",
       "name": "Git 代码审核",
-      "version": "0.2.11",
+      "version": "0.2.12",
       "clientUrl": "/api/extensions/aiti-git-review/assets/dist/aiti-git-review-client.mjs?v=31c50dabf1a2",
       "ui": {
         "clientImmediately": false,
@@ -7198,9 +7459,7 @@
             "id": "aiti-git-review-open",
             "label": "i18n:gr.app.label",
             "title": "i18n:gr.app.title",
-            "icon": {
-              "svg": "<path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>"
-            }
+            "icon": "icons/eye.svg"
           }
         ],
         "dialogs": [
@@ -7319,7 +7578,7 @@
     {
       "id": "aiti-git-trace",
       "name": "AI 变更追踪",
-      "version": "0.2.15",
+      "version": "0.2.17",
       "clientUrl": "/api/extensions/aiti-git-trace/assets/dist/aiti-git-trace-client.mjs?v=0c05cae09b97",
       "ui": {
         "toolbar": [
@@ -7327,17 +7586,13 @@
             "id": "aiti-git-trace-watch",
             "label": "i18n:gt.watch.short",
             "title": "i18n:gt.watch.app.title",
-            "icon": {
-              "svg": "<line x1=\"6\" x2=\"6\" y1=\"3\" y2=\"15\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><path d=\"M18 9a9 9 0 0 1-9 9\"/>"
-            }
+            "icon": "icons/git-branch.svg"
           },
           {
             "id": "aiti-git-trace-timeline",
             "label": "i18n:gt.timeline.short",
             "title": "i18n:gt.timeline.app.title",
-            "icon": {
-              "svg": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><line x1=\"3\" x2=\"9\" y1=\"12\" y2=\"12\"/><line x1=\"15\" x2=\"21\" y1=\"12\" y2=\"12\"/>"
-            }
+            "icon": "icons/git-commit-horizontal.svg"
           }
         ],
         "dialogs": [
@@ -7384,6 +7639,7 @@
         ],
         "i18n": {
           "en": {
+            "gt.sch.compact": "Trace repo compaction (keeps 30 days by default: prune old branches, gc objects, clear orphan ledger)",
             "feat.trace.enabled.desc": "When on, AI session file changes are written into the .aiti-trace tracking repo (off by default)",
             "feat.trace.excludeExtra.desc": "Extra excludes on top of the built-in list (stacks with the project .gitignore)",
             "feat.trace.includeExtra.desc": "! patterns to rescue paths wrongly hit by built-in excludes (parent dirs need negating too)",
@@ -7553,6 +7809,7 @@
             "it.aiti-git-trace-fork-dialog.label": "aiti-git-trace · 回撤",
             "ext.displayName": "AI 变更追踪",
             "gt.timeline.short": "时间线",
+            "gt.sch.compact": "影子仓按时间瘦身（默认保 30 天，删旧分支+回收对象+清无主台账）",
             "gt.watch.app.title": "aiti-git-trace：关注路径管理（workspace 持久 + 本会话识别；只追 git 仓）",
             "gt.timeline.app.title": "aiti-git-trace：本会话 ops 时间线（回滚/看 diff）",
             "gt.watch.short": "关注路径",
@@ -7823,9 +8080,6 @@
       "source": "user",
       "icon": "icon.svg",
       "description": "Out-of-band AI change tracking — repo-root .aiti-trace standalone trace repo (autoInit even without git) + op-numbered before/after dual commits + full file⇄message⇄op lineage + rollback + shadow repo slimming compact",
-      "provides": [
-        "cap.git-trace"
-      ],
       "features": [
         {
           "id": "trace.enabled",
@@ -7919,7 +8173,7 @@
     {
       "id": "aiti-helper",
       "name": "AI Helper（扩展的一句话 AI 能力）",
-      "version": "0.5.14",
+      "version": "0.5.15",
       "clientUrl": "/api/extensions/aiti-helper/assets/dist/aiti-helper-client.mjs?v=09ca23bbda64",
       "ui": {
         "clientImmediately": true,
@@ -7928,9 +8182,7 @@
             "id": "aiti-helper-open",
             "label": "i18n:helper.open.label",
             "title": "i18n:helper.open.title",
-            "icon": {
-              "svg": "<path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/><path d=\"M4 17v2\"/><path d=\"M5 18H3\"/>"
-            }
+            "icon": "icons/sparkles.svg"
           }
         ],
         "i18n": {
@@ -8205,9 +8457,7 @@
             "id": "aiti-mail-open",
             "label": "i18n:mail.open.label",
             "title": "i18n:mail.open.title",
-            "icon": {
-              "svg": "<rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\"/><path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\"/>"
-            }
+            "icon": "icons/mail.svg"
           }
         ],
         "rightFileDock": [
@@ -8325,7 +8575,7 @@
     {
       "id": "aiti-model-check",
       "name": "模型可用性管理（探测 / 429 限流识别）",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-model-check/assets/dist/aiti-model-check-client.mjs?v=26f69f442501",
       "ui": {
         "clientImmediately": true,
@@ -8334,9 +8584,7 @@
             "id": "aiti-model-check-open",
             "label": "i18n:mc.open.label",
             "title": "i18n:mc.open.title",
-            "icon": {
-              "svg": "<path d=\"M4.9 19.1C1 15.2 1 8.8 4.9 4.9\"/><path d=\"M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5\"/><path d=\"M19.1 4.9C23 8.8 23 15.5 19.1 19.1\"/>"
-            },
+            "icon": "icons/radio.svg",
             "feature": "behavior.showToolbar"
           }
         ],
@@ -8910,54 +9158,63 @@
       "features": [
         {
           "id": "behavior.showToolbar",
+          "type": "boolean",
           "label": "顶部工具条显示「模型」按钮",
           "description": "默认隐藏：模型检查从模型向导顶部「检查」入口进入；打开后在顶部工具条单独显示按钮",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_status",
+          "type": "boolean",
           "label": "model_status · 可用性总览",
           "description": "模型可用性总览：各 model 是否可用 / 429 限流 / 异常 / 预计恢复时间（多 key 显示每 key 状态）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_keys",
+          "type": "boolean",
           "label": "model_keys · 多 key 检查",
           "description": "查看各 provider 配置的多个 API key（打码）与分 key 检查状态（可用/429/异常）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_availability",
+          "type": "boolean",
           "label": "model_availability · 有无可用模型",
           "description": "看是否无可用模型（无模型 / 全部限流或异常）+ 最近被阻断的执行记录",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_probe",
+          "type": "boolean",
           "label": "model_probe · 立即探测",
           "description": "立即对模型发极小探针消息测当前可用性（200/429/其它）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_report_blocked",
+          "type": "boolean",
           "label": "model_report_blocked · 报告阻断",
           "description": "报告一次被限流阻断的执行（大量 429 导致任务中断）→ 标记模型不可用（大量出错且阻断执行才标记）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_history",
+          "type": "boolean",
           "label": "model_history · 探测历史",
           "description": "查看模型的探测历史（可用性 / 延迟 / 429 恢复时间预测）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_balance",
+          "type": "boolean",
           "label": "model_balance · 余额/用量",
           "description": "查询各 AI provider 账户余额/套餐用量（支持公开余额 API 的）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_config",
+          "type": "boolean",
           "label": "model_config · 配置",
           "description": "查看/修改 aiti-model-check 配置（修改需确认）",
           "enabled": false
@@ -8997,7 +9254,7 @@
     {
       "id": "aiti-model-recent",
       "name": "Model Recent",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-model-recent/assets/dist/aiti-model-recent.mjs?v=a9117c0ec923",
       "ui": {
         "i18n": {
@@ -9022,7 +9279,7 @@
     {
       "id": "aiti-model-wizard",
       "name": "模型添加向导（目录搜索 / 反向匹配 / 自动探测）",
-      "version": "0.1.17",
+      "version": "0.1.18",
       "clientUrl": "/api/extensions/aiti-model-wizard/assets/dist/aiti-model-wizard-client.mjs?v=ec0d5c801b52",
       "ui": {
         "toolbar": [
@@ -11165,54 +11422,63 @@
       "features": [
         {
           "id": "tool.aiti_model_wizard_status",
+          "type": "boolean",
           "label": "model_wizard_status · 现状",
           "description": "模型添加向导：当前已配置 providers（token 打码）+ models.json 路径",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_search",
+          "type": "boolean",
           "label": "model_wizard_search · 搜索目录",
           "description": "在目录里搜索 AI 提供商（中文/英文/别名/模型 id）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_provider",
+          "type": "boolean",
           "label": "model_wizard_provider · 提供商详情",
           "description": "查看某个提供商详情（api 地址/注册说明/领 token/已知模型）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_detect",
+          "type": "boolean",
           "label": "model_wizard_detect · 端点探测",
           "description": "给 baseUrl 自动探测 api 接口类型和真实地址（漏 /v1 /v2 自动补）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_test",
+          "type": "boolean",
           "label": "model_wizard_test · 测试连接",
           "description": "测试连接：2xx/429 通过，401/403 无效；有 model 发探针，无 model 拉 /models 验证",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_save",
+          "type": "boolean",
           "label": "model_wizard_save · 写 models.json",
           "description": "把 provider + 模型列表写入 models.json（合并去重，token 打码；可选多 key）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_combo_save",
+          "type": "boolean",
           "label": "model_wizard_combo_save · 建/改聚合组",
           "description": "创建或更新模型聚合组（组合模型）：多个真实模型组成虚拟模型，粘性+权重路由",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_keys",
+          "type": "boolean",
           "label": "model_wizard_keys · 多 key 管理",
           "description": "管理某 provider 的多个 API key（list/set/remove，含 rpm 限速）",
           "enabled": false
         },
         {
           "id": "tool.aiti_model_wizard_delete",
+          "type": "boolean",
           "label": "model_wizard_delete · 删 provider",
           "description": "从 models.json 删除一个 provider（其 apiKeys 一并删除）",
           "enabled": false
@@ -11229,7 +11495,7 @@
     {
       "id": "aiti-models-import",
       "name": "模型配置导入（从其他 agent）",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "clientUrl": "/api/extensions/aiti-models-import/assets/dist/aiti-models-import.mjs?v=224c27fafdcf",
       "ui": {
         "toolbar": [
@@ -11237,9 +11503,7 @@
             "id": "aiti-models-import-open",
             "label": "i18n:mi.open.label",
             "title": "i18n:mi.open.title",
-            "icon": {
-              "svg": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>"
-            }
+            "icon": "icons/import.svg"
           }
         ],
         "i18n": {
@@ -11547,7 +11811,7 @@
     {
       "id": "aiti-msg-anchor",
       "name": "消息锚点横幅",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-msg-anchor/assets/dist/aiti-msg-anchor-client.mjs?v=6d99678aa30f",
       "ui": {
         "clientDependsOn": [
@@ -11590,6 +11854,7 @@
       "features": [
         {
           "id": "show.banner",
+          "type": "boolean",
           "label": "显示消息锚点横幅",
           "description": "消息区顶部常驻横幅，展示当前视口所属的用户输入",
           "enabled": true
@@ -11605,12 +11870,14 @@
         },
         {
           "id": "display.title",
+          "type": "boolean",
           "label": "显示会话标题行",
           "description": "横幅第一行显示当前会话标题（name，无则显示会话第一条输入）",
           "enabled": true
         },
         {
           "id": "display.input",
+          "type": "boolean",
           "label": "显示当前输入行",
           "description": "横幅第二行显示当前视口所属的用户输入（display.mode 决定的输入）",
           "enabled": true
@@ -11638,7 +11905,7 @@
     {
       "id": "aiti-msg-nav",
       "name": "消息滚动导航",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-msg-nav/assets/dist/aiti-msg-nav-client.mjs?v=d41b04eeb972",
       "ui": {
         "clientDependsOn": [],
@@ -11671,12 +11938,14 @@
       "features": [
         {
           "id": "show.toolbar",
+          "type": "boolean",
           "label": "显示消息滚动导航条",
           "description": "消息区右侧的到最早/到最新/上一条/下一条按钮列",
           "enabled": true
         },
         {
           "id": "behavior.keepAwake",
+          "type": "boolean",
           "label": "长按『到最新』保持屏幕常亮",
           "description": "agent 运行时长按最底部按钮可让屏幕保持常亮（Screen Wake Lock API，不支持时自动降级）",
           "enabled": true
@@ -11686,7 +11955,7 @@
     {
       "id": "aiti-msg-share",
       "name": "消息分享",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-msg-share/assets/dist/aiti-msg-share-client.mjs?v=6d0285979b9e",
       "ui": {
         "i18n": {
@@ -11982,9 +12251,7 @@
           {
             "id": "aiti-msg-share.open",
             "label": "i18n:share.center",
-            "icon": {
-              "svg": "<circle cx=\"18\" cy=\"5\" r=\"3\"/><circle cx=\"6\" cy=\"12\" r=\"3\"/><circle cx=\"18\" cy=\"19\" r=\"3\"/><line x1=\"8.6\" y1=\"10.5\" x2=\"15.4\" y2=\"6.5\"/><line x1=\"8.6\" y1=\"13.5\" x2=\"15.4\" y2=\"17.5\"/>"
-            }
+            "icon": "icons/share-2.svg"
           }
         ],
         "userMessageActions": [
@@ -12120,42 +12387,45 @@
       "source": "user",
       "icon": "icon.svg",
       "description": "Message click recognition — paragraph/heading/code-line clicks → quote/copy/option popups + clause/line highlighting",
-      "optionalDependsOn": [
-        "aiti-git-trace"
-      ],
       "features": [
         {
           "id": "recognizer.question",
+          "type": "boolean",
           "label": "问题识别（引用回复）",
           "description": "识别封闭问句/选择问 → 选项按钮 + 引用回复",
           "enabled": true
         },
         {
           "id": "recognizer.selection",
+          "type": "boolean",
           "label": "划选识别（引用片段）",
           "description": "消息区划选文字 → 弹层：复制 / 引用回复（当前会话）/ 新会话引用（投递到新建会话 composer）",
           "enabled": true
         },
         {
           "id": "recognizer.file",
+          "type": "boolean",
           "label": "文件/目录识别",
           "description": "提取段落内文件/目录路径 → 打开/定位按钮（存在性校验）",
           "enabled": true
         },
         {
           "id": "recognizer.fileExternalRoots",
+          "type": "boolean",
           "label": "跨仓文件分辨",
           "description": "主 cwd 未命中时，配合 aiti-git-trace 的会话识别仓/关注路径分辩 cwd 外文件（如写入 ~/workspace/pi-web 却只说 docs/x.md）",
           "enabled": true
         },
         {
           "id": "recognizer.url",
+          "type": "boolean",
           "label": "链接识别",
           "description": "识别段落内 http/https 链接 → 新窗口打开按钮",
           "enabled": true
         },
         {
           "id": "recognizer.summary",
+          "type": "boolean",
           "label": "复制全文",
           "description": "任意段落提供复制全文动作",
           "enabled": true
@@ -12165,7 +12435,7 @@
     {
       "id": "aiti-omp-agent",
       "name": "Oh My Pi (omp 子进程后端)",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -12264,6 +12534,7 @@
       "features": [
         {
           "id": "onlyoffice.enabled",
+          "type": "boolean",
           "label": "启用 OnlyOffice",
           "description": "开启后探测 DocumentServer，健康时注册 word/sheet/slide 三 provider（Docker：scripts/onlyoffice-up.sh）",
           "enabled": false
@@ -12299,7 +12570,7 @@
     {
       "id": "aiti-pair",
       "name": "设备互连（临时聊天 / 互传文件）",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "clientUrl": "/api/extensions/aiti-pair/assets/dist/aiti-pair-client.mjs?v=b537929a5d65",
       "ui": {
         "rightFileDock": [
@@ -12320,6 +12591,13 @@
             "it.pair.label.2": "设备配对面板",
             "it.pair.label.3": "设备配对",
             "it.pair.title": "设备配对",
+            "it.pair.dialogTitle": "✉ 设备互连",
+            "it.pair.dialogSubtitle": "连同一桥即互发",
+            "it.pair.close": "关闭",
+            "it.pair.dockRight": "停靠到右侧",
+            "it.pair.phoneTitle": "设备互连 · 手机接入",
+            "it.pair.loadFailed": "pair-client.js 加载失败（aiti-devtools 扩展未部署？）",
+            "it.pair.loadNotExposed": "pair-client.js 已加载但未暴露 AitiPair（aiti-devtools 版本过旧？）",
             "ext.displayName": "设备互连（临时聊天 / 互传文件）"
           },
           "en": {
@@ -12327,6 +12605,13 @@
             "it.pair.label.2": "Device pairing panel",
             "it.pair.label.3": "Device pairing",
             "it.pair.title": "Device pairing",
+            "it.pair.dialogTitle": "✉ Device pairing",
+            "it.pair.dialogSubtitle": "Same bridge = direct delivery",
+            "it.pair.close": "Close",
+            "it.pair.dockRight": "Dock to the right panel",
+            "it.pair.phoneTitle": "Device pairing · phone access",
+            "it.pair.loadFailed": "pair-client.js failed to load (is the aiti-devtools extension deployed?)",
+            "it.pair.loadNotExposed": "pair-client.js loaded but did not expose AitiPair (outdated aiti-devtools?)",
             "ext.displayName": "Device Pairing (temp chat / file transfer)"
           }
         }
@@ -12339,7 +12624,7 @@
     {
       "id": "aiti-pi-agent",
       "name": "Pi Spawn (子进程后端)",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": null,
       "ui": {
         "i18n": {
@@ -12404,7 +12689,7 @@
     {
       "id": "aiti-plan-first",
       "name": "方案先行",
-      "version": "0.1.8",
+      "version": "0.2.0",
       "clientUrl": "/api/extensions/aiti-plan-first/assets/dist/aiti-plan-first-client.mjs?v=69ba9682efe8",
       "ui": {
         "toolbar": [
@@ -12412,9 +12697,7 @@
             "id": "aiti-plan-first-button",
             "label": "i18n:pf.app.label",
             "title": "i18n:pf.app.title",
-            "icon": {
-              "svg": "<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><path d=\"M12 11h4\"/><path d=\"M12 16h4\"/><path d=\"M8 11h.01\"/><path d=\"M8 16h.01\"/>"
-            }
+            "icon": "icons/clipboard-list.svg"
           }
         ],
         "sessionRowLeading": [
@@ -12796,7 +13079,7 @@
     {
       "id": "aiti-prompts",
       "name": "aiti prompt 片段收藏库",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-prompts/assets/dist/aiti-prompts-client.mjs?v=9914912d2038",
       "ui": {
         "clientImmediately": false,
@@ -12805,24 +13088,20 @@
             "id": "aiti-prompts-open",
             "label": "i18n:pp.app.label",
             "title": "i18n:pp.app.title",
-            "icon": {
-              "svg": "<path d=\"m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z\"/>"
-            }
+            "icon": "icons/bookmark.svg"
           },
           {
             "id": "aiti-prompts-export",
             "label": "i18n:pp.export.label",
             "title": "i18n:pp.export.title",
-            "icon": {
-              "svg": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M12 15V3\"/>"
-            }
+            "icon": "icons/import.svg"
           }
         ],
         "sidebarExplorerDock": [
           {
             "id": "panel",
-            "label": "i18n:pp.library.label",
-            "icon": "library"
+            "label": "i18n:pp.title",
+            "icon": "icons/bookmark.svg"
           }
         ],
         "rightFileDock": [
@@ -12974,25 +13253,25 @@
             "＋ 新建分组": "＋ New group",
             "＋ 新建子分组（在「": "＋ New subgroup (under \"",
             "it.export.label.2": "Export prompts",
-            "it.panel.title.2": "Snippet library",
+            "it.panel.title.2": "Prompt Snippets",
             "it.export.label": "Export prompts",
-            "it.open.title": "aiti-prompts: snippets / session extraction / queue jump",
+            "it.open.title": "Prompt Snippets: library / session extraction / queue jump",
             "it.open.label": "Prompt Snippets",
-            "it.panel.title": "Snippet library",
-            "it.panel.label": "Snippet library",
-            "it.aiti-prompts-panel.label": "aiti-prompts snippet library",
-            "it.aiti-prompts-save.label": "aiti-prompts save prompt",
-            "it.aiti-prompts-export.label": "aiti-prompts export prompts",
+            "it.panel.title": "Prompt Snippets",
+            "it.panel.label": "Prompt Snippets",
+            "it.aiti-prompts-panel.label": "Prompt snippet library",
+            "it.aiti-prompts-save.label": "Save prompt",
+            "it.aiti-prompts-export.label": "Export prompts",
             "ext.displayName": "Prompt Snippets",
-            "feat.aiti-prompts-panel": "aiti-prompts snippet library",
-            "feat.aiti-prompts-save": "aiti-prompts save prompt",
-            "feat.aiti-prompts-export": "aiti-prompts export prompts",
+            "feat.aiti-prompts-panel": "Prompt snippet library",
+            "feat.aiti-prompts-save": "Save prompt",
+            "feat.aiti-prompts-export": "Export prompts",
             "pp.app.label": "Prompt",
-            "pp.app.title": "aiti-prompts: library / session extraction / one-click queue-jump",
+            "pp.app.title": "Prompt Snippets: library / session extraction / one-click queue jump",
             "pp.export.label": "Export prompts",
-            "pp.export.title": "aiti-prompts: export this session's prompts (md/json)",
-            "pp.library.label": "Library",
-            "pp.title": "aiti-prompts",
+            "pp.export.title": "Prompt Snippets: export this session's prompts (md/json)",
+            "pp.library.label": "Prompt library",
+            "pp.title": "Prompt Snippets",
             "exportPrompts.title": "Export prompts",
             "exportPrompts.dateFrom": "From",
             "exportPrompts.dateTo": "To",
@@ -13140,7 +13419,7 @@
             "＋ 新建分组": "＋ 新建分组",
             "＋ 新建子分组（在「": "＋ 新建子分组（在「",
             "it.export.label.2": "导出 Prompts",
-            "it.panel.title.2": "收藏库",
+            "it.panel.title.2": "提示词收藏",
             "it.export.label": "导出 Prompts",
             "it.open.title": "aiti-prompts：收藏库 / 会话提取 / 一键插队排队",
             "it.open.label": "Prompt 收藏库",
@@ -13197,13 +13476,19 @@
     {
       "id": "aiti-provider-usage",
       "name": "Provider Usage",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-provider-usage/assets/dist/aiti-provider-usage.mjs?v=d53ffde1dad1",
       "ui": {
         "sessionInfoPanel": [
           {
             "id": "panel",
             "label": "剩余额度"
+          }
+        ],
+        "sessionStatsInline": [
+          {
+            "id": "quota-chip",
+            "label": "i18n:providerUsage.chip.label"
           }
         ],
         "i18n": {
@@ -13220,7 +13505,19 @@
             "providerUsage.updated": "更新于 {time}",
             "providerUsage.refresh": "刷新用量",
             "providerUsage.refreshing": "正在刷新用量",
-            "providerUsage.available": "可用"
+            "providerUsage.available": "可用",
+            "providerUsage.chip.label": "剩余额度",
+            "providerUsage.chip.tooltip": "额度",
+            "providerUsage.account": "当前会话账号",
+            "providerUsage.remaining": "剩余",
+            "providerUsage.quotaExceeded": "配额耗尽",
+            "providerUsage.plan": "套餐",
+            "providerUsage.expires": "到期",
+            "providerUsage.source": "来源",
+            "providerUsage.lastTurn": "上一轮",
+            "providerUsage.bucket.user_quota": "基础",
+            "providerUsage.bucket.add_on_quota": "扩展",
+            "providerUsage.bucket.org_resource_package": "组织"
           },
           "zh-TW": {
             "providerUsage.remainingQuota": "剩餘額度",
@@ -13235,10 +13532,23 @@
             "providerUsage.updated": "更新於 {time}",
             "providerUsage.refresh": "重新整理用量",
             "providerUsage.refreshing": "正在重新整理用量",
-            "providerUsage.available": "可用"
+            "providerUsage.available": "可用",
+            "providerUsage.chip.label": "剩餘額度",
+            "providerUsage.chip.tooltip": "額度",
+            "providerUsage.account": "當前會話帳號",
+            "providerUsage.remaining": "剩餘",
+            "providerUsage.quotaExceeded": "配額耗盡",
+            "providerUsage.plan": "套餐",
+            "providerUsage.expires": "到期",
+            "providerUsage.source": "來源",
+            "providerUsage.lastTurn": "上一輪",
+            "providerUsage.bucket.user_quota": "基礎",
+            "providerUsage.bucket.add_on_quota": "擴展",
+            "providerUsage.bucket.org_resource_package": "組織"
           },
           "en": {
             "feat.providerUsage.enabled": "Remaining quota panel",
+            "feat.usageChip": "Quota chip",
             "feat.panel": "Remaining quota",
             "providerUsage.remainingQuota": "Remaining quota",
             "providerUsage.currentSession": "current session",
@@ -13252,16 +13562,25 @@
             "providerUsage.updated": "Updated {time}",
             "providerUsage.refresh": "Refresh usage",
             "providerUsage.refreshing": "Refreshing usage",
-            "providerUsage.available": "Available"
+            "providerUsage.available": "Available",
+            "providerUsage.chip.label": "Remaining quota",
+            "providerUsage.chip.tooltip": "quota",
+            "providerUsage.account": "Current session account",
+            "providerUsage.remaining": "Remaining",
+            "providerUsage.quotaExceeded": "Quota exhausted",
+            "providerUsage.plan": "Plan",
+            "providerUsage.expires": "Expires",
+            "providerUsage.source": "Source",
+            "providerUsage.lastTurn": "Last turn",
+            "providerUsage.bucket.user_quota": "Base",
+            "providerUsage.bucket.add_on_quota": "Add-on",
+            "providerUsage.bucket.org_resource_package": "Org"
           }
         }
       },
       "source": "user",
       "icon": "icons/chart-column.svg",
       "description": "Provider balance/quota lookup — 16 adapter ids (DeepSeek/OpenRouter/Z.AI/OpenCode Go/Kimi/Codex/Copilot etc.), session info panel \"remaining quota\" section with the current session pinned on top, 5min TTL overview + manual refresh, event-driven zero polling",
-      "provides": [
-        "aiti-provider-usage.overview"
-      ],
       "features": [
         {
           "id": "providerUsage.enabled",
@@ -13269,13 +13588,20 @@
           "label": "剩余额度面板",
           "placeholder": "会话信息面板余额区块（15+ 家 provider）；关闭后信息面板不显示余额区（上游同形）",
           "enabled": true
+        },
+        {
+          "id": "usageChip",
+          "type": "boolean",
+          "label": "工具条额度徽标",
+          "placeholder": "会话统计行尾部显示当前会话账号剩余额度（悬停看摘要，点击打开会话信息看明细）",
+          "enabled": true
         }
       ]
     },
     {
       "id": "aiti-qoder-agent",
       "name": "Qoder CLI (国际/CN 独立 CLI·非 IDE)",
-      "version": "0.4.13",
+      "version": "0.4.14",
       "clientUrl": null,
       "ui": {
         "provides": [
@@ -13343,7 +13669,7 @@
     {
       "id": "aiti-queue-keeper",
       "name": "Queue Keeper",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-queue-keeper/assets/dist/aiti-queue-keeper.mjs?v=6763af5f8bc7",
       "ui": {
         "queuePanel": [
@@ -13522,7 +13848,7 @@
     {
       "id": "aiti-quickstart",
       "name": "快速上手",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "clientUrl": "/api/extensions/aiti-quickstart/assets/dist/aiti-quickstart-client.mjs?v=2a068a8ac3d0",
       "ui": {
         "clientImmediately": false,
@@ -13589,9 +13915,7 @@
             "id": "quickstart-open",
             "label": "i18n:qs.sidebarLabel",
             "title": "i18n:qs.sidebarTitle",
-            "icon": {
-              "svg": "<path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z\"/><path d=\"m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0\"/><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/>"
-            },
+            "icon": "icons/rocket.svg",
             "hidden": true
           }
         ],
@@ -13600,9 +13924,7 @@
             "id": "acquire",
             "label": "获取工作区…",
             "title": "获取工作区：Git 克隆 / 上传 / 本地目录 / 新建",
-            "icon": {
-              "svg": "<path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z\"/><path d=\"m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0\"/><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/>"
-            }
+            "icon": "icons/rocket.svg"
           }
         ],
         "i18n": {
@@ -13692,6 +14014,7 @@
             "qs.hub.clone.branch": "分支（可选）",
             "qs.hub.clone.dir": "目标目录（可选，默认 ~/workspace/<仓库名>）",
             "qs.hub.clone.depth": "浅克隆（--depth 1，只取最新提交）",
+            "qs.hub.clone.submodules": "初始化子模块（--recurse-submodules）",
             "qs.hub.clone.go": "开始克隆",
             "qs.hub.clone.needGit": "未找到 git——请先安装 git 再使用克隆",
             "qs.hub.clone.ok": "克隆完成：{root}",
@@ -13702,7 +14025,28 @@
             "qs.hub.new.go": "创建并使用",
             "qs.hub.new.created": "已创建：{root}",
             "qs.hub.forget": "移除记录",
-            "qs.hub.err.parse": "无法识别的仓库地址（支持 https…git / git@host:path / git:<url> / 本地路径）"
+            "qs.hub.err.parse": "无法识别的仓库地址（支持 https…git / git@host:path / git:<url> / 本地路径）",
+            "i18n.close": "关闭",
+            "i18n.cancel": "取消",
+            "i18n.checking": "检查中…",
+            "directoryPicker.selectDirectory": "选择目录",
+            "directoryPicker.goToParent": "转到上级目录",
+            "directoryPicker.directoryPath": "目录路径",
+            "directoryPicker.editPath": "编辑路径",
+            "directoryPicker.pathEditHint": "点击或直接键入以编辑路径（Alt+D / Ctrl+L）",
+            "directoryPicker.copyPath": "复制路径",
+            "directoryPicker.copied": "已复制路径",
+            "directoryPicker.pathPlaceholder": "/路径/到/项目 或 ~/项目",
+            "directoryPicker.loadingDirectories": "正在加载目录…",
+            "directoryPicker.noDrives": "未找到盘符",
+            "directoryPicker.noSubdirectories": "没有子目录",
+            "directoryPicker.selectCurrentDirectory": "选择当前目录",
+            "directoryPicker.selectThisFolder": "选择此文件夹",
+            "directoryPicker.newFolder": "新建文件夹",
+            "directoryPicker.newFolderIn": "在 {path} 新建文件夹",
+            "directoryPicker.folderName": "文件夹名",
+            "directoryPicker.create": "创建",
+            "directoryPicker.creating": "创建中…"
           },
           "en": {
             "ext.displayName": "Quickstart",
@@ -13790,6 +14134,7 @@
             "qs.hub.clone.branch": "Branch (optional)",
             "qs.hub.clone.dir": "Target directory (optional, default ~/workspace/<repo>)",
             "qs.hub.clone.depth": "Shallow clone (--depth 1, latest commit only)",
+            "qs.hub.clone.submodules": "Initialize submodules (--recurse-submodules)",
             "qs.hub.clone.go": "Clone",
             "qs.hub.clone.needGit": "git not found — install git to use clone",
             "qs.hub.clone.ok": "Cloned: {root}",
@@ -13800,23 +14145,43 @@
             "qs.hub.new.go": "Create & use",
             "qs.hub.new.created": "Created: {root}",
             "qs.hub.forget": "Forget",
-            "qs.hub.err.parse": "Unrecognized repository URL (https…git / git@host:path / git:<url> / local path)"
+            "qs.hub.err.parse": "Unrecognized repository URL (https…git / git@host:path / git:<url> / local path)",
+            "i18n.close": "Close",
+            "i18n.cancel": "Cancel",
+            "i18n.checking": "Checking…",
+            "directoryPicker.selectDirectory": "Select directory",
+            "directoryPicker.goToParent": "Go to parent directory",
+            "directoryPicker.directoryPath": "Directory path",
+            "directoryPicker.editPath": "Edit path",
+            "directoryPicker.pathEditHint": "Click or type to edit the path (Alt+D / Ctrl+L)",
+            "directoryPicker.copyPath": "Copy path",
+            "directoryPicker.copied": "Path copied",
+            "directoryPicker.pathPlaceholder": "/path/to/project or ~/project",
+            "directoryPicker.loadingDirectories": "Loading directories…",
+            "directoryPicker.noDrives": "No drives found",
+            "directoryPicker.noSubdirectories": "No subdirectories",
+            "directoryPicker.selectCurrentDirectory": "Select current directory",
+            "directoryPicker.selectThisFolder": "Select this folder",
+            "directoryPicker.newFolder": "New folder",
+            "directoryPicker.newFolderIn": "Create a new folder in {path}",
+            "directoryPicker.folderName": "Folder name",
+            "directoryPicker.create": "Create",
+            "directoryPicker.creating": "Creating…"
           }
         }
       },
       "source": "user",
       "icon": "icons/rocket.svg",
-      "category": "session",
       "description": "Blank-state onboarding extension — new-session welcome page widgets (getting-started steps / quick actions / while-it-runs concepts / sample prompts, via the host newSessionWidgets slot, ⚙ customizable) + a left sidebar DockStack fully-collapsed blank guide card (shares the screen with the app center, ✕ dismissible) + a v2 workspace-acquisition Hub (Git clone / upload archive / local directory / create new) + a sidebar \"Quick Start\" static entry (pinnable as a card in the app center; clicking returns to the quickstart welcome page)",
-      "optionalDependsOn": [
-        "session-manager"
+      "category": [
+        "session"
       ],
       "features": null
     },
     {
       "id": "aiti-recovery",
       "name": "Recovery",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "clientUrl": "/api/extensions/aiti-recovery/assets/dist/aiti-recovery.mjs?v=6a1e0254c6ed",
       "ui": {
         "recoveryDialog": [
@@ -14014,7 +14379,7 @@
     {
       "id": "aiti-session-cards",
       "name": "会话请求卡（审批/问答/授权）",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "clientUrl": "/api/extensions/aiti-session-cards/assets/dist/aiti-session-cards.mjs?v=4c228dff1688",
       "ui": {
         "i18n": {
@@ -14040,9 +14405,11 @@
     {
       "id": "aiti-sheet-univer",
       "name": "aiti-sheet-univer",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-sheet-univer/assets/dist/aiti-sheet-univer-client.mjs?v=0ae1a7581bc9",
       "ui": {
+        "clientImmediately": false,
+        "prefetchOnIdle": true,
         "i18n": {
           "zh-CN": {
             "ext.displayName": "Excel 编辑器"
@@ -14060,6 +14427,7 @@
       "features": [
         {
           "id": "sheet.edit",
+          "type": "boolean",
           "label": "Excel 编辑保存",
           "description": "开启后 .xlsx/.xlsm 提供 edit 能力（保存走 save-blob）；关闭仅预览",
           "enabled": true
@@ -14069,7 +14437,7 @@
     {
       "id": "aiti-subagents",
       "name": "子代理（ai 委托 · 多 agent 协作）",
-      "version": "0.4.13",
+      "version": "0.4.14",
       "clientUrl": "/api/extensions/aiti-subagents/assets/dist/aiti-subagents-client.mjs?v=21bed8633810",
       "ui": {
         "i18n": {
@@ -14409,9 +14777,7 @@
             "id": "aiti-subagents",
             "label": "i18n:sub.open.label",
             "title": "i18n:sub.open.title",
-            "icon": {
-              "svg": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>"
-            }
+            "icon": "icons/users.svg"
           }
         ],
         "sidebarExplorerDock": [
@@ -14462,7 +14828,7 @@
     {
       "id": "aiti-sysmon",
       "name": "系统状态（服务器 CPU/内存/磁盘/网络/温度）",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "clientUrl": "/api/extensions/aiti-sysmon/assets/dist/aiti-sysmon-client.mjs?v=3bba6ccc6e08",
       "ui": {
         "clientImmediately": true,
@@ -14470,9 +14836,7 @@
           {
             "id": "panel",
             "label": "i18n:sy.panel.label",
-            "icon": {
-              "svg": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m12 12 4-4\"/>"
-            }
+            "icon": "icons/gauge.svg"
           }
         ],
         "toolbar": [
@@ -14480,9 +14844,7 @@
             "id": "aiti-sysmon-open",
             "label": "i18n:sy.toolbar.label",
             "title": "i18n:sy.toolbar.title",
-            "icon": {
-              "svg": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m12 12 4-4\"/>"
-            }
+            "icon": "icons/gauge.svg"
           }
         ],
         "sessionStatsInline": [
@@ -14580,7 +14942,7 @@
     {
       "id": "aiti-testagent",
       "name": "TestAgent 连桥（Java 进程扫描 / Attach）",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-testagent/assets/dist/aiti-testagent-client.mjs?v=546fa5a33ac7",
       "ui": {
         "toolbar": [
@@ -14588,9 +14950,7 @@
             "id": "java",
             "label": "Java",
             "title": "i18n:at.title",
-            "icon": {
-              "svg": "<path d=\"M17 8h1a4 4 0 1 1 0 8h-1\"/><path d=\"M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z\"/><path d=\"M6 2v2\"/><path d=\"M10 2v2\"/><path d=\"M14 2v2\"/>"
-            }
+            "icon": "icons/coffee.svg"
           }
         ],
         "rightFileDock": [
@@ -14668,7 +15028,7 @@
     {
       "id": "aiti-testagent-native",
       "name": "testagent-native（Windows API/COM 追踪面板）",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-testagent-native/assets/dist/aiti-testagent-native-client.mjs?v=0d69e2442d4f",
       "ui": {
         "toolbar": [
@@ -14676,9 +15036,7 @@
             "id": "testagent-native",
             "label": "Win",
             "title": "i18n:wt.title",
-            "icon": {
-              "svg": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><line x1=\"8\" y1=\"21\" x2=\"16\" y2=\"21\"/><line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"21\"/>"
-            }
+            "icon": "icons/monitor.svg"
           }
         ],
         "rightFileDock": [
@@ -14739,7 +15097,7 @@
     {
       "id": "aiti-ui-env",
       "name": "UI 环境（桌面/无头虚拟屏）",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-ui-env/assets/dist/aiti-ui-env-client.mjs?v=9783ed4eb84a",
       "ui": {
         "clientImmediately": false,
@@ -14748,9 +15106,7 @@
             "id": "ui-env-toolbar",
             "label": "i18n:uiEnv.open",
             "title": "i18n:uiEnv.toolbarTitle",
-            "icon": {
-              "svg": "<rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\"/><line x1=\"8\" y1=\"21\" x2=\"16\" y2=\"21\"/><line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"21\"/>"
-            }
+            "icon": "icons/monitor.svg"
           }
         ],
         "rightFileDock": [
@@ -15043,7 +15399,7 @@
             "启动中…": "Starting…",
             "在跑": "running",
             "复制": "Copy",
-            "外部/远程 VNC（如 private-host:5900）；也可连本机未扫描到的端口": "External / remote VNC (e.g. private-host:5900); also connects to local ports the scan missed",
+            "外部/远程 VNC（如 192.0.2.1.20:5900）；也可连本机未扫描到的端口": "External / remote VNC (e.g. 192.0.2.1.20:5900); also connects to local ports the scan missed",
             "多实例：每次「▶ 启动」新实例随机分配 RFB/Web 端口，URL 路径段 = 实例真随机 token（代表该实例/端口，不落目标地址，定期轮换）。": "Multi-instance: each \"▶ Start\" spins a new instance with random RFB/Web ports; the URL path segment is a truly random token per instance/port (never the target address, rotated periodically).",
             "如 99": "e.g. 99",
             "安装中…（可能需 1-3 分钟）": "Installing… (may take 1-3 minutes)",
@@ -15241,7 +15597,7 @@
             "启动中…": "启动中…",
             "在跑": "在跑",
             "复制": "复制",
-            "外部/远程 VNC（如 private-host:5900）；也可连本机未扫描到的端口": "外部/远程 VNC（如 private-host:5900）；也可连本机未扫描到的端口",
+            "外部/远程 VNC（如 192.0.2.1.20:5900）；也可连本机未扫描到的端口": "外部/远程 VNC（如 192.0.2.1.20:5900）；也可连本机未扫描到的端口",
             "多实例：每次「▶ 启动」新实例随机分配 RFB/Web 端口，URL 路径段 = 实例真随机 token（代表该实例/端口，不落目标地址，定期轮换）。": "多实例：每次「▶ 启动」新实例随机分配 RFB/Web 端口，URL 路径段 = 实例真随机 token（代表该实例/端口，不落目标地址，定期轮换）。",
             "如 99": "如 99",
             "安装中…（可能需 1-3 分钟）": "安装中…（可能需 1-3 分钟）",
@@ -15563,30 +15919,35 @@
       "features": [
         {
           "id": "behavior.vnc",
+          "type": "boolean",
           "label": "VNC-on-web",
           "description": "虚拟屏带 x11vnc + node vnc-bridge/noVNC，可在浏览器查看/操作虚拟桌面",
           "enabled": true
         },
         {
           "id": "behavior.atspi",
+          "type": "boolean",
           "label": "AT-SPI 语义总线",
           "description": "虚拟屏环境注入 GTK/Qt a11y 开关（语义树可见，供 cua.ai 等独立扩展）",
           "enabled": true
         },
         {
           "id": "behavior.audio",
+          "type": "boolean",
           "label": "音频输出（Linux PipeWire/Pulse）",
           "description": "为虚拟屏/桌面启动的 GUI 应用注入 PULSE_SERVER + PIPEWIRE_RUNTIME_DIR（从 /run/user/<uid> 自动发现），让 SSH/agent 启动的 WebView、播放器能有声音；关闭则不改音频变量",
           "enabled": true
         },
         {
           "id": "behavior.autostart-headless",
+          "type": "boolean",
           "label": "虚拟屏未运行时自动拉起",
           "description": "resolve/run 时虚拟屏未启动→自动拉起 Xvfb+openbox（systemd 或裸进程）",
           "enabled": false
         },
         {
           "id": "behavior.random-display",
+          "type": "boolean",
           "label": "DISPLAY 随机避让",
           "description": "启动虚拟屏自动选空闲 DISPLAY 号（auto 随机，避免固定 :99 被占冲突）；关闭则固定用面板配置/默认号",
           "enabled": true
@@ -15611,54 +15972,63 @@
         },
         {
           "id": "tool.ui_env_status",
+          "type": "boolean",
           "label": "ui_env_status · 环境状态",
           "description": "报告当前模式、桌面/虚拟屏探测、VNC 链接、安装状态",
           "enabled": true
         },
         {
           "id": "tool.ui_env_set_mode",
+          "type": "boolean",
           "label": "ui_env_set_mode · 切换模式",
           "description": "切换显示模式（1优先桌面/2优先无头/3总是桌面/4总是无头），对新启动的 MCP/应用生效",
           "enabled": true
         },
         {
           "id": "tool.ui_env_resolve",
+          "type": "boolean",
           "label": "ui_env_resolve · 生成启动环境",
           "description": "按当前模式裁决目标屏，返回环境变量 JSON + export 行（给应用/MCP 启动器）",
           "enabled": true
         },
         {
           "id": "tool.ui_env_run",
+          "type": "boolean",
           "label": "ui_env_run · 代启动应用/MCP",
           "description": "用裁决后的环境启动命令（后台运行），返回 pid/目标屏/日志文件",
           "enabled": true
         },
         {
           "id": "tool.ui_env_headless",
+          "type": "boolean",
           "label": "ui_env_headless · 虚拟屏启停/查询",
           "description": "启动/停止/查询无头虚拟屏（Xvfb + 可配置 WM + dbus + AT-SPI；WM 经扩展管理器 behavior.wm 配置，默认 openbox）；start 幂等，stop 仅虚拟屏相关不碰真实桌面",
           "enabled": true
         },
         {
           "id": "tool.ui_env_deps",
+          "type": "boolean",
           "label": "ui_env_deps · 依赖自检/安装",
           "description": "自检/自动安装虚拟屏依赖组件（多发行版自适应）；action=check 只自检，install 需免密 sudo",
           "enabled": true
         },
         {
           "id": "tool.ui_env_vnc",
+          "type": "boolean",
           "label": "ui_env_vnc · VNC 查看/启停",
           "description": "查询/启动/停止 VNC-on-web（浏览器看虚拟桌面的地址）",
           "enabled": true
         },
         {
           "id": "behavior.rdp",
+          "type": "boolean",
           "label": "RDP-on-web",
           "description": "webRDP：通过 rdp-bridge 把 RDP 协议经 WebSocket 透传到浏览器（需 webRDP 静态资源 + 目标 RDP 服务器）",
           "enabled": true
         },
         {
           "id": "tool.ui_env_rdp",
+          "type": "boolean",
           "label": "ui_env_rdp · RDP 查看/启停",
           "description": "探测系统 RDP（xrdp）、启动/停止 RDP-on-web 桥、获取访问 URL",
           "enabled": true
@@ -15798,9 +16168,11 @@
     {
       "id": "aiti-word-docx-preview",
       "name": "aiti-word-docx-preview",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-word-docx-preview/assets/dist/aiti-word-docx-preview-client.mjs?v=35b387bf922d",
       "ui": {
+        "clientImmediately": false,
+        "prefetchOnIdle": true,
         "i18n": {
           "zh-CN": {
             "ext.displayName": "Word 预览"
@@ -15818,9 +16190,11 @@
     {
       "id": "aiti-word-superdoc",
       "name": "aiti-word-superdoc",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "clientUrl": "/api/extensions/aiti-word-superdoc/assets/dist/aiti-word-superdoc-client.mjs?v=a8f887f2b6ae",
       "ui": {
+        "clientImmediately": false,
+        "prefetchOnIdle": true,
         "i18n": {
           "zh-CN": {
             "ext.displayName": "Word 编辑"
@@ -15838,6 +16212,7 @@
       "features": [
         {
           "id": "word.edit",
+          "type": "boolean",
           "label": "Word 编辑保存",
           "description": "开启后 .docx 提供 edit 能力（保存走 save-blob）；关闭仅预览",
           "enabled": true
@@ -15847,7 +16222,7 @@
     {
       "id": "aiti-zcode-agent",
       "name": "ZCode CLI",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "clientUrl": "/api/extensions/aiti-zcode-agent/assets/dist/aiti-zcode-cards.mjs?v=37a148244b44",
       "ui": {
         "i18n": {
@@ -15985,7 +16360,7 @@
     {
       "id": "service-tunnels",
       "name": "Service Tunnels",
-      "version": "0.3.90",
+      "version": "0.3.91",
       "clientUrl": "/api/extensions/service-tunnels/assets/dist/service-tunnels.mjs?v=607c29fadb85",
       "ui": {
         "clientImmediately": false,
@@ -15994,9 +16369,7 @@
             "id": "ports",
             "label": "i18n:st.ports.label",
             "title": "i18n:st.ports.title",
-            "icon": {
-              "svg": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"2\" y1=\"12\" x2=\"22\" y2=\"12\"/><path d=\"M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"/>"
-            }
+            "icon": "icons/globe.svg"
           }
         ],
         "rightFileDock": [
@@ -16022,159 +16395,12 @@
             "id": "service-tunnels-mobile",
             "label": "i18n:mobile.footerLabel",
             "title": "i18n:mobile.footerTitle",
-            "icon": {
-              "svg": "<rect x=\"3\" y=\"3\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"M6 6h.01\"/><rect x=\"15\" y=\"3\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"M18 6h.01\"/><rect x=\"3\" y=\"15\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"M6 18h.01\"/><path d=\"M14 14h.01\"/><path d=\"M17 14h.01\"/><path d=\"M20 14h.01\"/><path d=\"M14 17h.01\"/><path d=\"M17 17h.01\"/><path d=\"M20 17h.01\"/><path d=\"M14 20h.01\"/><path d=\"M17 20h.01\"/><path d=\"M20 20h.01\"/>"
-            },
+            "icon": "icons/qr-code.svg",
             "hideOnMobile": true
           }
         ],
         "i18n": {
           "en": {
-            "ui.ports.allowDownload": "Allow on-demand tool downloads",
-            "ui.ports.toolsMissing": "missing",
-            "ui.ports.activeExposes": "Active exposes",
-            "ui.ports.detail": "Detail",
-            "ui.ports.stop": "Stop",
-            "ui.ports.stopAll": "Stop all",
-            "ui.ports.stopAllHint": "Stop every tunnel process and remove all proxy bindings?",
-            "ui.ports.stopConfirm": "Stop expose {name}?",
-            "ui.ports.stopHint": "Stops the tunnel process (or removes the proxy binding for proxy mode).",
-            "ui.ports.stopped": "Stopped",
-            "ui.ports.none": "No service ports found. Start a dev server and refresh.",
-            "ui.ports.loading": "Loading",
-            "ui.ports.listenOn": "Listening on",
-            "ui.ports.rename": "Name this service",
-            "ui.ports.renamePrompt": "Service name (empty to clear)",
-            "ui.ports.renamed": "Service name saved",
-            "ui.ports.detected": "detected",
-            "ui.ports.direct": "Direct (bypass panel)",
-            "ui.ports.viaProxy": "Via virtual host",
-            "ui.ports.proxyLocal": "local vhost",
-            "ui.ports.proxyDomain": "base domain",
-            "ui.ports.exposeTitle": "Expose this port",
-            "ui.ports.ipv6Address": "IPv6 address",
-            "ui.ports.ipv6Optional": "optional",
-            "ui.ports.ipv6Hint": "Direct public-IPv6 exposure (no tunnel). Leave empty to auto-detect the first global v6 — check with `st ipv6`.",
-            "ui.ports.thisPortExposes": "Exposes for this port",
-            "ui.ports.presetUser": "user",
-            "ui.ports.tcpNotSupport": "tunnel type does not support tcp",
-            "ui.ports.exposing": "Exposing…",
-            "ui.ports.exposeDone": "Expose ready",
-            "ui.ports.tokenHint": "Token auth: create a token in the Tokens tab",
-            "ui.ports.sshHint": "SSH auth: public keys follow the site; any protocol via port-forward",
-            "ui.ports.logFiles": "Log files",
-            "ui.ports.view": "View",
-            "ui.ports.tunnelParams": "Tunnel parameters",
-            "ui.ports.authParams": "Auth parameters",
-            "ui.ports.fieldRequired": "required",
-            "ui.ports.protoAuto": "auto-detect",
-            "ui.ports.fixedHint": "Fixed value — provided by the provider definition",
-            "ui.ports.selectHint": "Select…",
-            "ui.ports.presetUse": "Use preset…",
-            "ui.ports.presetSave": "Save as…",
-            "ui.ports.presetDel": "Delete preset",
-            "ui.ports.presetDeleted": "Preset deleted",
-            "ui.ports.presetLoadFailed": "Preset load failed",
-            "ui.ports.presetNamePrompt": "Preset name:",
-            "ui.ports.presetSensitiveHint": "saved — leave empty to use stored value",
-            "ui.ports.presetApplied": "Preset applied",
-            "ui.ports.presetSaved": "Preset saved",
-            "ui.ports.presetEmpty": "No params to save",
-            "ui.ports.presetPick": "Pick a preset first",
-            "ui.doctor.ev.phase-start": "▶ {label}",
-            "ui.doctor.ev.probe-done": "{item}: {verdict} ({ms}ms)",
-            "ui.doctor.ev.tunnel-est": "Tunnel established: {provider} → {url} ({ms}ms)",
-            "ui.doctor.ev.tunnel-fail": "Tunnel failed: {provider} — {error} ({ms}ms)",
-            "ui.doctor.ev.channel-result": "{provider} external check [{channel}] level {level} ({ms}ms)",
-            "ui.doctor.ev.verdict-confirmed": "{provider} verdict {verdict} ({sourcesOk} sources, confirmed)",
-            "ui.doctor.ev.advice-update": "Advice updated: {note}",
-            "ui.doctor.ev.phase-end": "Phase {phase} done — {summary}",
-            "ui.doctor.ev.summary": "Report ready (see summary card)",
-            "ui.doctor.ev.done": "Netcheck finished",
-            "ui.doctor.ev.error": "Netcheck error: {message}",
-            "ui.doctor.ev.cancelled": "Netcheck cancelled (partial results kept)",
-            "ui.doctor.ev.unknown": "Unknown event: {type}",
-            "ui.doctor.advice.confirmed": "confirmed",
-            "ui.doctor.advice.unconfirmed": "unconfirmed",
-            "ui.doctor.advice.untested": "not tested",
-            "ui.portmap.title": "Router mapping",
-            "ui.portmap.hint": "Creates a port mapping on the router so the internet can reach this port directly.",
-            "ui.portmap.method": "Mapping method",
-            "ui.portmap.gateway": "Gateway IP (optional)",
-            "ui.portmap.externalPort": "External port",
-            "ui.portmap.autoAssign": "auto",
-            "ui.portmap.leaseSeconds": "Lease seconds",
-            "ui.portmap.probe": "Probe router",
-            "ui.portmap.probing": "Probing router…",
-            "ui.portmap.probeOkUpnp": "Router supports UPnP — portmap ready",
-            "ui.portmap.probeOkPcp": "Router supports NAT-PMP/PCP — portmap ready",
-            "ui.portmap.probeCgnat": "External IP is CGNAT — router mapping cannot work; use tunnel / ipv6 instead",
-            "ui.portmap.probePublic": "External IP is public — no mapping needed for direct access",
-            "ui.portmap.probeNone": "Router does not support UPnP/NAT-PMP — use tunnel / ipv6 (or ssh-router)",
-            "ui.portmap.probeFail": "Probe failed: {error}",
-            "ui.ipv6.auto": "auto (detect public IPv6)",
-            "ui.ipv6.manual": "enter manually…",
-            "ui.ipv6.public": "outbound",
-            "ui.ipv6.loadFail": "IPv6 candidates unavailable: {error}",
-            "ui.detail.portmap": "Router mapping",
-            "ui.detail.leaseLeft": "Lease remaining",
-            "ui.detail.ipv6Entry": "IPv6 entry",
-            "ui.detail.ipv6Candidates": "Candidate addresses",
-            "ui.doctor.start": "Run netcheck",
-            "ui.doctor.stop": "Stop",
-            "ui.doctor.running": "netcheck running…",
-            "ui.doctor.advice": "Suggestions",
-            "ui.doctor.report": "Report",
-            "ui.doctor.copyMd": "Copy Markdown",
-            "ui.doctor.copied": "copied",
-            "ui.ddns.emptyTitle": "No DDNS configuration yet",
-            "ui.ddns.emptyGuide": "Step 1: add a provider credential below (API token of your DNS provider). Step 2: create a profile with your domain target. Step 3: register entries — portmap/tunnel exposes bound to a profile update DNS automatically on every expose.",
-            "ui.ddns.pp.title": "Provider profiles (credentials)",
-            "ui.ddns.pp.name": "Name",
-            "ui.ddns.pp.provider": "Provider",
-            "ui.ddns.pp.empty": "No provider credentials — add one below.",
-            "ui.ddns.pf.title": "Profiles (provider + domain target)",
-            "ui.ddns.pf.name": "Name",
-            "ui.ddns.pf.pp": "Provider profile",
-            "ui.ddns.pf.empty": "No profiles — add one below.",
-            "ui.ddns.e.title": "Registration entries (portmap/tunnel → auto DNS)",
-            "ui.ddns.e.name": "Name",
-            "ui.ddns.e.target": "Target",
-            "ui.ddns.e.flags": "Records",
-            "ui.ddns.e.empty": "No registration entries — portmap/tunnel exposes won't update DNS until one exists.",
-            "ui.ddns.e.addByProfile": "Add (profile reference)",
-            "ui.ddns.e.addFull": "Add (full details, standalone)",
-            "ui.ddns.add": "Add",
-            "ui.ddns.del": "Delete",
-            "ui.ddns.reveal": "Show token",
-            "ui.ddns.hide": "Hide token",
-            "ui.ddns.saved": "DDNS config saved",
-            "ui.ddns.pickProvider": "Pick a provider ({n} available)",
-            "ui.ddns.err.name": "Name is required",
-            "ui.ddns.err.provider": "Provider is required",
-            "ui.ddns.err.token": "Token is required",
-            "ui.ddns.err.zone": "Zone is required (e.g. example.com)",
-            "ui.ddns.err.zoneFormat": "Zone looks invalid (needs a dot, no spaces)",
-            "ui.ddns.err.profile": "Profile is required",
-            "ui.ddns.err.pp": "Provider profile is required",
-            "ui.ddns.err.flag": "Pick at least one record type (A/AAAA/CNAME/TXT)",
-            "ui.ports.authNoneBadge": "⚠ none",
-            "ui.ports.runningBadge": "● running",
-            "ui.ports.accessLog": "access",
-            "ui.ports.errorLog": "error",
-            "ui.detail.k.mode": "Mode",
-            "ui.detail.k.provider": "Auth",
-            "ui.detail.k.tunnel": "Tunnel",
-            "ui.detail.k.site": "Site",
-            "ui.detail.k.protocol": "Protocol",
-            "ui.detail.k.started": "Started",
-            "ui.detail.k.params": "Params",
-            "ui.detail.k.urls": "URLs",
-            "ui.ports.renamePlaceholder": "e.g. my-blog",
-            "ui.ports.renameHint": "Custom service name shown in the port list — leave empty to clear and fall back to the detected title.",
-            "ui.ports.renameClear": "Clear",
-            "ui.ports.renameSave": "Save",
-            "ui.ports.noneGuide": "Start a local service first (e.g. python3 -m http.server 8000), then refresh this page.",
             "ext.displayName": "Service Tunnels",
             "feat.self-expose-alert": "Unauthenticated exposure alert",
             "it.ports-dialog.label": "Service ports",
@@ -16386,6 +16612,50 @@
             "services.tabUsers": "Users",
             "services.tabSelf": "Pi-web",
             "services.selfAccessUrls": "Access URLs",
+            "services.svcTitle": "Service management",
+            "services.svcUnavailable": "Service management needs the aiti-updater extension (not deployed on this host).",
+            "services.svcLoading": "Reading run status…",
+            "services.svcFormService": "Service",
+            "services.svcFormBare": "Bare process",
+            "services.svcFormUnknown": "Unknown",
+            "services.svcUnit": "unit",
+            "services.svcLatest": "latest",
+            "services.svcUpdateAvailable": "update available",
+            "services.svcUpgrade": "Upgrade",
+            "services.svcUpgradeHint": "Launch the upgrade assistant (confirm gate lives in the assistant window)",
+            "services.svcDetails": "Details",
+            "services.svcRegister": "Register as service",
+            "services.svcRegisterHint": "Generate a register config and launch the switch assistant (confirm gate in the assistant window)",
+            "services.svcRestart": "Restart",
+            "services.svcStop": "Stop",
+            "services.svcStopHow": "stop",
+            "services.svcStopHowVal": "byPort (SIGTERM → SIGKILL grace 5s)",
+            "services.svcUnregister": "Unregister",
+            "services.svcUnregisterHint": "Stop and remove the service unit (pi-web goes down)",
+            "services.svcNameLabel": "Service name",
+            "services.svcManager": "manager",
+            "services.svcF": "form",
+            "services.svcCmd": "cmd",
+            "services.svcListen": "listen",
+            "services.svcBasePath": "base path",
+            "services.svcVersions": "versions",
+            "services.svcVersionsTip": "Version compare (current vs latest)",
+            "services.svcFailed": "Action failed",
+            "services.svcSource": "source: GET /api/extensions/aiti-updater/run-status · refreshes on window focus and after each action",
+            "services.pfAdopted": "Kept the current state",
+            "services.svcRegisterConfirm": "Re-register and replace the existing unit spec? The running process is restarted by the assistant.",
+            "services.svcStopAssistantHint": "Stops via the assistant (an external process — you'll see the stop output and the verification there)",
+            "services.pfFree": "Port is free — safe to register",
+            "services.pfSelfManaged": "Already hosted by the target service (same condition)",
+            "services.pfConflict": "Port is held by a DIFFERENT service/process",
+            "services.pfBare": "Held by a bare process — safe to stop and take over",
+            "services.pfOccupier": "Occupier",
+            "services.pfAdopt": "Adopt current (no action)",
+            "services.pfReregister": "Re-register (replace spec)",
+            "services.pfReplace": "Replace (stop occupier)",
+            "services.pfReplaceConfirm": "Stop the foreign unit \"{unit}\" and take the port over? This stops a service that is not yours.",
+            "services.pfCancel": "Cancel",
+            "services.svcRestartAssistantHint": "Restarts via the assistant (watch the stop → start → health verification live; one auto-retry on failure)",
             "services.selfUrl.loopback": "Loopback",
             "services.selfUrl.lan": "LAN ({name})",
             "services.selfUrl.vhostLocal": "Service vhost (local)",
@@ -16565,151 +16835,6 @@
             "mobile.footerTitle": "Open on phone: scan to open pi-web on your mobile"
           },
           "zh-CN": {
-            "ui.ports.allowDownload": "允许按需下载工具",
-            "ui.ports.toolsMissing": "缺失",
-            "ui.ports.activeExposes": "活动暴露",
-            "ui.ports.detail": "详情",
-            "ui.ports.stop": "停止",
-            "ui.ports.stopAll": "全部停止",
-            "ui.ports.stopAllHint": "停止所有隧道进程并移除全部代理绑定？",
-            "ui.ports.stopConfirm": "停止暴露 {name}？",
-            "ui.ports.stopHint": "停止隧道进程（proxy 模式移除代理绑定）。",
-            "ui.ports.stopped": "已停止",
-            "ui.ports.none": "未发现服务端口。启动开发服务器后刷新。",
-            "ui.ports.loading": "加载中",
-            "ui.ports.listenOn": "监听地址",
-            "ui.ports.rename": "命名此服务",
-            "ui.ports.renamePrompt": "服务名称（留空清除）",
-            "ui.ports.renamed": "服务名称已保存",
-            "ui.ports.detected": "探测",
-            "ui.ports.direct": "直连（绕过面板）",
-            "ui.ports.viaProxy": "虚拟主机",
-            "ui.ports.proxyLocal": "本地 vhost",
-            "ui.ports.proxyDomain": "部署域名",
-            "ui.ports.exposeTitle": "暴露此端口",
-            "ui.ports.ipv6Address": "IPv6 地址",
-            "ui.ports.ipv6Optional": "可选",
-            "ui.ports.ipv6Hint": "公网 IPv6 直连暴露（无需隧道）。留空自动选第一个全局 v6——先 `st ipv6` 确认。",
-            "ui.ports.thisPortExposes": "该端口已开暴露",
-            "ui.ports.presetUser": "预置用户",
-            "ui.ports.tcpNotSupport": "该隧道类型不支持 tcp",
-            "ui.ports.exposing": "正在暴露…",
-            "ui.ports.exposeDone": "暴露成功",
-            "ui.ports.tokenHint": "token 认证：请到 Tokens 页签创建 token",
-            "ui.ports.sshHint": "ssh 认证：公钥随 site；任意协议经端口转发",
-            "ui.ports.logFiles": "日志文件",
-            "ui.ports.view": "查看",
-            "ui.ports.tunnelParams": "隧道参数",
-            "ui.ports.authParams": "认证参数",
-            "ui.ports.fieldRequired": "为必选",
-            "ui.ports.protoAuto": "自动检测",
-            "ui.ports.fixedHint": "固定值——由 provider 定义提供，不可修改",
-            "ui.ports.selectHint": "请选择",
-            "ui.ports.presetUse": "选用常用…",
-            "ui.ports.presetSave": "另存为常用",
-            "ui.ports.presetDel": "删除常用",
-            "ui.ports.presetDeleted": "方案已删除",
-            "ui.ports.presetLoadFailed": "方案加载失败",
-            "ui.ports.presetNamePrompt": "常用名称:",
-            "ui.ports.presetSensitiveHint": "已保存，留空使用已存值",
-            "ui.ports.presetApplied": "已应用常用",
-            "ui.ports.presetSaved": "已保存常用",
-            "ui.ports.presetEmpty": "无参数可保存",
-            "ui.ports.presetPick": "请先选择常用",
-            "ui.doctor.ev.phase-start": "▶ {label}",
-            "ui.doctor.ev.probe-done": "{item}: {verdict}（{ms}ms）",
-            "ui.doctor.ev.tunnel-est": "隧道已建立：{provider} → {url}（{ms}ms）",
-            "ui.doctor.ev.tunnel-fail": "隧道失败：{provider} — {error}（{ms}ms）",
-            "ui.doctor.ev.channel-result": "{provider} 外部回连 [{channel}] 置信 {level}（{ms}ms）",
-            "ui.doctor.ev.verdict-confirmed": "{provider} 结论 {verdict}（{sourcesOk} 源一致，已确认）",
-            "ui.doctor.ev.advice-update": "建议已更新：{note}",
-            "ui.doctor.ev.phase-end": "阶段 {phase} 完成 — {summary}",
-            "ui.doctor.ev.summary": "报告已生成（见汇总卡片）",
-            "ui.doctor.ev.done": "体检完成",
-            "ui.doctor.ev.error": "体检出错：{message}",
-            "ui.doctor.ev.cancelled": "体检已取消（保留已完成部分）",
-            "ui.doctor.ev.unknown": "未知事件：{type}",
-            "ui.doctor.advice.confirmed": "已确认",
-            "ui.doctor.advice.unconfirmed": "单源未确认",
-            "ui.doctor.advice.untested": "未实测",
-            "ui.portmap.title": "路由器映射",
-            "ui.portmap.hint": "在路由器上建立端口映射，让公网直接访问该端口。",
-            "ui.portmap.method": "映射方式",
-            "ui.portmap.gateway": "网关 IP（可选）",
-            "ui.portmap.externalPort": "外部端口",
-            "ui.portmap.autoAssign": "自动",
-            "ui.portmap.leaseSeconds": "租约秒数",
-            "ui.portmap.probe": "探测路由器",
-            "ui.portmap.probing": "正在探测路由器…",
-            "ui.portmap.probeOkUpnp": "路由器支持 UPnP——可用 portmap",
-            "ui.portmap.probeOkPcp": "路由器支持 NAT-PMP/PCP——可用 portmap",
-            "ui.portmap.probeCgnat": "出口 IP 是 CGNAT——路由器映射无法生效；建议改用 tunnel / ipv6",
-            "ui.portmap.probePublic": "出口即公网 IP——无需映射，直连即可",
-            "ui.portmap.probeNone": "路由器不支持 UPnP/NAT-PMP——建议 tunnel / ipv6（或 ssh-router）",
-            "ui.portmap.probeFail": "探测失败：{error}",
-            "ui.ipv6.auto": "auto（自动检测公网 IPv6）",
-            "ui.ipv6.manual": "手动输入…",
-            "ui.ipv6.public": "公网出口",
-            "ui.ipv6.loadFail": "IPv6 候选地址不可用：{error}",
-            "ui.detail.portmap": "路由器映射",
-            "ui.detail.leaseLeft": "租约剩余",
-            "ui.detail.ipv6Entry": "IPv6 入口",
-            "ui.detail.ipv6Candidates": "候选地址",
-            "ui.doctor.start": "开始体检",
-            "ui.doctor.stop": "停止",
-            "ui.doctor.running": "体检进行中…",
-            "ui.doctor.advice": "建议",
-            "ui.doctor.report": "报告",
-            "ui.doctor.copyMd": "复制 Markdown",
-            "ui.doctor.copied": "已复制",
-            "ui.ddns.emptyTitle": "还没有 DDNS 配置",
-            "ui.ddns.emptyGuide": "第 1 步：在下方添加 provider 凭据（DNS 服务商的 API token）。第 2 步：建 profile（provider + 域名目标）。第 3 步：登记注册条目——portmap/tunnel 暴露绑定 profile 后，每次暴露自动更新 DNS。",
-            "ui.ddns.pp.title": "Provider 凭据",
-            "ui.ddns.pp.name": "名称",
-            "ui.ddns.pp.provider": "Provider",
-            "ui.ddns.pp.empty": "还没有 provider 凭据——在下方添加。",
-            "ui.ddns.pf.title": "Profile（provider + 域名目标）",
-            "ui.ddns.pf.name": "名称",
-            "ui.ddns.pf.pp": "Provider 凭据",
-            "ui.ddns.pf.empty": "还没有 profile——在下方添加。",
-            "ui.ddns.e.title": "注册条目（portmap/tunnel → 自动 DNS）",
-            "ui.ddns.e.name": "名称",
-            "ui.ddns.e.target": "目标",
-            "ui.ddns.e.flags": "记录",
-            "ui.ddns.e.empty": "还没有注册条目——没有条目时 portmap/tunnel 暴露不会自动更新 DNS。",
-            "ui.ddns.e.addByProfile": "添加（profile 引用）",
-            "ui.ddns.e.addFull": "添加（完整信息，单独注册）",
-            "ui.ddns.add": "添加",
-            "ui.ddns.del": "删除",
-            "ui.ddns.reveal": "显示 token",
-            "ui.ddns.hide": "隐藏 token",
-            "ui.ddns.saved": "ddns 配置已保存",
-            "ui.ddns.pickProvider": "选择 provider（共 {n} 家）",
-            "ui.ddns.err.name": "名称必填",
-            "ui.ddns.err.provider": "provider 必填",
-            "ui.ddns.err.token": "token 必填",
-            "ui.ddns.err.zone": "zone 必填（如 example.com）",
-            "ui.ddns.err.zoneFormat": "zone 格式不对（需要含点号、无空格）",
-            "ui.ddns.err.profile": "profile 必填",
-            "ui.ddns.err.pp": "Provider 凭据必填",
-            "ui.ddns.err.flag": "至少勾选一种记录（A/AAAA/CNAME/TXT）",
-            "ui.ports.authNoneBadge": "⚠ 无认证",
-            "ui.ports.runningBadge": "● 运行中",
-            "ui.ports.accessLog": "访问日志",
-            "ui.ports.errorLog": "错误日志",
-            "ui.detail.k.mode": "模式",
-            "ui.detail.k.provider": "认证",
-            "ui.detail.k.tunnel": "隧道",
-            "ui.detail.k.site": "站点",
-            "ui.detail.k.protocol": "协议",
-            "ui.detail.k.started": "开始时间",
-            "ui.detail.k.params": "参数",
-            "ui.detail.k.urls": "链接",
-            "ui.ports.renamePlaceholder": "如：我的博客",
-            "ui.ports.renameHint": "显示在端口列表的自定义服务名——留空清除，回落到探测到的服务名。",
-            "ui.ports.renameClear": "清除",
-            "ui.ports.renameSave": "保存",
-            "ui.ports.noneGuide": "先在本地起一个服务（如 python3 -m http.server 8000），再刷新本页。",
             "ext.displayName": "服务隧道",
             "feat.self-expose-alert": "自暴露无认证告警",
             "it.ports-dialog.label": "服务端口",
@@ -16921,6 +17046,50 @@
             "services.tabUsers": "用户",
             "services.tabSelf": "Pi-web",
             "services.selfAccessUrls": "可访问地址",
+            "services.svcTitle": "服务管理",
+            "services.svcUnavailable": "服务管理需要 aiti-updater 扩展（本机未部署）。",
+            "services.svcLoading": "正在读取运行状态…",
+            "services.svcFormService": "服务托管",
+            "services.svcFormBare": "裸进程",
+            "services.svcFormUnknown": "未知",
+            "services.svcUnit": "unit",
+            "services.svcLatest": "最新版",
+            "services.svcUpdateAvailable": "有可用更新",
+            "services.svcUpgrade": "升级",
+            "services.svcUpgradeHint": "启动升级助手（确认门在助手窗口内）",
+            "services.svcDetails": "详情",
+            "services.svcRegister": "注册为服务",
+            "services.svcRegisterHint": "生成注册配置并启动切换助手（确认门在助手窗口内）",
+            "services.svcRestart": "重启",
+            "services.svcStop": "停止",
+            "services.svcStopHow": "停止方式",
+            "services.svcStopHowVal": "byPort（SIGTERM → SIGKILL，5s 宽限）",
+            "services.svcUnregister": "取消注册",
+            "services.svcUnregisterHint": "停止并删除服务单元（pi-web 将停止运行）",
+            "services.svcNameLabel": "服务名",
+            "services.svcManager": "管理器",
+            "services.svcF": "形态",
+            "services.svcCmd": "启动命令",
+            "services.svcListen": "监听",
+            "services.svcBasePath": "basePath",
+            "services.svcVersions": "版本",
+            "services.svcVersionsTip": "版本对比（当前 vs 最新）",
+            "services.svcFailed": "操作失败",
+            "services.svcSource": "数据源：GET /api/extensions/aiti-updater/run-status · 聚焦窗口与每次操作后刷新",
+            "services.pfAdopted": "保留现状",
+            "services.svcRegisterConfirm": "重新注册并替换现有单元 spec？运行中的进程会由助手重启。",
+            "services.svcStopAssistantHint": "经助手停止（外部进程执行——停止输出与验证都在助手窗口可见）",
+            "services.pfFree": "端口空闲——可以安全注册",
+            "services.pfSelfManaged": "已由目标服务托管（同条件）",
+            "services.pfConflict": "端口被其他服务/进程占用",
+            "services.pfBare": "被裸进程占用——可安全停止并接管",
+            "services.pfOccupier": "占用者",
+            "services.pfAdopt": "采用现状（不操作）",
+            "services.pfReregister": "重新注册（替换 spec）",
+            "services.pfReplace": "替换（停止占用者）",
+            "services.pfReplaceConfirm": "停止外部单元 \"{unit}\" 并接管端口？这会停止一个不属于本应用的服务。",
+            "services.pfCancel": "取消",
+            "services.svcRestartAssistantHint": "经助手重启（实时查看 停止 → 启动 → 健康验证；失败自动重试一次）",
             "services.selfUrl.loopback": "本机（回环）",
             "services.selfUrl.lan": "局域网（{name}）",
             "services.selfUrl.vhostLocal": "服务虚拟主机（本机）",
@@ -17109,7 +17278,7 @@
     {
       "id": "session-manager",
       "name": "Session Manager",
-      "version": "0.2.19",
+      "version": "0.2.21",
       "clientUrl": "/api/extensions/session-manager/assets/dist/session-manager.mjs?v=dd117eb9b81b",
       "ui": {
         "provides": [
@@ -17120,9 +17289,7 @@
             "id": "sessions",
             "label": "Sessions",
             "title": "i18n:sm.allSessions",
-            "icon": {
-              "svg": "<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"/>"
-            }
+            "icon": "icons/message-square.svg"
           }
         ],
         "sidebar": [
@@ -17233,6 +17400,7 @@
             "it.tags.label": "Session tags",
             "ext.displayName": "Session Manager",
             "feat.toolbar.search": "Top-bar session search box",
+            "sm.sch.vacuum": "Session index vacuum (reclaims free pages left by deleted rows; never touches session data; runs in the index worker off the main thread)",
             "feat.behavior.favorite-icons": "Favorite icons",
             "feat.behavior.session-timeline": "Session-row timeline button",
             "feat.behavior.folder-quota": "Sidebar folder block retention",
@@ -17477,6 +17645,8 @@
             "sm.deleteLive": "Delete permanently (live session)",
             "sm.confirmDeleteLive": "Permanently delete this LIVE session file? (not archived — bypasses archive, cannot be undone; running agents are stopped first)",
             "sm.extRemove": "Remove from list",
+            "sm.extView": "View session",
+            "sm.extViewHint": "Open the read-only external-session viewer (import it as a pi session from there)",
             "sm.extTrueArchive": "True archive (remove from source, restorable)",
             "sm.pendingRemoval": "Removing…",
             "sm.optSlow": "Still processing in the background — rows stay hidden until it lands; the list refreshes when done",
@@ -17555,6 +17725,20 @@
             "sm.sources.error": "Error",
             "sm.import.button": "Import as pi session",
             "sm.import.failed": "Import failed: external session has no cwd, or the pi sessions dir is not writable.",
+            "sm.export.button": "Export JSON",
+            "sm.export.hintBtn": "Save this session as a JSON file — open it here for reading, or @-reference it from a new session so another agent can inspect / continue the work",
+            "sm.export.title": "Export as JSON",
+            "sm.export.hint": "The whole normalized message stream is written to one JSON file. Pick a folder and a file name; the file opens right after export and can be @-referenced from any agent session.",
+            "sm.export.dir": "Folder",
+            "sm.export.name": "File name",
+            "sm.export.browse": "Browse…",
+            "sm.export.do": "Export",
+            "sm.export.done": "Exported",
+            "sm.export.failed": "Export failed",
+            "sm.export.noDir": "Pick an export folder first",
+            "sm.export.noName": "Enter a file name",
+            "sm.openLive.noProvider": "No backend extension can drive agent \"{agent}\"; use Import to load it as a pi session.",
+            "sm.openLive.failed": "Open failed: {error}",
             "sm.viewerSearch": "Search messages…",
             "sm.viewerNoMatch": "No matching messages",
             "sm.viewer.user": "User",
@@ -17682,6 +17866,22 @@
             "i18n.cancel": "取消",
             "i18n.checking": "檢查中…",
             "sm.extRemove": "從列表移除",
+            "sm.extView": "檢視",
+            "sm.extViewHint": "開啟唯讀外部會話檢視器（可在其中匯入為 pi 會話）",
+            "sm.export.button": "匯出 JSON",
+            "sm.export.hintBtn": "把此會話儲存為 JSON 檔案——可在此開啟閱讀，也可在新會話裡用 @ 引用，交給其他 agent 檢視 / 續作",
+            "sm.export.title": "匯出為 JSON",
+            "sm.export.hint": "完整訊息流會寫入單一 JSON 檔案。選擇資料夾與檔名，匯出後會直接開啟，並可在任何 agent 會話裡用 @ 引用。",
+            "sm.export.dir": "資料夾",
+            "sm.export.name": "檔名",
+            "sm.export.browse": "瀏覽…",
+            "sm.export.do": "匯出",
+            "sm.export.done": "已匯出",
+            "sm.export.failed": "匯出失敗",
+            "sm.export.noDir": "請先選擇匯出資料夾",
+            "sm.export.noName": "請填寫檔名",
+            "sm.openLive.noProvider": "未安裝能驅動 agent「{agent}」的後端擴充；可先「匯入」為 pi 會話",
+            "sm.openLive.failed": "開啟失敗：{error}",
             "sm.extTrueArchive": "真歸檔（從來源移除，可放回）",
             "sm.pin": "置頂",
             "sm.unpin": "取消置頂",
@@ -17739,6 +17939,7 @@
             "it.tags.label": "标签",
             "ext.displayName": "会话管理器",
             "sidebar.loading": "加载中...",
+            "sm.sch.vacuum": "会话索引库瘦身（回收删除残留空闲页，不删会话数据；经索引 worker 后台执行）",
             "sidebar.noSessions": "未找到会话",
             "sidebar.new": "新建",
             "sidebar.newSessionTitle": "在 {path} 中新建会话",
@@ -17970,6 +18171,8 @@
             "sm.deleteLive": "彻底删除（未归档）",
             "sm.confirmDeleteLive": "彻底删除该会话文件？（未归档，不经过归档直接删除，删后不可恢复；运行中的 agent 会先停止）",
             "sm.extRemove": "从列表移除",
+            "sm.extView": "查看",
+            "sm.extViewHint": "打开只读的外部会话查看器（可在其中导入为 pi 会话）",
             "sm.extTrueArchive": "真归档（从源移除，可放回）",
             "sm.pendingRemoval": "处理中…",
             "sm.optSlow": "操作仍在后台处理，行会保持隐藏直到完成；完成后列表会自动刷新",
@@ -18048,6 +18251,20 @@
             "sm.sources.error": "出错",
             "sm.import.button": "导入为 pi 会话",
             "sm.import.failed": "导入失败：外部会话缺少 cwd 或 pi sessions 目录不可写。",
+            "sm.export.button": "导出 JSON",
+            "sm.export.hintBtn": "把这个会话存成 JSON 文件——可在这里打开查看，也可在新会话里 @ 引用，交给其他 agent 查看 / 继续执行",
+            "sm.export.title": "导出为 JSON",
+            "sm.export.hint": "完整消息流写入单个 JSON 文件。选择目录和文件名，导出后会直接打开该文件，并可在任何 agent 会话里用 @ 引用。",
+            "sm.export.dir": "目录",
+            "sm.export.name": "文件名",
+            "sm.export.browse": "浏览…",
+            "sm.export.do": "导出",
+            "sm.export.done": "已导出",
+            "sm.export.failed": "导出失败",
+            "sm.export.noDir": "请先选择导出目录",
+            "sm.export.noName": "请填写文件名",
+            "sm.openLive.noProvider": "未安装能驱动 agent「{agent}」的后端扩展；可先「导入」为 pi 会话",
+            "sm.openLive.failed": "打开失败：{error}",
             "sm.agentFilter.empty": "未选择任何来源——点击上方来源 chips 选择要查看的 agent",
             "sm.dockAdv": "高级",
             "sm.dockAdvTitle": "高级过滤（来源 agent / 标签）",
@@ -18091,29 +18308,24 @@
       "source": "user",
       "icon": "icon.svg",
       "description": "Cross-project session panel — tag tree + colors / favorites / search / archive / kanban / new-session branch·Worktree picker / history parsing for 23 agent families / DockStack orchestration",
-      "dependsOn": [
-        "aiti-float.dockstack"
-      ],
-      "optionalDependsOn": [
-        "aiti-git-ops",
-        "aiti-app-center",
-        "aiti-quickstart"
-      ],
       "features": [
         {
           "id": "toolbar.search",
+          "type": "boolean",
           "label": "顶栏会话搜索框",
           "description": "顶栏（含 ⋯ 菜单）的会话搜索框；全部会话面板内已有搜索",
           "enabled": false
         },
         {
           "id": "behavior.favorite-icons",
+          "type": "boolean",
           "label": "收藏图标",
           "description": "会话列表/看板/顶栏显示收藏（★）图标；关闭后收藏操作入口收敛到标签下拉的「收藏」项（标签下拉始终可用）",
           "enabled": false
         },
         {
           "id": "behavior.session-timeline",
+          "type": "boolean",
           "label": "会话行时间线按钮",
           "description": "侧栏会话行悬停操作里显示「⎇ 时间线」按钮（aiti-git-trace 打开该会话的变更时间线）；全部会话面板行「⋯」菜单的时间线入口不受此开关影响",
           "enabled": false
@@ -18129,6 +18341,7 @@
         },
         {
           "id": "agentTools.enabled",
+          "type": "boolean",
           "label": "会话检索工具（session_search / session_read）",
           "description": "给新建的 pi 会话注入两个只读工具：全文检索本机全部 agent 的历史会话、按会话读原始消息（压缩找回/翻旧账）。关闭后仅新建会话不再获得工具（存量会话在 wrapper 重建前仍持有）。",
           "enabled": true
